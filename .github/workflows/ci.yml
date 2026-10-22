@@ -67,7 +67,7 @@ jobs:
       # Incremental mode: reuse results for unchanged code/tests.
       # PRs fall back to main's baseline on their first run.
       - name: Restore Stryker incremental baseline
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: reports/stryker-incremental.json
           key: stryker-${{ github.head_ref || github.ref_name }}-${{ github.sha }}
