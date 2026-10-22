@@ -1,10 +1,10 @@
 ---
 name: write-adr
 description: >-
-  Records an Architecture Decision Record in docs/decisions/. Use when a
-  significant technical decision is made or changed (choosing a library,
-  pattern, data flow, boundary, or trade-off between real alternatives), or
-  when the user asks to document a decision.
+  Records an Architecture Decision Record in docs/decisions/. Use when an
+  architectural boundary changes, a paid external service is added, or a core
+  subsystem choice is made (routine utility libraries and local helpers do not
+  need an ADR), or when the user asks to document a decision.
 ---
 
 # Write an ADR

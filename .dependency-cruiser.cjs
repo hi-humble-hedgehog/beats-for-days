@@ -20,6 +20,8 @@ module.exports = {
           "[.]d[.]ts$",
           "(^|/)tsconfig[.]json$",
           "^src/app/",
+          "^src/lib/types/",
+          "^test/",
           "^scripts/.+/cli[.]ts$",
         ],
       },

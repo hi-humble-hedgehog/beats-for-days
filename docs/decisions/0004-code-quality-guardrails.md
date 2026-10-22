@@ -19,8 +19,8 @@ automatic, fast where they run often, and thorough where they run rarely.
 | Commit messages         | commitlint (Conventional)                                         | commit-msg                    |
 | Tests                   | Vitest                                                            | pre-push, CI                  |
 | Architecture boundaries | dependency-cruiser                                                | pre-push, CI                  |
-| Dead code / unused deps | knip                                                              | CI                            |
-| CRAP gate               | `scripts/crap`                                                    | CI (`pnpm verify` locally)    |
+| Dead code / unused deps | knip                                                              | pre-push, CI                  |
+| CRAP gate               | `scripts/crap`                                                    | pre-push, CI                  |
 | Mutation testing        | Stryker (incremental)                                             | CI, on demand                 |
 | Build                   | `next build`                                                      | CI                            |
 | Dependency updates      | Dependabot (grouped, weekly)                                      | GitHub                        |

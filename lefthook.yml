@@ -39,5 +39,3 @@ pre-push:
   jobs:
     - name: verify
       run: pnpm verify
-    - name: mutation
-      run: pnpm test:mutation

@@ -14,7 +14,7 @@ To maintain high code quality and clear change tracking across human developers 
    - Direct work on `main` is disallowed locally (blocked via `lefthook` pre-commit).
 2. **Pull Request Protocol:**
    - PR titles must strictly conform to [Conventional Commits](https://www.conventionalcommits.org) (validated in CI).
-   - PR size hygiene: PRs targeting >400 modified lines trigger a warning step in CI to encourage bite-sized, reviewable increments.
+   - PR size hygiene: PRs targeting >400 modified production lines (excluding `*.test.*`, `docs/`, and `pnpm-lock.yaml`) trigger a warning step in CI to encourage bite-sized, reviewable increments without penalizing thorough test suites or documentation.
    - PR description follows `.github/pull_request_template.md` with explicit quality checklist verification.
 3. **Merge Strategy:**
    - **Squash and Merge** only.

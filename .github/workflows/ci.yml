@@ -45,14 +45,15 @@ jobs:
 
       - name: Check PR Size
         run: |
-          CHANGES=$(git diff --stat origin/${{ github.base_ref }}...HEAD | tail -n 1)
-          echo "PR Diff Stats: $CHANGES"
-          INSERTIONS=$(git diff --numstat origin/${{ github.base_ref }}...HEAD | awk '{s+=$1} END {print s+0}')
-          DELETIONS=$(git diff --numstat origin/${{ github.base_ref }}...HEAD | awk '{s+=$2} END {print s+0}')
+          DIFF_FILTER=(-- . ':(exclude)**/*.test.ts' ':(exclude)**/*.test.tsx' ':(exclude)docs/**' ':(exclude)pnpm-lock.yaml')
+          CHANGES=$(git diff --stat origin/${{ github.base_ref }}...HEAD "${DIFF_FILTER[@]}" | tail -n 1)
+          echo "PR Diff Stats (excluding tests, docs & lockfile): $CHANGES"
+          INSERTIONS=$(git diff --numstat origin/${{ github.base_ref }}...HEAD "${DIFF_FILTER[@]}" | awk '{s+=$1} END {print s+0}')
+          DELETIONS=$(git diff --numstat origin/${{ github.base_ref }}...HEAD "${DIFF_FILTER[@]}" | awk '{s+=$2} END {print s+0}')
           TOTAL_CHANGES=$((INSERTIONS + DELETIONS))
-          echo "Total changed lines: $TOTAL_CHANGES"
+          echo "Total changed production lines: $TOTAL_CHANGES"
           if [ "$TOTAL_CHANGES" -gt 400 ]; then
-            echo "::warning title=Large PR Alert::This PR modifies $TOTAL_CHANGES lines (threshold: 400). Consider breaking it down into smaller, focused review units."
+            echo "::warning title=Large PR Alert::This PR modifies $TOTAL_CHANGES production lines (threshold: 400, excluding tests & docs). Consider breaking it down into smaller, focused review units."
           fi
 
   quality:

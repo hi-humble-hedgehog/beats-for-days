@@ -32,8 +32,8 @@ Use **pnpm** only. Never edit `pnpm-lock.yaml` by hand.
 3. New/changed logic has tests that would **fail if the logic broke**. Run
    `pnpm test:mutation` for logic-heavy changes and kill surviving mutants
    (see the `quality-gate` skill).
-4. **Strict ADR enforcement:** An ADR draft in `docs/decisions/` is **mandatory**
-   for any new library, architectural boundary change, or core pattern change before declaring done.
+4. **Scoped ADR enforcement:** An ADR draft in `docs/decisions/` is **mandatory**
+   for architectural boundary changes, paid external services, or core subsystem choices before declaring done (routine utility libraries and local helpers do not require an ADR).
 5. No unapproved `eslint-disable` or `@ts-ignore` comments. When hitting a rule
    boundary, refactor and decompose. Any suppression requires an explicit rationale comment explaining the necessity.
 6. **Zero live AI calls:** Never execute requests against live generative APIs

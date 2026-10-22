@@ -2,26 +2,61 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { parseServerEnv } from "./env";
 
 describe("parseServerEnv", () => {
-  it("returns only the validated variables, trimmed", () => {
-    expect(
-      parseServerEnv({ ELEVENLABS_API_KEY: " sk_123 ", OTHER: "x" }),
-    ).toEqual({ ELEVENLABS_API_KEY: "sk_123" });
+  it("defaults ALLOW_LIVE_AI_CALLS to false and allows omitting ELEVENLABS_API_KEY in offline mode", () => {
+    expect(parseServerEnv({ OTHER: "ignored" })).toEqual({
+      ALLOW_LIVE_AI_CALLS: false,
+      ELEVENLABS_API_KEY: undefined,
+    });
   });
 
-  it("rejects a missing ELEVENLABS_API_KEY", () => {
-    expect(() => parseServerEnv({})).toThrow(
-      /^Invalid server environment:\n.*\n.*ELEVENLABS_API_KEY/,
+  it("normalizes blank ELEVENLABS_API_KEY to undefined when ALLOW_LIVE_AI_CALLS is false", () => {
+    expect(
+      parseServerEnv({
+        ALLOW_LIVE_AI_CALLS: "false",
+        ELEVENLABS_API_KEY: "   ",
+      }),
+    ).toEqual({
+      ALLOW_LIVE_AI_CALLS: false,
+      ELEVENLABS_API_KEY: undefined,
+    });
+  });
+
+  it("returns trimmed ELEVENLABS_API_KEY and parses ALLOW_LIVE_AI_CALLS=true", () => {
+    expect(
+      parseServerEnv({
+        ALLOW_LIVE_AI_CALLS: "true",
+        ELEVENLABS_API_KEY: " sk_123 ",
+        OTHER: "x",
+      }),
+    ).toEqual({
+      ALLOW_LIVE_AI_CALLS: true,
+      ELEVENLABS_API_KEY: "sk_123",
+    });
+  });
+
+  it("rejects invalid ALLOW_LIVE_AI_CALLS values", () => {
+    expect(() => parseServerEnv({ ALLOW_LIVE_AI_CALLS: "yes" })).toThrow(
+      /ALLOW_LIVE_AI_CALLS/,
     );
   });
 
   it.each([
+    ["missing", undefined],
     ["empty", ""],
     ["blank", "   "],
-  ])("rejects an %s ELEVENLABS_API_KEY as required", (_label, value) => {
-    expect(() => parseServerEnv({ ELEVENLABS_API_KEY: value })).toThrow(
-      "Invalid server environment:\n✖ is required\n  → at ELEVENLABS_API_KEY",
-    );
-  });
+  ])(
+    "rejects a %s ELEVENLABS_API_KEY when ALLOW_LIVE_AI_CALLS=true",
+    (_label, value) => {
+      expect(() =>
+        parseServerEnv({
+          ALLOW_LIVE_AI_CALLS: "true",
+          ELEVENLABS_API_KEY: value,
+        }),
+      ).toThrow(
+        "Invalid server environment:\n✖ is required when ALLOW_LIVE_AI_CALLS=true\n  → at ELEVENLABS_API_KEY",
+      );
+    },
+  );
 });
 
 describe("getServerEnv", () => {
@@ -44,7 +79,8 @@ describe("getServerEnv", () => {
     expect(getServerEnv().ELEVENLABS_API_KEY).toBe("first");
   });
 
-  it("throws when the environment is invalid", async () => {
+  it("throws when live AI calls are enabled without an API key", async () => {
+    vi.stubEnv("ALLOW_LIVE_AI_CALLS", "true");
     vi.stubEnv("ELEVENLABS_API_KEY", "");
     const { getServerEnv } = await loadFresh();
     expect(() => getServerEnv()).toThrow(/ELEVENLABS_API_KEY/);

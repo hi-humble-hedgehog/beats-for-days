@@ -15,8 +15,9 @@ Agent-facing instructions live in [`/AGENTS.md`](../AGENTS.md) and
 
 ## When to write what
 
-- **Made a choice between real alternatives** (library, pattern, data flow,
-  trade-off)? → write an ADR in `decisions/`.
+- **Made an architectural boundary change, added a paid external service, or
+  chose a core subsystem** (not routine utility libraries or local helpers)? →
+  write an ADR in `decisions/`.
 - **Changed how modules fit together**? → update `architecture/overview.md`
   (and `.dependency-cruiser.cjs` if a boundary changed).
 - **Changed a command, convention or workflow**? → update the relevant guide

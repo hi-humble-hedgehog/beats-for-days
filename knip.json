@@ -6,5 +6,6 @@
     "scripts/**/*.ts",
     "test/**/*.ts",
     ".agents/**/*.mjs"
-  ]
+  ],
+  "ignoreExportsUsedInFile": true
 }

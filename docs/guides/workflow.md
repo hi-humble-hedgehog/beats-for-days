@@ -27,7 +27,7 @@ pnpm test:mutation      # after logic-heavy changes
    - `chore/<task>`
 2. **Pull Requests:**
    - PR title must follow Conventional Commits (e.g., `feat(audio): implement gapless bar looping`). Enforced in CI.
-   - PR size target: ≤ 400 changed lines. CI warns if exceeded.
+   - PR size target: ≤ 400 changed production lines (excluding tests, `docs/`, and lockfile). CI warns if exceeded.
    - Merge strategy: **Squash and merge** with conventional title to maintain linear history on `main`.
    - Head branch auto-deleted after merge.
 
@@ -37,7 +37,7 @@ pnpm test:mutation      # after logic-heavy changes
 flowchart LR
     commit["git commit"] --> pc["pre-commit (~5s): gitleaks · eslint --fix · prettier · typecheck"]
     commit --> cm["commit-msg: commitlint"]
-    push["git push"] --> pp["pre-push: full verify (tests, CRAP, boundaries, knip) · mutation testing (incremental)"]
+    push["git push"] --> pp["pre-push: full verify (tests, CRAP, boundaries, knip)"]
     pr["Pull request"] --> ci["CI: verify + build · mutation (incremental) · gitleaks"]
 ```
 
