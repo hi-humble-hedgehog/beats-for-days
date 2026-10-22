@@ -1,0 +1,11 @@
+{
+  "quality-gate-on-stop": {
+    "Stop": [
+      {
+        "type": "command",
+        "command": "node hooks/stop-quality-gate.mjs",
+        "timeout": 120
+      }
+    ]
+  }
+}

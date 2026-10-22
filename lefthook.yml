@@ -1,0 +1,40 @@
+# Git hooks — https://lefthook.dev
+# Emergency bypass: LEFTHOOK=0 git commit ... or LEFTHOOK=0 git push ...
+
+pre-commit:
+  piped: true # sequential: fixers must not race on the same files
+  jobs:
+    - name: secrets
+      run: |
+        if command -v gitleaks >/dev/null 2>&1; then
+          gitleaks git --pre-commit --staged --redact --no-banner
+        else
+          echo "⚠ gitleaks not installed (brew install gitleaks): skipping local secret scan. CI still scans."
+        fi
+
+    - name: lint
+      glob: "*.{ts,tsx,mts,js,mjs}"
+      run: pnpm exec eslint --fix --max-warnings=0 --no-warn-ignored {staged_files}
+      stage_fixed: true
+
+    - name: format
+      glob: "*.{ts,tsx,mts,js,mjs,cjs,json,md,css,yml,yaml}"
+      run: pnpm exec prettier --write --ignore-unknown {staged_files}
+      stage_fixed: true
+
+    - name: typecheck
+      glob: "*.{ts,tsx,mts}"
+      run: pnpm typecheck
+
+commit-msg:
+  jobs:
+    - name: conventional-commit
+      run: pnpm exec commitlint --edit {1}
+
+pre-push:
+  piped: true
+  jobs:
+    - name: verify
+      run: pnpm verify
+    - name: mutation
+      run: pnpm test:mutation

@@ -10,6 +10,7 @@
 **Beats for Days** is an infinite generative music experience dedicated to the golden era of 90s boom bap hip hop (dusty vinyl chops, punchy SP-1200 / MPC kicks & snares, warm basslines, and hypnotic grooves).
 
 The platform continuously generates, loops, and evolves beats in real time:
+
 - **In-Track Looping:** Handled natively in the client using the **Web Audio API** for sample-accurate, gapless playback.
 - **Track Transitions & Bridging:** Custom **ElevenLabs audio inpainting** pipelines to smoothly morph and transition between distinct generated boom bap tracks.
 - **Visual Presentation:** A highly visual, audio-reactive frontend designed to double as a full-screen ambient player and stream source.
@@ -63,46 +64,65 @@ flowchart TD
 
 ---
 
-## 📂 Repository Structure (Planned)
+## 📂 Repository Structure
 
 ```text
 beats-for-days/
 ├── src/
-│   ├── app/                 # Next.js App Router pages & API routes
-│   │   ├── api/             # Generation & inpainting endpoints
-│   │   ├── layout.tsx       # Root layout
-│   │   └── page.tsx         # Main player & visualizer interface
-│   ├── components/          # Reusable UI & visualizer components
-│   │   ├── audio/           # Player controls, transport, volume
-│   │   └── visualizer/      # Audio-reactive canvas / scene modules
-│   ├── lib/
-│   │   ├── audio/           # Web Audio API context, buffers, scheduling
-│   │   ├── elevenlabs/      # API client & inpainting helpers
-│   │   └── types/           # Shared TypeScript interfaces
-│   └── styles/              # Global styles & Tailwind configuration
-├── stream-worker/           # Headless browser + FFmpeg RTMP streaming worker
-├── .gitignore
-├── package.json
-└── README.md
+│   ├── app/                 # Next.js App Router routes, layouts & API route handlers
+│   ├── components/          # Thin, presentational React components (.tsx)
+│   └── lib/                 # Framework-agnostic logic (.ts): audio, visualizer, elevenlabs, env
+├── scripts/crap/            # In-repo CRAP (complexity × coverage) gate
+├── test/                    # Shared test setup & stubs
+├── docs/                    # Architecture, decisions (ADRs) & guides
+├── .agents/                 # Agent skills & hooks (Antigravity)
+├── AGENTS.md                # Instructions for AI coding agents
+└── stream-worker/           # (planned) Headless browser + FFmpeg RTMP worker
 ```
+
+Full layout and layering rules: [`docs/architecture/overview.md`](docs/architecture/overview.md).
 
 ---
 
 ## 🚀 Getting Started
 
-*(Next.js scaffolding and dependency setup will occur in the next milestone.)*
-
 ### Prerequisites
-- Node.js 20+
-- pnpm / npm / yarn
+
+- Node.js 22.12+ (see `.nvmrc`)
+- [pnpm](https://pnpm.io) (version pinned in `package.json`)
 - ElevenLabs API credentials
+- Optional: `brew install gitleaks` for local secret scanning
+
+```bash
+pnpm install                 # installs deps + git hooks
+cp .env.example .env.local   # add your ELEVENLABS_API_KEY
+pnpm dev                     # http://localhost:3000
+```
+
+### Quality gate
+
+```bash
+pnpm verify          # typecheck · lint · format · boundaries · knip · tests · CRAP
+pnpm test:mutation   # Stryker mutation testing (incremental)
+```
+
+See [`docs/guides/workflow.md`](docs/guides/workflow.md) and [`docs/guides/testing.md`](docs/guides/testing.md).
+
+---
+
+## 📚 Documentation
+
+- [`docs/`](docs/README.md): architecture, guides
+- [`docs/decisions/`](docs/decisions/README.md): Architecture Decision Records
+- [`AGENTS.md`](AGENTS.md): conventions & definition of done for AI agents (and humans)
 
 ---
 
 ## 🛣️ Roadmap
 
 - [x] Initial design alignment & repository setup
-- [ ] Scaffold Next.js (App Router, TypeScript, Tailwind CSS)
+- [x] Scaffold Next.js (App Router, TypeScript, Tailwind CSS)
+- [x] Quality foundation: docs/ADRs, CRAP gate, mutation testing, CI, agent guidelines
 - [ ] Implement core Web Audio API loop engine (gapless bar looping)
 - [ ] Integrate ElevenLabs inpainting pipeline for track transitions
 - [ ] Build extensible visualizer component

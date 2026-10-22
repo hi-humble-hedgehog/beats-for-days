@@ -1,0 +1,24 @@
+# Architecture Decision Records
+
+Short, immutable records of significant decisions: the context, the choice,
+and its consequences. Format: lightweight [MADR](https://adr.github.io/madr/).
+
+## Process
+
+1. Copy [`0000-template.md`](0000-template.md) to `NNNN-kebab-title.md`
+   (next free number).
+2. Fill it in. Keep it short: a page is plenty.
+3. Add it to the index below in the same PR as the change it describes.
+4. ADRs are **not edited** after acceptance (typos aside). To change a decision,
+   write a new ADR and mark the old one `Superseded by NNNN`.
+
+## Index
+
+| #                                             | Title                                     | Status   |
+| --------------------------------------------- | ----------------------------------------- | -------- |
+| [0001](0001-record-architecture-decisions.md) | Record architecture decisions             | Accepted |
+| [0002](0002-nextjs-pnpm-foundation.md)        | Next.js App Router + pnpm foundation      | Accepted |
+| [0003](0003-testing-strategy.md)              | Testing strategy: Vitest, CRAP & mutation | Accepted |
+| [0004](0004-code-quality-guardrails.md)       | Code quality guardrails                   | Accepted |
+| [0005](0005-agent-guidelines.md)              | Agent guidelines & feedback loops         | Accepted |
+| [0006](0006-strict-ai-token-guardrails.md)    | Strict AI token guardrails & cost control | Accepted |

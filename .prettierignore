@@ -1,0 +1,9 @@
+pnpm-lock.yaml
+.next/
+out/
+build/
+coverage/
+reports/
+.stryker-tmp/
+public/
+next-env.d.ts

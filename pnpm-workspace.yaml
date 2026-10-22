@@ -1,0 +1,10 @@
+# Packages allowed to run install scripts (pnpm blocks them by default).
+onlyBuiltDependencies:
+  - esbuild
+
+# Install scripts we intentionally skip.
+# lefthook: git hooks are installed via the `prepare` script instead.
+ignoredBuiltDependencies:
+  - lefthook
+  - sharp
+  - unrs-resolver
