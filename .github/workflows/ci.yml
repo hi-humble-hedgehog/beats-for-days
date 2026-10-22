@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+    types: [opened, synchronize, reopened, edited]
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -11,8 +12,49 @@ concurrency:
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
+  pr-metadata:
+    name: PR Title & Size Check
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Validate PR Title (Conventional Commits)
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check PR Size
+        run: |
+          CHANGES=$(git diff --stat origin/${{ github.base_ref }}...HEAD | tail -n 1)
+          echo "PR Diff Stats: $CHANGES"
+          INSERTIONS=$(git diff --numstat origin/${{ github.base_ref }}...HEAD | awk '{s+=$1} END {print s+0}')
+          DELETIONS=$(git diff --numstat origin/${{ github.base_ref }}...HEAD | awk '{s+=$2} END {print s+0}')
+          TOTAL_CHANGES=$((INSERTIONS + DELETIONS))
+          echo "Total changed lines: $TOTAL_CHANGES"
+          if [ "$TOTAL_CHANGES" -gt 400 ]; then
+            echo "::warning title=Large PR Alert::This PR modifies $TOTAL_CHANGES lines (threshold: 400). Consider breaking it down into smaller, focused review units."
+          fi
+
   quality:
     name: Quality gate
     runs-on: ubuntu-latest

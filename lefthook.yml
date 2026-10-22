@@ -4,6 +4,9 @@
 pre-commit:
   piped: true # sequential: fixers must not race on the same files
   jobs:
+    - name: branch-check
+      run: node scripts/git/check-branch-name.mjs
+
     - name: secrets
       run: |
         if command -v gitleaks >/dev/null 2>&1; then

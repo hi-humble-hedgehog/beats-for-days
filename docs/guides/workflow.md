@@ -18,6 +18,19 @@ pnpm verify             # full local gate before pushing / declaring done
 pnpm test:mutation      # after logic-heavy changes
 ```
 
+## Branching & PR workflow
+
+1. **Branch naming:** Create feature/fix branches. Direct commits to `main` are blocked.
+   - `feat/<feature-name>`
+   - `fix/<bug-name>`
+   - `refactor/<scope>`
+   - `chore/<task>`
+2. **Pull Requests:**
+   - PR title must follow Conventional Commits (e.g., `feat(audio): implement gapless bar looping`). Enforced in CI.
+   - PR size target: ≤ 400 changed lines. CI warns if exceeded.
+   - Merge strategy: **Squash and merge** with conventional title to maintain linear history on `main`.
+   - Head branch auto-deleted after merge.
+
 ## What runs when
 
 ```mermaid

@@ -60,6 +60,7 @@ Use **pnpm** only. Never edit `pnpm-lock.yaml` by hand.
 - **Async:** no floating promises. Await or explicitly `void` them.
 - **AI Token Guardrail:** Generative requests (ElevenLabs audio inpainting, Gemini prompts) must be stubbed/mocked in local development and automated tests. Running live generation or spending API tokens requires explicit user approval and the `ALLOW_LIVE_AI_CALLS=true` runtime flag.
 - **Commits:** Conventional Commits (`feat(audio): …`, `fix: …`, `docs: …`).
+- **Branching:** Never commit directly to `main`. Create task branches (`feat/*`, `fix/*`, `refactor/*`, `chore/*`).
 - Don't bypass hooks (`--no-verify`, `LEFTHOOK=0`) unless the user asks.
 - Prefer small, focused changes. Don't add dependencies without a reason;
   knip will flag unused ones.
