@@ -21,8 +21,7 @@ Shared setup lives in `test/` (`setup-dom.ts`, `stubs/`).
 - Prefer pure functions. Inject time, randomness and `AudioContext` so tests
   are deterministic: pass `now()` / `random()` / a context factory as
   parameters rather than reaching for globals.
-- Components: query by role/label (`getByRole`), use `@testing-library/user-event`
-  for interactions (add it as a devDependency when first needed).
+- Components: query by accessible role/label (`getByRole`, `getByLabelText`) rather than test IDs or CSS selectors to enforce WCAG semantics ([ADR 0008](../decisions/0008-gdpr-and-wcag-accessibility-compliance.md)). Verify keyboard operability, ARIA states (`aria-pressed`, `aria-valuetext`, `aria-live`), and `prefers-reduced-motion` behaviour where applicable. Use `@testing-library/user-event` for interactions (add it as a devDependency when first needed).
 - Avoid `vi.resetModules()` + dynamic `import()` unless module-level state
   forces it (it confuses Stryker's per-test coverage).
 

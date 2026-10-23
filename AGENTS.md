@@ -38,7 +38,8 @@ Use **pnpm** only. Never edit `pnpm-lock.yaml` by hand.
    boundary, refactor and decompose. Any suppression requires an explicit rationale comment explaining the necessity.
 6. **Zero live AI calls:** Never execute requests against live generative APIs
    (Gemini, ElevenLabs) without explicit human confirmation in prompt. Tests and dev loops must run mocked/stubbed.
-7. Docs/AGENTS.md updated when commands, structure or conventions change.
+7. **GDPR & WCAG 2.2 AA compliance:** Every UI and backend change must satisfy [`docs/guides/compliance-and-a11y.md`](docs/guides/compliance-and-a11y.md) ([ADR 0008](docs/decisions/0008-gdpr-and-wcag-accessibility-compliance.md)) — privacy by design (zero non-essential tracking without prior opt-in, no third-party CDN IP leaks, no PII sent to external APIs) and accessible UI (semantic landmarks, full keyboard navigation, ARIA states/live regions for audio, ≥ 4.5:1 contrast, `prefers-reduced-motion` support).
+8. Docs/AGENTS.md updated when commands, structure or conventions change.
 
 ## Conventions
 
@@ -59,6 +60,8 @@ Use **pnpm** only. Never edit `pnpm-lock.yaml` by hand.
   truly must disable one, add a comment explaining why.
 - **Async:** no floating promises. Await or explicitly `void` them.
 - **AI Token Guardrail:** Generative requests (ElevenLabs audio inpainting, Gemini prompts) must be stubbed/mocked in local development and automated tests. Running live generation or spending API tokens requires explicit user approval and the `ALLOW_LIVE_AI_CALLS=true` runtime flag.
+- **GDPR & Privacy by Design:** Zero non-essential cookies, analytics, or persistent storage without explicit opt-in consent. Self-host all fonts (`next/font`) and static assets so visitor IPs never leak to third-party CDNs. Never forward user IPs or PII to external APIs (ElevenLabs, Gemini, Supabase).
+- **Accessibility (a11y / WCAG 2.2 AA):** Use semantic HTML (`<main>`, `<nav>`, `<button>`, `<input type="range">`), visible `:focus-visible` states, and full keyboard operability. Audio controls require accurate ARIA labels/value text and `aria-live="polite"` status announcements. Visualizers must honour `prefers-reduced-motion: reduce` and never flash > 3 times/sec. Test components via `getByRole`. See [`docs/guides/compliance-and-a11y.md`](docs/guides/compliance-and-a11y.md).
 - **Commits:** Conventional Commits (`feat(audio): …`, `fix: …`, `docs: …`).
 - **Branching:** Never commit directly to `main`. Create task branches (`feat/*`, `fix/*`, `refactor/*`, `chore/*`).
 - Don't bypass hooks (`--no-verify`, `LEFTHOOK=0`) unless the user asks.

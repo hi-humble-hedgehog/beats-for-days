@@ -6,6 +6,10 @@ describe("parseServerEnv", () => {
     expect(parseServerEnv({ OTHER: "ignored" })).toEqual({
       ALLOW_LIVE_AI_CALLS: false,
       ELEVENLABS_API_KEY: undefined,
+      NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54521",
+      NEXT_PUBLIC_SUPABASE_ANON_KEY:
+        "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH",
+      SUPABASE_SERVICE_ROLE_KEY: "sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz",
     });
   });
 
@@ -18,6 +22,10 @@ describe("parseServerEnv", () => {
     ).toEqual({
       ALLOW_LIVE_AI_CALLS: false,
       ELEVENLABS_API_KEY: undefined,
+      NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54521",
+      NEXT_PUBLIC_SUPABASE_ANON_KEY:
+        "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH",
+      SUPABASE_SERVICE_ROLE_KEY: "sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz",
     });
   });
 
@@ -31,6 +39,10 @@ describe("parseServerEnv", () => {
     ).toEqual({
       ALLOW_LIVE_AI_CALLS: true,
       ELEVENLABS_API_KEY: "sk_123",
+      NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54521",
+      NEXT_PUBLIC_SUPABASE_ANON_KEY:
+        "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH",
+      SUPABASE_SERVICE_ROLE_KEY: "sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz",
     });
   });
 

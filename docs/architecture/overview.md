@@ -85,3 +85,11 @@ Logic (state machines, timing math, parsing, API mapping) goes in `.ts` modules
 under `src/lib` or hooks. `.tsx` components wire that logic to the DOM. This
 keeps the important code fast to test and lets mutation testing focus on
 `.ts` files. See [ADR 0003](../decisions/0003-testing-strategy.md).
+
+## Beat generation & on-the-fly transition graph playback
+
+Phased beat generation on `/generate` (Phase 1 waitlist signup; Phase 2 free
+waitlist, paid instant pass, and BYOK) and the on-the-fly directed transition
+graph playback model are detailed in
+[`generation-policy.md`](generation-policy.md) and
+[ADR 0009](../decisions/0009-beat-generation-access-and-queue-policy.md).

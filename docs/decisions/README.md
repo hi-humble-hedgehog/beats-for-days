@@ -14,12 +14,14 @@ and its consequences. Format: lightweight [MADR](https://adr.github.io/madr/).
 
 ## Index
 
-| #                                             | Title                                        | Status   |
-| --------------------------------------------- | -------------------------------------------- | -------- |
-| [0001](0001-record-architecture-decisions.md) | Record architecture decisions                | Accepted |
-| [0002](0002-nextjs-pnpm-foundation.md)        | Next.js App Router + pnpm foundation         | Accepted |
-| [0003](0003-testing-strategy.md)              | Testing strategy: Vitest, CRAP & mutation    | Accepted |
-| [0004](0004-code-quality-guardrails.md)       | Code quality guardrails                      | Accepted |
-| [0005](0005-agent-guidelines.md)              | Agent guidelines & feedback loops            | Accepted |
-| [0006](0006-strict-ai-token-guardrails.md)    | Strict AI token guardrails & cost control    | Accepted |
-| [0007](0007-git-branching-pr-workflow.md)     | Git branching, PR workflow & merge standards | Accepted |
+| #                                                       | Title                                              | Status   |
+| ------------------------------------------------------- | -------------------------------------------------- | -------- |
+| [0001](0001-record-architecture-decisions.md)           | Record architecture decisions                      | Accepted |
+| [0002](0002-nextjs-pnpm-foundation.md)                  | Next.js App Router + pnpm foundation               | Accepted |
+| [0003](0003-testing-strategy.md)                        | Testing strategy: Vitest, CRAP & mutation          | Accepted |
+| [0004](0004-code-quality-guardrails.md)                 | Code quality guardrails                            | Accepted |
+| [0005](0005-agent-guidelines.md)                        | Agent guidelines & feedback loops                  | Accepted |
+| [0006](0006-strict-ai-token-guardrails.md)              | Strict AI token guardrails & cost control          | Accepted |
+| [0007](0007-git-branching-pr-workflow.md)               | Git branching, PR workflow & merge standards       | Accepted |
+| [0008](0008-gdpr-and-wcag-accessibility-compliance.md)  | Enforce GDPR privacy and WCAG 2.2 AA accessibility | Accepted |
+| [0009](0009-beat-generation-access-and-queue-policy.md) | Phased beat generation access & transition graph   | Accepted |

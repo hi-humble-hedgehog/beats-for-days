@@ -16,6 +16,16 @@ const serverEnvSchema = z
       .trim()
       .transform((val) => (val === "" ? undefined : val))
       .optional(),
+    NEXT_PUBLIC_SUPABASE_URL: z
+      .string()
+      .url()
+      .default("http://127.0.0.1:54521"),
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: z
+      .string()
+      .default("sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH"),
+    SUPABASE_SERVICE_ROLE_KEY: z
+      .string()
+      .default("sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz"),
   })
   .refine(
     (env) => !env.ALLOW_LIVE_AI_CALLS || Boolean(env.ELEVENLABS_API_KEY),
