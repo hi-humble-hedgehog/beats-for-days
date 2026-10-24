@@ -3,7 +3,8 @@ export interface Identifiable {
 }
 
 /**
- * Deterministic 32-bit FNV-1a hash for a seed, cycle, and item id.
+ * Returns a repeatable 32-bit FNV-1a hash for a `seed`, `cycle`, and `itemId`.
+ * Fast enough to sort the track list synchronously in the browser without external dependencies.
  */
 export function hashSeedItem(
   seed: string,
@@ -20,8 +21,9 @@ export function hashSeedItem(
 }
 
 /**
- * Permutes items deterministically based on seed and cycle without repetition.
- * Optionally pins startingId to index 0.
+ * Shuffles items in a repeatable order for a given `seed` and `cycle`.
+ * Gives each listener a unique playlist order without tracking cookies or server sessions.
+ * If `startingId` is given (e.g. from a `/beat/0042` link), that item is placed first.
  */
 export function epochShuffle<T extends Identifiable>(
   items: T[],

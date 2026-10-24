@@ -5,41 +5,41 @@
 
 ## Context
 
-Beats for Days is a public-facing web application featuring continuous audio playback and reactive canvas/WebGL visualizers. Without explicit guardrails, media-heavy web apps frequently regress on two fronts:
+Beats for Days is a public web app with continuous audio and canvas visualizers. Without clear rules, audio and visual web apps often fail in two ways:
 
-1. **Privacy (GDPR / ePrivacy):** Unintentionally leaking visitor IP addresses or personal data (PII) via third-party CDNs, unconsented analytics, persistent client storage, or outbound generative API requests.
-2. **Accessibility (WCAG 2.2 AA):** Building custom audio transport controls, canvas visualizers, and keyboard shortcuts that are inoperable via screen readers or keyboards, or that trigger vestibular/photosensitive reactions.
+1. **Privacy (GDPR / ePrivacy):** Leaking visitor IP addresses or personal data through third-party CDNs, tracking cookies, browser storage, or external API calls.
+2. **Accessibility (WCAG 2.2 AA):** Building custom audio players and visualizers that keyboard or screen-reader users cannot operate, or that flash rapidly.
 
 ## Decision
 
-We will enforce **strict GDPR compliance (privacy by design)** and **WCAG 2.2 Level AA accessibility** across all features, routes, and third-party integrations:
+We enforce **GDPR privacy by design** and **WCAG 2.2 Level AA accessibility** on every route and feature.
 
 ### 1. GDPR & Privacy by Design
 
-- **Zero cookie/profiling trackers by default:** No cookie-based analytics, marketing pixels, cross-site trackers, or persistent device fingerprinting may load without prior, explicit, granular opt-in consent.
-- **Cookieless aggregate telemetry (no banner required, disclosed in `/privacy`):**
-  - **Vercel Web Analytics (`@vercel/analytics`):** Permitted for basic first-party pageview/referrer stats because it sets zero cookies or client storage and discards short-lived session hashes after 24 hours (GDPR Art. 6(1)(f) legitimate interest / ePrivacy-exempt).
-  - **Anonymous track skip telemetry (`public.track_skip_events`):** Permitted for recording `{ track_id, skipped_at_sec, loop_count }` in Supabase with zero IP addresses, User-Agents, or session/user identifiers stored (GDPR Recital 26 anonymous data).
-- **Strictly necessary storage only:** Essential client state (e.g. volume, muted state, `playedTrackIds` LRU history for non-repeating radio playback, reduced-motion preference, or `sessionStorage` BYOK API key) may only use local storage when directly supporting user-requested functionality, and must be documented.
-- **No third-party asset leaks:** Fonts (bundled at build time via `next/font`), icons, and static media must be self-hosted or served from first-party origins so visitor IPs are not leaked to external CDNs on page load.
-- **PII-free third-party API calls:** Server-side calls to external services (ElevenLabs, Gemini, Supabase) must never forward end-user IP addresses, raw user-agent strings, or unconsented personal identifiers.
-- **Transparency & user rights:** Maintain clear, accessible Privacy Policy and Terms of Service routes detailing any data processing, storage, and sub-processors (including Vercel Web Analytics). Whenever user accounts or persisted user data are introduced, provide self-service data export (portability) and deletion (erasure) flows.
+- **No tracking cookies by default:** Never load cookie-based analytics, ad pixels, or fingerprinting scripts without prior opt-in consent.
+- **Cookieless metrics only (no banner needed, listed in `/privacy-policy`):**
+  - **Vercel Web Analytics (`@vercel/analytics`):** Counts pageviews and referrers without cookies or `localStorage`. Short-lived session hashes expire after 24 hours.
+  - **Anonymous skip events (`public.track_skip_events`):** Logs only `{ track_id, skipped_at_sec, loop_count }` in Supabase. Never log IP addresses, User-Agents, or user IDs.
+- **Essential browser storage only:** Use `localStorage` or `sessionStorage` only for features the user asked for: volume, mute state, `playedTrackIds` play history, reduced-motion setting, or a user-supplied ElevenLabs API key in `sessionStorage`.
+- **Self-host all static assets:** Bundle fonts at build time with `next/font` and serve icons and audio from our own domain. Never load assets from third-party CDNs in the browser.
+- **No personal data sent to third-party APIs:** Server calls to ElevenLabs, Gemini, or Supabase must never forward visitor IP addresses, cookies, or User-Agent strings.
+- **Legal pages & user rights:** Keep `/privacy-policy`, `/terms-of-service`, and `/about` reachable from every page without stopping audio playback. Support data export and deletion whenever we store personal data (such as waitlist emails).
 
-### 2. Accessibility (a11y / WCAG 2.2 Level AA)
+### 2. Accessibility (WCAG 2.2 Level AA)
 
-- **Semantic HTML & landmarks:** Every route must use proper document structure (`<main>`, `<nav>`, `<header>`, `<footer>`, sequential headings `<h1>`–`<h6>`) and native interactive elements (`<button>`, `<input>`, `<a>`) before reaching for custom ARIA.
-- **Full keyboard operability:** All interactive controls (transport, volume sliders, track selectors, modals) must be reachable and operable via keyboard alone (`Tab`, `Shift+Tab`, `Space`, `Enter`, arrow keys, `Escape`) with visible `:focus-visible` indicators and no keyboard traps.
-- **Accessible audio controls & live announcements:** Custom player controls must expose accurate roles, labels, and states (`aria-label`, `aria-pressed`, `aria-valuemin`/`max`/`now`/`text`). Dynamic track/playback changes must be announced non-disruptively via `aria-live="polite"`.
-- **Visual contrast & target sizing:** Text and interactive UI icons must meet WCAG AA contrast ratios (≥ 4.5:1 for normal text, ≥ 3:1 for large text and UI components) and minimum pointer target sizes (≥ 24×24 CSS pixels).
-- **Motion & photosensitivity safety:** All visualizers and animations must respect `prefers-reduced-motion: reduce` (providing a static or low-motion fallback) and never flash more than 3 times per second (WCAG 2.3.1). `<canvas>` elements must include descriptive fallback/accessible labels or `aria-hidden="true"` when purely decorative alongside accessible text equivalents.
+- **Semantic HTML:** Use `<header>`, `<nav>`, `<main>`, `<footer>`, ordered headings (`<h1>`–`<h6>`), and native `<button>`, `<input>`, and `<a>` elements.
+- **Full keyboard support:** Every control must work with a keyboard (`Tab`, `Shift+Tab`, `Space`, `Enter`, arrow keys, `Escape`) and show a clear `:focus-visible` ring.
+- **Screen-reader friendly audio controls:** Give player buttons and sliders clear ARIA labels and values (`aria-label`, `aria-pressed`, `aria-valuetext`). Announce track changes with `aria-live="polite"`.
+- **Contrast & target size:** Keep text contrast ≥ 4.5:1 (≥ 3:1 for large text and icons). Make buttons and controls at least 24×24 CSS pixels.
+- **Safe motion:** Honour `prefers-reduced-motion: reduce` by pausing or slowing animations. Never flash visualizers more than 3 times per second. Mark decorative `<canvas>` elements with `aria-hidden="true"`.
 
 ## Consequences
 
-- Agents and developers must treat GDPR and WCAG 2.2 AA checks as part of the Definition of Done in `AGENTS.md`.
-- Component tests (`*.test.tsx`) must query elements by accessible role and accessible name (`getByRole(..., { name })`) rather than test IDs or CSS selectors.
-- Introducing any new external service, storage mechanism, or analytics tool requires an ADR evaluating its GDPR sub-processor and data-flow impact.
+- GDPR and WCAG 2.2 AA checks are part of the Definition of Done in `AGENTS.md`.
+- Component tests (`*.test.tsx`) find elements with `getByRole` instead of test IDs or CSS selectors.
+- Adding any new external service, storage key, or analytics tool requires an ADR.
 
 ## Alternatives considered
 
-- **Retrofitting compliance before launch:** Expensive and error-prone, especially for custom Web Audio players, canvas visualizers, and third-party integrations.
-- **Relying solely on automated cookie banners:** Does not solve IP leaks from third-party assets, server-side PII forwarding, or architectural data minimization.
+- **Fixing privacy and accessibility right before launch:** Harder and more expensive to retrofit into custom audio players and visualizers.
+- **Adding a cookie banner instead of cutting trackers:** A banner adds UI friction and still does not fix CDN IP leaks or server-side data leaks.

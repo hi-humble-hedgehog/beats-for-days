@@ -14,8 +14,10 @@ description: >-
    `docs/decisions/NNNN-kebab-case-title.md`. Title in imperative mood
    ("Use X for Y").
 3. Fill in Context → Decision → Consequences → Alternatives. Keep it under a
-   page. State the decision plainly ("We will …"). Include concrete
-   consequences (follow-ups, constraints, things that get harder).
+   page and follow **ISO 24495-1 plain language**: short sentences (≤ 20 words),
+   active voice ("We will …"), everyday words instead of jargon, and bullet
+   lists or tables for scannability. Include concrete consequences (follow-ups,
+   constraints, things that get harder).
 4. Set `Status: Accepted` (or `Proposed` if the user hasn't agreed yet) and
    today's date.
 5. If it replaces an earlier ADR, change only the old ADR's status line to

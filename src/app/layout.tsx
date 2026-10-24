@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -19,6 +20,8 @@ export const metadata: Metadata = {
 
 import { AudioPlayerProvider } from "@/components/audio/AudioPlayerContext";
 import { PersistentPlayerBar } from "@/components/audio/PersistentPlayerBar";
+import { HeaderNav } from "@/components/navigation/HeaderNav";
+import { API_ROUTES } from "@/lib/constants";
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
@@ -26,11 +29,22 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col pb-24">
-        <AudioPlayerProvider>
-          {children}
-          <PersistentPlayerBar />
-        </AudioPlayerProvider>
+      <head>
+        <link
+          rel="preload"
+          href={API_ROUTES.BEATS_NEXT}
+          as="fetch"
+          crossOrigin="anonymous"
+        />
+      </head>
+      <body className="flex min-h-full flex-col bg-zinc-950 pb-24 text-zinc-100">
+        <Suspense fallback={null}>
+          <AudioPlayerProvider>
+            <HeaderNav />
+            {children}
+            <PersistentPlayerBar />
+          </AudioPlayerProvider>
+        </Suspense>
       </body>
     </html>
   );

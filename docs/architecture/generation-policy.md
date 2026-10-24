@@ -116,18 +116,24 @@ Both instant-generation paths enforce a maximum of **5 beats per 24-hour window*
 
 ---
 
-## 4. On-the-Fly Directed Transition Graph & 1-Minute Loop Architecture
+## 4. On-the-Fly Transition Graph & 1-Minute Loop Architecture
 
-To keep the 24/7 radio stream bounded in cost while giving every listener a non-repeating shuffle across `/beat/####` tracks—without rigid playlists or batch tables—tracks and transitions form a **self-balancing directed graph** (`public.tracks` + `public.transitions`).
+Tracks and transitions form a **directed graph** (`public.tracks` + `public.transitions`). This keeps AI generation costs capped while giving every listener a non-repeating stream of `/beat/####` tracks.
 
-### Sequential `/beat/####` IDs & 1-Minute Loopable Beats
+### 4-Digit `/beat/####` URLs & 1-Minute Loops
 
-- Every beat is assigned the next sequential 4-digit ID in creation order (`/beat/0001`, `/beat/0002`, …, `/beat/1500`, formatted via `String(beatNumber).padStart(4, "0")`).
-- Every beat is **1 minute long and infinitely loopable** (`loop_start_ms` $\to$ `loop_end_ms`).
+- Each beat gets the next 4-digit ID in creation order (`/beat/0001`, `/beat/0002`, …, `/beat/1500`, formatted with `String(beatNumber).padStart(4, "0")`).
+- Visiting `/beats` redirects to the currently playing beat (`/beat/####`).
+- Every beat is **1 minute long and loops seamlessly** (`loop_start_ms` $\to$ `loop_end_ms`).
 
-### Client LRU Song History (`playedTrackIds`)
+### Loading the Catalog: Phase 1 vs. Phase 2
 
-The browser maintains a single deduplicated `playedTrackIds` array (ordered oldest $\to$ newest) in `localStorage`:
+- **Phase 1 MVP (30–40 tracks):** `GET /api/beats` loads all seed tracks in one request (~15–20 KB gzipped) so playback starts right away.
+- **Phase 2 (up to 1,500 tracks):** Instead of loading the whole catalog, the player fetches only the current beat and its outgoing transitions (`GET /api/beats/[id]`), keeping each response under 1 KB.
+
+### Browser Play History (`playedTrackIds`)
+
+The browser stores a list of heard beat IDs in `localStorage`, ordered from oldest to newest:
 
 ```ts
 const nextPlayedTrackIds = [
@@ -136,11 +142,11 @@ const nextPlayedTrackIds = [
 ];
 ```
 
-Moving replayed tracks to the newest end guarantees that least-recently-played fallback selection rotates cleanly across all exits and keeps `localStorage` bounded to at most the catalog size.
+When a beat plays, its ID moves to the end of the list. That way, if all transitions from the current beat have been heard before, the player can pick the one heard longest ago.
 
-### Natural Radio Transition Flow (Triggered After Loop 1)
+### How Radio Transitions Work (After Loop 1)
 
-AI transition blends only happen during continuous radio playback (never on manual skip):
+AI transitions only play during continuous radio listening, never when the user clicks Skip:
 
 ```mermaid
 flowchart TD

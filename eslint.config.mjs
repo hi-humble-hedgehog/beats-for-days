@@ -2,6 +2,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import prettier from "eslint-config-prettier/flat";
+import jsdoc from "eslint-plugin-jsdoc";
 
 // Rationale for these rules: docs/decisions/0004-code-quality-guardrails.md
 const eslintConfig = defineConfig([
@@ -49,6 +50,34 @@ const eslintConfig = defineConfig([
       ],
       "no-console": ["error", { allow: ["warn", "error"] }],
       eqeqeq: ["error", "smart"],
+    },
+  },
+  {
+    name: "bfd/jsdoc-lib",
+    files: ["src/lib/**/*.{ts,tsx}"],
+    ignores: ["**/*.test.{ts,tsx}"],
+    plugins: {
+      jsdoc,
+    },
+    rules: {
+      "jsdoc/require-jsdoc": [
+        "error",
+        {
+          publicOnly: true,
+          enableFixer: false,
+          require: {
+            FunctionDeclaration: true,
+            MethodDefinition: true,
+            ClassDeclaration: true,
+            ArrowFunctionExpression: true,
+            FunctionExpression: true,
+          },
+        },
+      ],
+      "jsdoc/require-description": "error",
+      "jsdoc/no-types": "error",
+      "jsdoc/check-param-names": "error",
+      "jsdoc/check-tag-names": "error",
     },
   },
   {

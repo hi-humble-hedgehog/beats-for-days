@@ -10,7 +10,7 @@ vi.mock("next/navigation", () => ({
 
 describe("PersistentPlayerBar", () => {
   const sampleBeat: BeatView = {
-    id: "track-a",
+    id: "0001",
     name: "Soul Rhodes & Piano",
     audioUrl: "http://storage/track-a.wav",
     transitions: [],
@@ -21,11 +21,11 @@ describe("PersistentPlayerBar", () => {
       <AudioPlayerContext.Provider
         value={{
           current: sampleBeat,
-          cycle: 1,
-          orderHash: "seed_test123",
+          isPlaying: true,
           secondsRemaining: 4,
           isLoading: false,
           error: null,
+          togglePlay: vi.fn(),
           advanceTrack: vi.fn(),
         }}
       >
@@ -37,7 +37,12 @@ describe("PersistentPlayerBar", () => {
       screen.getByText(/Now Playing: Soul Rhodes & Piano/),
     ).toBeInTheDocument();
     expect(screen.getByText(/Next in 4s/)).toBeInTheDocument();
-    expect(screen.getByText(/Cycle #1/)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Pause audio" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Skip to next track" }),
+    ).toBeInTheDocument();
   });
 
   it("renders loading state when initial fetch is pending", () => {
@@ -45,11 +50,11 @@ describe("PersistentPlayerBar", () => {
       <AudioPlayerContext.Provider
         value={{
           current: null,
-          cycle: 1,
-          orderHash: "seed_test123",
+          isPlaying: false,
           secondsRemaining: 5,
           isLoading: true,
           error: null,
+          togglePlay: vi.fn(),
           advanceTrack: vi.fn(),
         }}
       >

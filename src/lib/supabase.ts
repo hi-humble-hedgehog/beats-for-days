@@ -4,6 +4,10 @@ import { getServerEnv } from "./env";
 
 let supabaseClient: SupabaseClient | undefined;
 
+/**
+ * Returns a shared Supabase client for server routes.
+ * Disables session storage and token refresh because server requests are stateless.
+ */
 export function getSupabaseServerClient(): SupabaseClient {
   if (!supabaseClient) {
     const env = getServerEnv();

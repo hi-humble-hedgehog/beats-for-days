@@ -5,30 +5,28 @@
 
 ## Context
 
-To maintain high code quality and clear change tracking across human developers and AI coding agents, we need disciplined branching conventions, PR size hygiene, and a clean linear commit history on `main`.
+Both humans and AI agents contribute to this repo. We need simple branching rules, small pull requests, and a clean commit history on `main`.
 
 ## Decision
 
-1. **Branch Naming Standard:**
-   - Branches must follow standard prefixes: `feat/*`, `fix/*`, `refactor/*`, `perf/*`, `test/*`, `docs/*`, `chore/*`.
-   - Direct work on `main` is disallowed locally (blocked via `lefthook` pre-commit).
-2. **Pull Request Protocol:**
-   - PR titles must strictly conform to [Conventional Commits](https://www.conventionalcommits.org) (validated in CI).
-   - PR size hygiene: PRs targeting >400 modified production lines (excluding `*.test.*`, `docs/`, and `pnpm-lock.yaml`) trigger a warning step in CI to encourage bite-sized, reviewable increments without penalizing thorough test suites or documentation.
-   - PR description follows `.github/pull_request_template.md` with explicit quality checklist verification.
-3. **Merge Strategy:**
-   - **Squash and Merge** only.
-   - The squashed commit message uses the validated Conventional Commit PR title and description.
-   - Automatic deletion of head branches upon merge.
-   - Linear history required on `main`.
+1. **Branches:**
+   - Start every task on a branch named `feat/*`, `fix/*`, `refactor/*`, `perf/*`, `test/*`, `docs/*`, or `chore/*`.
+   - `lefthook` blocks direct commits to local `main`.
+2. **Pull requests:**
+   - Write PR titles in [Conventional Commits](https://www.conventionalcommits.org) format (checked in CI).
+   - Keep PRs under **400 changed production lines** (excluding `*.test.*`, `docs/`, and `pnpm-lock.yaml`). CI warns if a PR is larger.
+   - Fill out the checklist in `.github/pull_request_template.md`.
+3. **Merging:**
+   - Use **Squash and Merge** so `main` stays linear.
+   - Delete the feature branch after merging.
 
 ## Consequences
 
-- Direct accidental commits to local `main` are stopped before committing.
-- Repository history on `main` remains clean, bisectable, and conventional.
-- Agents must create feature branches before executing multi-step tasks.
+- Local hooks stop accidental commits to `main`.
+- `main` has one clean commit per PR, making `git bisect` and release notes easy.
+- Agents must create a branch before committing changes.
 
 ## Alternatives considered
 
-- **Rebase and merge**: Preserves individual commits, but agent iterative micro-commits can clutter history.
-- **Merge commits**: Creates branching bubbles that complicate automated release notes.
+- **Rebase and merge:** Keeps noisy work-in-progress commits on `main`.
+- **Merge commits:** Adds merge commits that clutter `git log`.

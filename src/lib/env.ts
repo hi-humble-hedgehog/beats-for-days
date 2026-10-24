@@ -37,6 +37,10 @@ const serverEnvSchema = z
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
 
+/**
+ * Checks an object of environment variables against the server schema.
+ * Takes `source` as an argument so tests can run without changing `process.env`.
+ */
 export function parseServerEnv(
   source: Record<string, string | undefined>,
 ): ServerEnv {
@@ -51,7 +55,10 @@ export function parseServerEnv(
 
 let cached: ServerEnv | undefined;
 
-/** Lazily validated so `next build` doesn't require runtime secrets. */
+/**
+ * Validates `process.env` on first call and caches the result.
+ * Runs lazily so `next build` succeeds even when runtime secrets are not set.
+ */
 export function getServerEnv(): ServerEnv {
   cached ??= parseServerEnv(process.env);
   return cached;

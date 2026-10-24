@@ -6,43 +6,43 @@ Beats for Days is **GDPR compliant by design** and targets **WCAG 2.2 Level AA**
 
 ## GDPR & Privacy Checklist
 
-1. **Data minimization & cookieless telemetry by default**
-   - Do not add cookie-based third-party analytics, marketing pixels, or cross-site tracking scripts without an ADR and an explicit, prior opt-in consent mechanism (with an equally easy reject/withdraw flow).
-   - **Approved cookieless telemetry (no cookie banner required, disclosed in `/privacy`):**
-     - **Vercel Web Analytics (`@vercel/analytics`):** Basic aggregate pageview/referrer metrics (stores zero cookies/localStorage; daily rotating hash expires after 24h).
-     - **Anonymous first-party skip metrics (`public.track_skip_events`):** Stores only `{ track_id, skipped_at_sec, loop_count }` in Supabase with zero IP addresses, User-Agents, or user/session IDs.
-2. **No client-side IP leaks**
-   - Never load fonts, stylesheets, scripts, or audio assets directly from third-party CDNs in the browser (`fonts.googleapis.com`, `unpkg.com`, etc.).
-   - Use `next/font` so fonts are downloaded at build time and served from our own origin.
-3. **Client storage (`localStorage` / `sessionStorage` / cookies)**
-   - Only store strictly necessary state required for user-requested features: volume level, mute state, `playedTrackIds` (LRU song history so the radio player does not repeat tracks), reduced-motion preference, or `sessionStorage` BYOK API key.
-   - Never store raw PII or cross-session tracking identifiers without explicit consent.
-4. **Server-side API boundaries**
-   - Route handlers (`src/app/api/**`) and server clients (`src/lib/elevenlabs/`, `src/lib/supabase.ts`) must never forward visitor IP addresses, cookies, or personal identifiers to external AI or media providers.
-5. **User rights & legal routes**
-   - Keep legal/transparency pages (`/terms-of-service`, `/privacy`, `/about`) reachable from every route and playable without interrupting audio.
-   - Any feature that persists user-identifiable data must ship with data export (Article 20) and account/data erasure (Article 17) capabilities.
+1. **Collect minimal data & use cookieless metrics**
+   - Do not add cookie-based analytics, ad pixels, or cross-site trackers without an ADR and an opt-in consent banner (with an equally easy reject button).
+   - **Approved cookieless metrics (no banner needed, listed in `/privacy-policy`):**
+     - **Vercel Web Analytics (`@vercel/analytics`):** Counts pageviews and referrers without cookies or `localStorage`. Session hashes rotate daily and expire after 24 hours.
+     - **Anonymous skip events (`public.track_skip_events`):** Saves only `{ track_id, skipped_at_sec, loop_count }` in Supabase. Never save IP addresses, User-Agents, or user IDs.
+2. **Never leak visitor IPs to third-party CDNs**
+   - Never load fonts, stylesheets, scripts, or audio directly from external CDNs in the browser (`fonts.googleapis.com`, `unpkg.com`, etc.).
+   - Use `next/font` so fonts download at build time and serve from our own domain.
+3. **Browser storage (`localStorage` / `sessionStorage` / cookies)**
+   - Store only state needed for features the user asked for: volume, mute state, `playedTrackIds` play history, reduced-motion setting, or a user-supplied ElevenLabs API key in `sessionStorage`.
+   - Never store personal data or tracking IDs in browser storage without explicit consent.
+4. **Server API routes**
+   - Route handlers (`src/app/api/**`) and server clients (`src/lib/elevenlabs/`, `src/lib/supabase.ts`) must never forward visitor IP addresses, cookies, or personal data to external AI or media services.
+5. **Legal pages & user rights**
+   - Keep `/terms-of-service`, `/privacy-policy`, and `/about` reachable from every route without stopping audio playback.
+   - Any feature that saves personal data (such as waitlist emails) must support data export (Article 20) and deletion (Article 17).
 
-## Accessibility (a11y / WCAG 2.2 AA) Checklist
+## Accessibility (WCAG 2.2 AA) Checklist
 
 1. **Semantic HTML & landmarks**
    - Structure pages with `<header>`, `<nav>`, `<main>`, and `<footer>`.
-   - Maintain a logical heading hierarchy (`<h1>` once per view, followed by `<h2>`, `<h3>` without skipping levels).
-   - Use native `<button>`, `<a>`, and `<input type="range">` elements instead of clickable `<div>` or `<span>` elements.
-2. **Keyboard navigation & focus management**
-   - Every interactive control must be operable via keyboard (`Tab`, `Shift+Tab`, `Enter`, `Space`, arrow keys for sliders, `Escape` to close overlays).
-   - Never remove focus outlines (`outline-none`) without providing a high-contrast `:focus-visible` replacement (e.g. `focus-visible:ring-2`).
-   - Avoid global single-key shortcuts that hijack typing unless scoped or disabled when focus is inside an input/interactive control (WCAG 2.1.4).
-3. **Web Audio player & transport controls**
-   - Toggle buttons (Play/Pause, Mute/Unmute) must expose a clear accessible name (`aria-label`) or state (`aria-pressed`).
-   - Range sliders (volume, scrubber/progress) must expose `aria-label`, `aria-valuemin`, `aria-valuemax`, `aria-valuenow`, and human-readable `aria-valuetext` (e.g. `"75%"` or `"1 minute 20 seconds"`).
-   - Announce track transitions and loading/error states using an `aria-live="polite"` region so screen reader users know what is playing without focus being stolen.
-   - Never autoplay audio on initial page load without explicit user interaction (WCAG 1.4.2).
-4. **Visualizers, motion & photosensitivity**
-   - Respect `prefers-reduced-motion: reduce` in both CSS (`motion-reduce:*`) and JavaScript (`window.matchMedia("(prefers-reduced-motion: reduce)")`). When reduced motion is active, pause or throttle canvas/WebGL animations to a static or gentle frame.
-   - Ensure reactive beat visualizers never flash more than **3 times per second** (WCAG 2.3.1 Three Flashes or Below Threshold).
-   - Mark purely decorative `<canvas>` elements with `aria-hidden="true"` while ensuring track metadata and playback status are available in the DOM.
-5. **Contrast, sizing & zoom**
-   - Normal text contrast ≥ **4.5:1**; large text and active UI controls/icons ≥ **3:1**.
-   - Interactive pointer targets must be at least **24×24 CSS pixels** (prefer **44×44 CSS pixels** for primary transport controls).
-   - Layouts must reflow cleanly at 200% browser zoom and down to 320px viewport width without horizontal scrolling or clipped controls.
+   - Keep headings in order (`<h1>` once per page, then `<h2>`, `<h3>` without skipping levels).
+   - Use native `<button>`, `<a>`, and `<input type="range">` elements instead of clickable `<div>` or `<span>` tags.
+2. **Keyboard navigation & focus**
+   - Every control must work with a keyboard (`Tab`, `Shift+Tab`, `Enter`, `Space`, arrow keys for sliders, `Escape` to close popovers).
+   - Never remove focus outlines (`outline-none`) without adding a high-contrast `:focus-visible` style (such as `focus-visible:ring-2`).
+   - Do not add single-key shortcuts that fire while the user is typing in an input field (WCAG 2.1.4).
+3. **Audio player controls**
+   - Give toggle buttons (Play/Pause, Mute/Unmute) a clear `aria-label` or `aria-pressed` state.
+   - Give range sliders (volume, progress) `aria-label`, `aria-valuemin`, `aria-valuemax`, `aria-valuenow`, and human-friendly `aria-valuetext` (such as `"75%"` or `"1 minute 20 seconds"`).
+   - Announce track changes and loading or error states inside an `aria-live="polite"` region so screen readers report what is playing without stealing focus.
+   - Never autoplay audio on page load without a user click (WCAG 1.4.2).
+4. **Visualizers & safe motion**
+   - Honour `prefers-reduced-motion: reduce` in CSS (`motion-reduce:*`) and JavaScript (`window.matchMedia("(prefers-reduced-motion: reduce)")`). Pause or slow down canvas animations when reduced motion is on.
+   - Never flash visualizers more than **3 times per second** (WCAG 2.3.1).
+   - Add `aria-hidden="true"` to decorative `<canvas>` elements and keep track titles and status in normal DOM text.
+5. **Contrast, target size & zoom**
+   - Keep normal text contrast ≥ **4.5:1**, and large text or icons ≥ **3:1**.
+   - Make clickable targets at least **24×24 CSS pixels** (aim for **44×44 CSS pixels** on main player buttons).
+   - Pages must work at 200% browser zoom and down to a 320px screen width without horizontal scrolling or clipped buttons.

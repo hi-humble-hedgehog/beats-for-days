@@ -1,6 +1,6 @@
 export interface TransitionView {
   id: string;
-  targetTrackName: string;
+  targetTrackId: string;
   audioUrl: string;
 }
 

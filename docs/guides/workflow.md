@@ -3,12 +3,19 @@
 ## Setup
 
 ```bash
-nvm use                 # Node from .nvmrc
-pnpm install            # also installs git hooks (lefthook)
+nvm use                           # Node from .nvmrc
+pnpm install                      # also installs git hooks (lefthook)
 cp .env.example .env.local
-brew install gitleaks   # optional: local secret scanning (CI always scans)
+supabase start                    # local Supabase (requires Docker running)
+pnpm exec tsx scripts/seed/cli.ts # upload starter tracks & transitions
+brew install gitleaks             # optional: local secret scanning (CI always scans)
 pnpm dev
 ```
+
+### Local Supabase Troubleshooting
+
+- **Docker daemon not running:** Start Docker Desktop (`open -a Docker`) or OrbStack before running `supabase start`.
+- **Stale container state (`no container found for project`):** Run `supabase stop --no-backup` followed by `supabase start` to recreate clean local containers.
 
 ## Inner loop
 

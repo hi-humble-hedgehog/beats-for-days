@@ -48,7 +48,7 @@ describe("buildBeatViews", () => {
       transitions: [
         {
           id: "t-a-b",
-          targetTrackName: "Jazz Flute & Vibraphone",
+          targetTrackId: "track-b",
           audioUrl: "http://storage.local/transitions/a-to-b.wav",
         },
       ],
@@ -61,7 +61,7 @@ describe("buildBeatViews", () => {
       transitions: [
         {
           id: "t-b-a",
-          targetTrackName: "Soul Rhodes & Piano",
+          targetTrackId: "track-a",
           audioUrl: "http://storage.local/transitions/b-to-a.wav",
         },
       ],
@@ -74,7 +74,7 @@ describe("buildBeatViews", () => {
     expect(views[1]?.transitions).toEqual([]);
   });
 
-  it("falls back to target ID if target track name is not found", () => {
+  it("preserves target track ID even if not found in tracks list", () => {
     const orphanTransition: TransitionRow = {
       id: "t-a-x",
       from_track_id: "track-a",
@@ -87,7 +87,7 @@ describe("buildBeatViews", () => {
       [orphanTransition],
       dummyResolver,
     );
-    expect(views[0]?.transitions[0]?.targetTrackName).toBe("track-x");
+    expect(views[0]?.transitions[0]?.targetTrackId).toBe("track-x");
   });
 });
 
@@ -146,7 +146,7 @@ describe("fetchBeatViews", () => {
         transitions: [
           {
             id: "t-1-2",
-            targetTrackName: "track-2",
+            targetTrackId: "track-2",
             audioUrl: "https://test.supabase.co/audio/transitions/1-2.wav",
           },
         ],

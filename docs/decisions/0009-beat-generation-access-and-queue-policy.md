@@ -1,66 +1,70 @@
-# 0009. Enforce phased beat generation access, deferred waitlist redemption, and on-the-fly transition graph playback
+# 0009. Roll out beat generation in phases and use a capped transition graph
 
 - **Status:** Accepted
 - **Date:** 2026-10-23
 
 ## Context
 
-Generating a custom boom bap track and transition bridge via ElevenLabs (`music_v2_5`) and Google Gemini incurs direct per-generation API costs. Opening unthrottled public generation would expose the platform to runaway API spend, while generating tracks speculatively in background queues would waste funds on users who never check their email. Additionally, pre-rendering a full $N \times (N - 1)$ transition matrix across hundreds of tracks would scale quadratically ($O(N^2)$), while rigid track batches would force listeners into fixed, repeating playlists.
+Generating a custom beat and transition via ElevenLabs and Gemini costs money on every call. We have three cost and playback problems to solve:
+
+1. Opening unthrottled generation to the public would cause runaway API bills.
+2. Pre-generating beats in the background would waste money on waitlist users who never open their invite email.
+3. Generating transitions between every pair of tracks ($N \times (N - 1)$) grows quadratically as the catalog grows, while fixed track batches trap listeners in repeating playlists.
 
 ## Decision
 
-We will roll out in **two phases** (Phase 1: seeded radio player + waitlist signup; Phase 2: 4-tier public beat generation on `/generate`), backed by an **on-the-fly directed transition graph** capped per track:
+We will roll out in **two phases** and connect tracks through an **on-the-fly transition graph** with a cap on transitions per track.
 
-### 1. Phased Rollout & Four-Tier Access (`/generate`)
+### 1. Two-Phase Rollout & Four Access Tiers (`/generate`)
 
-- **Phase 1 MVP (Radio + Waitlist Signup Only):**
-  - Launches with **30–40 curated 1-minute infinitely loopable seed beats** on `/` and `/beat/####`.
-  - `/generate` collects email waitlist signups to notify users when public beat generation opens (no live user beat generation or checkout enabled yet).
-- **Phase 2 (4-Tier Generation on `/generate`):**
-  1. **Tier A — 24/7 Radio Stream (`/`):** Free passive playback of pre-generated tracks and cached transitions.
+- **Phase 1 MVP (Radio Player + Waitlist Signup):**
+  - Launches with **30–40 curated 1-minute loopable beats** on `/` and `/beat/####`.
+  - `/generate` collects email signups for the waitlist. No live user beat generation or checkout runs in Phase 1.
+- **Phase 2 (4-Tier Public Generation on `/generate`):**
+  1. **Tier A — 24/7 Radio Stream (`/`):** Free listening using existing tracks and saved transitions.
   2. **Tier B — Free Email Waitlist (`/generate`):**
-     - Capped at **1,500 free invites** per batch, displayed publicly (`"X of 1,500 free invites remaining"`). Sending an invite holds 1 slot; if the invite expires unused after 48 hours, the slot returns (`+1`) to the remaining pool.
-     - Dispatched at an average pace of up to **48 invites/day**, enforcing at least a **23-hour wait** after email verification and delivered in an hourly batch at **12:00 PM in the user's local timezone** (captured via `Intl.DateTimeFormat`).
-     - Users see only their **estimated invite date and time** ($\text{days\_out} = \max(1, \lceil N / 48 \rceil)$ at 12:00 PM local time), never their numeric position in line.
-     - Re-entering an email on `/generate` or clicking the verification link (`/generate?verify=TOKEN`) displays the current estimated invite date.
+     - Gives out **1,500 free invites** per batch (`"X of 1,500 free invites remaining"`). Sending an invite holds 1 spot. If an invite expires after 48 hours without being used, the spot returns (`+1`) to the pool.
+     - Sends up to **48 invites per day**. Each user waits at least **23 hours** after verifying their email and receives their invite at **12:00 PM in their local timezone** (read from `Intl.DateTimeFormat`).
+     - Shows only the **estimated invite date and time** ($\text{days\_out} = \max(1, \lceil N / 48 \rceil)$ at 12:00 PM), never a queue number.
+     - Users can check their estimated date anytime by re-entering their email on `/generate` or opening their verification link (`/generate?verify=TOKEN`).
   3. **Tier C — Paid Instant Pass (`/generate`):**
-     - Allows skipping the waitlist via a payment platform checkout.
-     - Issues a unique per-order token via webhook / license key that both redirects the browser to `/generate?invite=TOKEN` and is emailed to the buyer's checkout address so paid passes are never lost if a browser tab closes.
-     - Capped at **5 generations per day per checkout email** (avoiding IP-based caps that block shared Wi-Fi or mobile CGNAT).
+     - Lets users skip the waitlist through checkout.
+     - Redirects the browser to `/generate?invite=TOKEN` and emails a backup link to the buyer so they never lose access if they close the tab.
+     - Limits each buyer email to **5 beats per day**. We rate-limit by hashed email instead of IP address so shared office or mobile networks are not blocked.
   4. **Tier D — Bring Your Own Key (BYOK, `/generate`):**
-     - Users supply their own `ELEVENLABS_API_KEY`. The raw key is stored strictly in browser `sessionStorage` and sent via request header.
-     - The server hashes the key with `HMAC-SHA256` to enforce a **5 generations per day cooldown per key** without persisting raw keys ([ADR 0008](0008-gdpr-and-wcag-accessibility-compliance.md)).
+     - Users enter their own `ELEVENLABS_API_KEY`. The browser keeps the raw key in `sessionStorage` and sends it via request header.
+     - The server hashes the key with `HMAC-SHA256` to enforce a **5 beats per day limit per key** without saving raw keys ([ADR 0008](0008-gdpr-and-wcag-accessibility-compliance.md)).
 
-### 2. Deferred Generation & Error-Safe State Machine
+### 2. Generate Only on Click & Handle Errors Safely
 
-- **Zero speculative generation:** Audio is never generated in background cron jobs. Opening `/generate?invite=TOKEN` only unlocks the studio controls.
-- **Atomic redemption & retry:** Clicking **Generate Beat** transitions the invite from `invited` to `redeeming` (locking against double-clicks) and then `redeemed` on success. If an external API fails, the invite enters `failed`, preserving the token so the user can click **Try Again**.
-- **Expiration & re-entry:** Unused invites expire after 48 hours (`expired`) at zero cost. Returning after an expired invite grants a one-time priority bump (`is_priority_bump = true`) to the front of the waitlist. Returning after a `redeemed` invite allows rejoining at the back of the waitlist (enforced via a partial unique index allowing one active waitlist entry per normalized email).
+- **No background generation:** Cron jobs only send invite emails. Opening `/generate?invite=TOKEN` only unlocks the form.
+- **Lock and retry on failure:** Clicking **Generate Beat** changes the invite status from `invited` to `redeeming` (preventing double-clicks) and then `redeemed` when finished. If an API call fails, the status becomes `failed` so the user can click **Try Again** with the same token.
+- **Expiry and rejoining:** Unused invites expire after 48 hours (`expired`) at zero cost. If a user returns after an expired invite, they get a one-time bump to the front of the waitlist (`is_priority_bump = true`). If they return after redeeming an invite, they join the back of the waitlist.
 
-### 3. On-the-Fly Directed Transition Graph & 1-Minute Loop Playback
+### 3. On-the-Fly Transition Graph & 1-Minute Loops
 
-- **Sequential `/beat/####` IDs:** Every beat is assigned the next sequential 4-digit ID (`/beat/0001`, `/beat/0002`, …, `/beat/1500`).
-- **1-minute infinitely loopable tracks:** All beats are ~1 minute long (`loop_start_ms` $\to$ `loop_end_ms`).
-- **Client LRU song history (`playedTrackIds`):** The browser stores a deduplicated `playedTrackIds` array (ordered oldest $\to$ newest) in `localStorage`. When a track plays, it is moved/appended to the newest end of `playedTrackIds`.
-- **Natural radio transition (after Loop 1 completes):**
-  - AI transition blends only occur during continuous radio listening (never on manual skip).
-  - Once **Loop 1 finishes (`t = 60s`)**, the player enters Loop 2 and resolves the next transition from the current track (`Track A`):
-    1. If `public.transitions` already has one or more outgoing transitions from `Track A` pointing to a `to_track_id` **not** in `playedTrackIds`, pick one at random (`$0` cost).
-    2. Otherwise, if `Track A` is below its outgoing cap (**max 8 out** in Phase 1; configurable e.g. **3–6** for Phase 2 tracks) and an unheard track `Track B` exists below its incoming cap (**max 8 in** in Phase 1), the server selects the unheard `Track B` with the **lowest `in_degree`**, generates the `A -> B` transition on the fly, and persists it to `public.transitions`. `Track A` continues looping seamlessly until the transition buffer is ready, then blends in at the end of the current loop.
-    3. Otherwise (if `Track A` has reached its outgoing cap or all unheard tracks have reached their incoming cap), pick the existing outgoing transition from `Track A` whose `to_track_id` is **oldest** in `playedTrackIds` (`$0` cost).
-- **Manual skip & anonymous telemetry:**
-  - Clicking **Skip / Next** performs a client-side Web Audio transition into an unheard track at `$0` API cost (never triggering an ElevenLabs transition generation).
-  - Each manual skip logs an anonymous row `{ track_id, skipped_at_sec, loop_count }` to `public.track_skip_events` (with zero IP/session identifiers per [ADR 0008](0008-gdpr-and-wcag-accessibility-compliance.md)).
+- **4-digit `/beat/####` URLs:** Each beat gets the next 4-digit ID in order (`/beat/0001`, `/beat/0002`, …, `/beat/1500`). Visiting `/beats` redirects to the currently playing beat (`/beat/####`).
+- **1-minute loopable beats:** Every beat is 1 minute long and loops seamlessly from end to start.
+- **Browser play history (`playedTrackIds`):** The browser saves a list of heard beat IDs in `localStorage`, ordered from oldest to newest. Playing a beat moves its ID to the newest end of the list.
+- **How the radio picks the next beat (after Loop 1 finishes):**
+  - AI transitions only play during continuous listening, never when the user clicks Skip.
+  - After **Loop 1 finishes (`t = 60s`)**, `Track A` starts Loop 2 while the app picks the next beat in three steps:
+    1. **Use an unheard saved transition (free):** If `Track A` already has a saved transition to a beat not in `playedTrackIds`, pick one at random.
+    2. **Generate a new transition (if under the cap):** If `Track A` has fewer than **8 outgoing transitions** (or 3–6 for Phase 2 tracks), find an unheard `Track B` with the **fewest incoming transitions** (under 8). Generate the `A -> B` transition on the fly and save it to `public.transitions`. `Track A` keeps looping until the transition audio is ready, then blends in at the end of the loop.
+    3. **Fallback to the oldest heard transition (free):** If `Track A` is at its cap (or all unheard beats are at their cap), pick the existing transition from `Track A` whose target beat was heard longest ago.
+- **Manual skip & anonymous skip counts:**
+  - Clicking **Skip / Next** switches to an unheard beat in the browser at `$0` API cost (no ElevenLabs call).
+  - Each skip saves `{ track_id, skipped_at_sec, loop_count }` to `public.track_skip_events` with no IP address, cookies, or user ID ([ADR 0008](0008-gdpr-and-wcag-accessibility-compliance.md)).
 
 ## Consequences
 
-- Zero wasted API spend on unclicked invites or early track skips (transitions only generate after Loop 1 completes, and are permanently cached up to the per-track degree cap).
-- No `track_batches` tables or rigid multi-stage slot caps are needed; `public.tracks` and `public.transitions` form a self-balancing directed graph where newly added tracks (`in_degree = 0`) are automatically prioritized.
-- Queue state transitions, wait-date math, and graph transition selection must live in pure `.ts` modules under `src/lib/` with full unit and mutation test coverage ([ADR 0003](0003-testing-strategy.md)).
+- We spend `$0` on ignored invites or early skips. Transitions are generated only after a listener finishes a full 1-minute loop and are saved for all future listeners.
+- New tracks start with `0` incoming transitions, so step 2 automatically connects them into the radio stream first.
+- Queue math and graph selection live in pure `.ts` files under `src/lib/` with unit and mutation tests ([ADR 0003](0003-testing-strategy.md)).
 
 ## Alternatives considered
 
-- **Background pre-generation when a waitlist turn arrives:** Rejected because unclicked emails would waste API spend per ignored invite.
-- **Full all-pairs ($N \times (N - 1)$) transition matrix:** Rejected because transition costs scale quadratically ($O(N^2)$) as the catalog grows toward 1,500 tracks.
-- **Fixed 10-track batches with stratified slot caps:** Rejected in favor of the capped on-the-fly directed graph (`max 8 in / 8 out`), which avoids rigid repeating chains and eliminates batch-management schema complexity.
-- **Storing paid passes solely in browser `localStorage`:** Rejected because clearing site data or closing private tabs causes lost passes and support friction.
+- **Pre-generating beats when sending invite emails:** Wastes API money whenever an invite email goes unopened.
+- **Generating transitions between every pair of tracks ($N \times (N - 1)$):** Costs grow quadratically ($O(N^2)$) as the catalog grows.
+- **Fixed 10-track batches:** Traps listeners in small repeating loops and adds extra database tables.
+- **Saving paid passes only in `localStorage`:** Users lose their pass if they clear browser data or switch devices.

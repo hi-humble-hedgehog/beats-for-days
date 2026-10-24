@@ -18,19 +18,21 @@ export interface TransitionRow {
 import type { BeatView } from "./types/beat";
 export type { BeatView };
 
+/**
+ * Combines `tracks` and `transitions` table rows into `BeatView` objects.
+ * Kept separate from `fetchBeatViews` so we can test this logic without a database.
+ */
 export function buildBeatViews(
   tracks: TrackRow[],
   transitions: TransitionRow[],
   resolveAudioUrl: (path: string) => string,
 ): BeatView[] {
-  const trackMap = new Map(tracks.map((t) => [t.id, t.name]));
-
   return tracks.map((track) => {
     const trackTransitions = transitions
       .filter((tr) => tr.from_track_id === track.id)
       .map((tr) => ({
         id: tr.id,
-        targetTrackName: trackMap.get(tr.to_track_id) ?? tr.to_track_id,
+        targetTrackId: tr.to_track_id,
         audioUrl: resolveAudioUrl(tr.audio_path),
       }));
 
@@ -43,6 +45,10 @@ export function buildBeatViews(
   });
 }
 
+/**
+ * Loads all tracks and transitions from Supabase and turns storage paths into public URLs.
+ * Designed for the Phase 1 catalog (30–40 tracks). Phase 2 will load one beat at a time.
+ */
 export async function fetchBeatViews(
   client: SupabaseClient = getSupabaseServerClient(),
 ): Promise<BeatView[]> {

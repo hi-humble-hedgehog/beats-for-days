@@ -30,8 +30,18 @@ Hooks are managed by **lefthook** (fast, parallel, single binary), installed by
 
 ESLint complexity budget: cyclomatic ≤ 10, max-depth 4, max-params 4,
 ≤ 80 lines/function, ≤ 300 lines/file (tests exempt from size limits).
+Split complex functions into local helpers in the same file instead of creating
+single-use, 10-line files. Move code to a new file only when it is shared or
+exceeds 300 lines.
+
 Type-aware rules: no floating or misused promises, exhaustive switches,
 consistent type imports, no `any`.
+
+Scoped JSDoc rules (`eslint-plugin-jsdoc` on `src/lib/**/*.{ts,tsx}`, excluding tests):
+
+- Require a JSDoc description on exported functions, methods, and classes (`publicOnly: true`, `enableFixer: false`).
+- Check that `@param` names match the function signature (`jsdoc/check-param-names`).
+- Forbid TypeScript type annotations in tags (`jsdoc/no-types`) so comments explain _why_ in plain language (ISO 24495-1) rather than repeating types.
 
 ## Consequences
 
