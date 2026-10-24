@@ -1,26 +1,76 @@
 @import "tailwindcss";
 
+/*
+  Palette drawn from 90s white-label promo pressings:
+  sleeve paper, vinyl black, rubber-stamp red, pencil grey.
+*/
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+  --sleeve: #eceae4;
+  --vinyl: #141414;
+  --stamp: #d62718;
+  --pencil: #6f6d67;
+
+  --background: var(--sleeve);
+  --foreground: var(--vinyl);
+  --card: var(--sleeve);
+  --card-foreground: var(--vinyl);
+  --popover: var(--sleeve);
+  --popover-foreground: var(--vinyl);
+  --primary: var(--stamp);
+  --primary-foreground: var(--sleeve);
+  --secondary: var(--vinyl);
+  --secondary-foreground: var(--sleeve);
+  --muted: var(--sleeve);
+  --muted-foreground: var(--pencil);
+  --accent: var(--stamp);
+  --accent-foreground: var(--sleeve);
+  --destructive: var(--stamp);
+  --border: var(--vinyl);
+  --input: var(--vinyl);
+  --ring: var(--stamp);
+  --radius: 0rem;
 }
 
 @theme inline {
+  --font-sans:
+    var(--font-inter-tight), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --color-sleeve: var(--sleeve);
+  --color-vinyl: var(--vinyl);
+  --color-stamp: var(--stamp);
+  --color-pencil: var(--pencil);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: var(--radius);
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius);
+  --radius-xl: var(--radius);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    border-color: var(--border);
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size-adjust: from-font;
+  }
 }

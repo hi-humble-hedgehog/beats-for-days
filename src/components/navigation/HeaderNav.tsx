@@ -10,48 +10,48 @@ export function HeaderNav() {
   const beatsHref = current?.id ? formatBeatUrl(current.id) : ROUTES.BEATS;
 
   return (
-    <header className="border-b border-zinc-800 bg-zinc-950/80 px-6 py-4 backdrop-blur">
+    <header className="border-b border-border bg-background/90 px-6 py-4 backdrop-blur">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4">
         <Link
           href={ROUTES.HOME}
-          className="flex items-center gap-2 font-bold tracking-tight text-zinc-100 transition hover:text-amber-400"
+          className="flex items-center gap-2 font-bold tracking-tight text-foreground transition hover:text-primary"
         >
-          <span className="text-amber-500" aria-hidden="true">
-            ◈
+          <span className="font-black text-primary" aria-hidden="true">
+            #
           </span>{" "}
           Beats for Days
         </Link>
         <nav
           aria-label="Main navigation"
-          className="flex flex-wrap items-center gap-6 text-sm font-medium text-zinc-400"
+          className="flex flex-wrap items-center gap-6 text-xs font-bold tracking-widest text-muted-foreground uppercase"
         >
           <Link
             href={beatsHref}
-            className="transition hover:text-zinc-100 focus-visible:outline-2 focus-visible:outline-amber-400"
+            className="transition hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary"
           >
             Beats
           </Link>
           <Link
             href={ROUTES.GENERATE}
-            className="transition hover:text-zinc-100 focus-visible:outline-2 focus-visible:outline-amber-400"
+            className="transition hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary"
           >
             Generate
           </Link>
           <Link
             href={ROUTES.ABOUT}
-            className="transition hover:text-zinc-100 focus-visible:outline-2 focus-visible:outline-amber-400"
+            className="transition hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary"
           >
             About
           </Link>
           <Link
             href={ROUTES.TERMS}
-            className="transition hover:text-zinc-100 focus-visible:outline-2 focus-visible:outline-amber-400"
+            className="transition hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary"
           >
             Terms
           </Link>
           <Link
             href={ROUTES.PRIVACY}
-            className="transition hover:text-zinc-100 focus-visible:outline-2 focus-visible:outline-amber-400"
+            className="transition hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary"
           >
             Privacy
           </Link>

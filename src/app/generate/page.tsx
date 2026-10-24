@@ -59,12 +59,12 @@ function WaitlistForm({ onSuccess }: WaitlistFormProps) {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="your@email.com"
           disabled={isSubmitting}
-          className="flex-1 rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus-visible:outline-2 focus-visible:outline-amber-400 disabled:opacity-50"
+          className="flex-1 border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-50"
         />
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-lg bg-amber-500 px-5 py-2.5 text-sm font-semibold text-zinc-950 transition hover:bg-amber-400 focus-visible:outline-2 focus-visible:outline-amber-400 disabled:opacity-50"
+          className="bg-primary px-5 py-2.5 text-sm font-bold tracking-wider text-primary-foreground uppercase transition hover:opacity-90 focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-50"
         >
           {isSubmitting ? "Joining..." : "Join Waitlist"}
         </button>
@@ -73,7 +73,7 @@ function WaitlistForm({ onSuccess }: WaitlistFormProps) {
         <div
           role="status"
           aria-live="polite"
-          className="w-full rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-400"
+          className="w-full border border-destructive bg-destructive/10 p-3 text-xs font-bold tracking-wider text-destructive uppercase"
         >
           {error}
         </div>
@@ -117,23 +117,23 @@ export default function GeneratePage() {
 
   return (
     <main className="mx-auto flex max-w-2xl flex-1 flex-col items-center justify-center gap-6 p-8 text-center">
-      <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 font-mono text-xs text-amber-400">
+      <span className="border border-foreground px-3 py-1 text-xs font-bold tracking-widest text-foreground uppercase">
         Phase 1 • Early Access
       </span>
 
-      <h1 className="text-3xl font-extrabold tracking-tight text-zinc-100 sm:text-4xl">
+      <h1 className="text-3xl leading-[0.85] font-bold tracking-tighter text-foreground sm:text-5xl">
         Generate Boom Bap Beats
       </h1>
 
       <p
         aria-live="polite"
-        className="font-mono text-sm font-medium text-amber-400"
+        className="text-xs font-bold tracking-widest text-primary uppercase tabular-nums"
       >
         {stats.remaining.toLocaleString()} of {stats.total.toLocaleString()}{" "}
         free invites remaining
       </p>
 
-      <p className="max-w-md text-sm text-zinc-400">
+      <p className="max-w-md text-sm text-muted-foreground">
         Public AI generation will open soon in phased batches. Join the free
         waitlist to receive your generation invite delivered at noon in your
         local timezone.
@@ -145,7 +145,7 @@ export default function GeneratePage() {
         <div
           role="status"
           aria-live="polite"
-          className="max-w-md rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-400"
+          className="max-w-md border border-border bg-card p-3 text-xs font-bold tracking-wider text-foreground uppercase"
         >
           {successMessage}
         </div>

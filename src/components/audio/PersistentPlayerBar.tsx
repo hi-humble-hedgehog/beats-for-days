@@ -14,12 +14,18 @@ function PlayerStatusBanner({
       aria-label="Persistent Audio Player"
       className={
         isError
-          ? "fixed inset-x-0 bottom-0 z-50 border-t border-red-900 bg-zinc-950 px-6 py-4 text-red-400"
-          : "fixed inset-x-0 bottom-0 z-50 border-t border-zinc-800 bg-zinc-950/95 px-6 py-4 text-zinc-400 backdrop-blur"
+          ? "fixed inset-x-0 bottom-0 z-50 border-t border-destructive bg-background px-6 py-4 text-destructive"
+          : "fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/95 px-6 py-4 text-muted-foreground backdrop-blur"
       }
     >
       <div className="mx-auto flex max-w-5xl items-center justify-between">
-        <p className={isError ? "text-sm" : "animate-pulse text-sm"}>
+        <p
+          className={
+            isError
+              ? "text-xs font-bold tracking-widest uppercase"
+              : "animate-pulse text-xs font-bold tracking-widest uppercase"
+          }
+        >
           {message}
         </p>
       </div>
@@ -49,7 +55,7 @@ export function PersistentPlayerBar() {
   return (
     <aside
       aria-label="Persistent Audio Player"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-zinc-800 bg-zinc-950/95 px-6 py-4 shadow-2xl backdrop-blur"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/95 px-6 py-4 shadow-lg backdrop-blur"
     >
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4">
         {/* Track Title */}
@@ -57,15 +63,15 @@ export function PersistentPlayerBar() {
           <span
             className={
               isPlaying
-                ? "flex h-3 w-3 animate-pulse rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.7)]"
-                : "flex h-3 w-3 rounded-full bg-zinc-600"
+                ? "flex h-2.5 w-2.5 bg-primary"
+                : "flex h-2.5 w-2.5 bg-muted-foreground"
             }
             aria-hidden="true"
           />
           <div>
             <p
               aria-live="polite"
-              className="font-mono text-xs tracking-wider text-zinc-300 uppercase"
+              className="text-xs font-bold tracking-widest text-foreground uppercase"
             >
               Now Playing: {current?.name ?? "Waiting for next beat..."}
             </p>
@@ -78,16 +84,16 @@ export function PersistentPlayerBar() {
             type="button"
             onClick={togglePlay}
             aria-label={isPlaying ? "Pause audio" : "Play audio"}
-            className="rounded bg-amber-500 px-3 py-1 text-xs font-semibold text-zinc-950 hover:bg-amber-400 focus-visible:outline-2 focus-visible:outline-amber-400"
+            className="bg-primary px-3 py-1.5 text-xs font-bold tracking-wider text-primary-foreground uppercase transition hover:opacity-90 focus-visible:outline-2 focus-visible:outline-primary"
           >
             {isPlaying ? "⏸ Pause" : "▶ Play"}
           </button>
 
-          <div className="flex items-center gap-2 rounded-full bg-zinc-900 px-3 py-1 font-mono text-xs text-zinc-300">
+          <div className="flex items-center gap-2 border border-border bg-card px-3 py-1 text-xs font-bold tracking-widest text-foreground uppercase tabular-nums">
             <span>Next in {secondsRemaining}s</span>
-            <div className="h-1.5 w-16 overflow-hidden rounded-full bg-zinc-800">
+            <div className="h-1.5 w-16 overflow-hidden bg-muted-foreground/20">
               <div
-                className="h-full bg-amber-500 transition-all duration-1000 ease-linear"
+                className="h-full bg-primary transition-all duration-1000 ease-linear"
                 style={{ width: `${((5 - secondsRemaining) / 5) * 100}%` }}
               />
             </div>
@@ -97,7 +103,7 @@ export function PersistentPlayerBar() {
             type="button"
             onClick={advanceTrack}
             aria-label="Skip to next track"
-            className="rounded bg-zinc-800 px-3 py-1 text-xs font-medium text-zinc-200 hover:bg-zinc-700 focus-visible:outline-2 focus-visible:outline-zinc-400"
+            className="border border-border bg-transparent px-3 py-1.5 text-xs font-bold tracking-wider text-foreground uppercase transition hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-border"
           >
             ⏭ Skip
           </button>

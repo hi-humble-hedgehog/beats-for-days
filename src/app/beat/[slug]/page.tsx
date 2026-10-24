@@ -12,15 +12,16 @@ export default function BeatPage() {
   return (
     <main className="mx-auto flex max-w-4xl flex-1 flex-col items-center justify-center gap-8 p-8 text-center">
       <div className="flex flex-col items-center gap-4">
-        <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 font-mono text-xs text-emerald-400">
-          Dummy Beats
+        <span className="border border-primary px-3 py-1 text-xs font-bold tracking-widest text-primary uppercase">
+          {isPlaying ? "Playing" : "Paused"}
         </span>
 
-        <h1 className="text-4xl font-extrabold tracking-tight text-zinc-100 sm:text-6xl">
+        <h1 className="text-4xl leading-[0.85] font-bold tracking-tighter text-foreground sm:text-6xl">
+          <span className="font-black text-primary">#</span>
           {current?.name ?? `Loading Beat ${slug}...`}
         </h1>
 
-        <p className="max-w-md font-mono text-sm text-zinc-400">
+        <p className="max-w-md text-xs font-bold tracking-widest text-muted-foreground uppercase tabular-nums">
           Track ID: {current?.id ?? slug}
         </p>
       </div>
@@ -29,7 +30,7 @@ export default function BeatPage() {
         <button
           type="button"
           onClick={togglePlay}
-          className="rounded-full bg-amber-500 px-8 py-3.5 text-base font-bold text-zinc-950 shadow-lg shadow-amber-500/20 transition hover:bg-amber-400 focus-visible:outline-2 focus-visible:outline-amber-400"
+          className="bg-primary px-6 py-3 text-sm font-bold tracking-wider text-primary-foreground uppercase shadow-md transition hover:opacity-90 focus-visible:outline-2 focus-visible:outline-primary"
         >
           {isPlaying ? "⏸ Pause Beat" : "▶ Play Beat"}
         </button>
@@ -37,13 +38,13 @@ export default function BeatPage() {
         <button
           type="button"
           onClick={advanceTrack}
-          className="rounded-full border border-zinc-700 bg-zinc-900 px-6 py-3.5 text-base font-semibold text-zinc-200 transition hover:border-zinc-500 hover:text-white focus-visible:outline-2 focus-visible:outline-zinc-400"
+          className="border border-foreground bg-transparent px-6 py-3 text-sm font-bold tracking-wider text-foreground uppercase transition hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-foreground"
         >
           ⏭ Next Beat
         </button>
       </div>
 
-      <p className="font-mono text-xs text-zinc-500">
+      <p className="text-xs font-bold tracking-widest text-muted-foreground uppercase tabular-nums">
         Automatic seamless AI transition queued in {secondsRemaining}s
       </p>
     </main>
