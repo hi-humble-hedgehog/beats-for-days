@@ -18,13 +18,6 @@ export interface VinylBrakeOptions {
   durationSec?: number;
 }
 
-export interface VinylScratchOptions {
-  source: AudioBufferSourceNodeLike | null;
-  currentTime: number;
-  rateMultiplier: number;
-  durationSec?: number;
-}
-
 function rampParamDown(
   param: AudioParamLike | undefined,
   currentTime: number,
@@ -89,42 +82,5 @@ export function applyVinylBrake(options: VinylBrakeOptions): void {
     source.stop(stopTime);
   } catch {
     // Gracefully catch if node was already stopped
-  }
-}
-
-/**
- * Automates transient turntable pitch and speed modulation for DJ scratch effects.
- * Temporarily shifts playback rate before returning to normal speed.
- */
-export function applyVinylScratch(options: VinylScratchOptions): void {
-  const { source, currentTime, rateMultiplier, durationSec = 0.16 } = options;
-  if (!source?.playbackRate) return;
-
-  try {
-    const rate = source.playbackRate;
-    const clampedMultiplier = Math.max(0.05, Math.min(3.0, rateMultiplier));
-    const halfDuration = durationSec / 2;
-    const currentRate = Math.max(0.001, rate.value || 1.0);
-
-    rate.cancelScheduledValues(currentTime);
-    rate.setValueAtTime(currentRate, currentTime);
-
-    if (typeof rate.exponentialRampToValueAtTime === "function") {
-      rate.exponentialRampToValueAtTime(
-        clampedMultiplier,
-        currentTime + halfDuration,
-      );
-      rate.exponentialRampToValueAtTime(1.0, currentTime + durationSec);
-    } else if (typeof rate.linearRampToValueAtTime === "function") {
-      rate.linearRampToValueAtTime(
-        clampedMultiplier,
-        currentTime + halfDuration,
-      );
-      rate.linearRampToValueAtTime(1.0, currentTime + durationSec);
-    } else {
-      rate.setValueAtTime(1.0, currentTime);
-    }
-  } catch {
-    // Ignore parameter schedule conflicts
   }
 }

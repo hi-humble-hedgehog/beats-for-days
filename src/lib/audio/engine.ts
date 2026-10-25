@@ -1,7 +1,6 @@
 import type { BeatView, TransitionView } from "../types/beat";
 import { BoundedAudioCache } from "./cache";
 import { createLoopingTrackNodes } from "./scheduler";
-import { ScratchController } from "./scratch";
 import {
   computeEngineSnapshot,
   connectSourceToOutputs,
@@ -21,7 +20,7 @@ import type {
   GainNodeLike,
   PlaybackPhase,
 } from "./types";
-import { applyVinylBrake, applyVinylScratch, applyVinylSpinUp } from "./vinyl";
+import { applyVinylBrake, applyVinylSpinUp } from "./vinyl";
 
 /**
  * Orchestrates Web Audio playback, native gapless looping, and 3-node transition splices.
@@ -32,7 +31,6 @@ export class AudioEngine {
   private readonly cache: BoundedAudioCache;
   private readonly onTrackHandoff?: (nextBeat: BeatView) => void;
   private readonly vinylEffects: boolean;
-  private readonly scratchController = new ScratchController();
   private readonly transitions = new TransitionCoordinator();
   private isResumingFromPause = false;
   private currentBuffer: AudioBufferLike | null = null;
@@ -91,7 +89,6 @@ export class AudioEngine {
     this.pausedOffsetSec = initialOffsetSec;
     this.isResumingFromPause = false;
     this.currentBuffer = await this.cache.get(beat.audioUrl);
-    this.scratchController.reset();
   }
 
   /**
@@ -145,6 +142,22 @@ export class AudioEngine {
     this.phase = "idle";
   }
 
+  private handleHandoff(handoff: {
+    currentBeat: BeatView;
+    currentSource: AudioBufferSourceNodeLike | null;
+    currentGain: GainNodeLike | null;
+    segmentStartTime: number;
+    initialOffsetSec: number;
+  }): void {
+    this.currentBeat = handoff.currentBeat;
+    this.currentSource = handoff.currentSource;
+    this.currentGain = handoff.currentGain;
+    this.segmentStartTime = handoff.segmentStartTime;
+    this.initialOffsetSec = handoff.initialOffsetSec;
+    this.continuousPlayAccumSec = 0;
+    this.continuousPlayStartCtxTime = handoff.segmentStartTime;
+  }
+
   /**
    * Pre-loads transition and next track buffers to schedule the three-node splice.
    */
@@ -169,15 +182,7 @@ export class AudioEngine {
       onPhaseChange: (p) => {
         this.phase = p;
       },
-      onHandoffSuccess: (handoff) => {
-        this.currentBeat = handoff.currentBeat;
-        this.currentSource = handoff.currentSource;
-        this.currentGain = handoff.currentGain;
-        this.segmentStartTime = handoff.segmentStartTime;
-        this.initialOffsetSec = handoff.initialOffsetSec;
-        this.continuousPlayAccumSec = 0;
-        this.continuousPlayStartCtxTime = handoff.segmentStartTime;
-      },
+      onHandoffSuccess: (h) => this.handleHandoff(h),
       onTrackHandoff: this.onTrackHandoff,
     });
   }
@@ -203,62 +208,15 @@ export class AudioEngine {
       const loadPromise = this.loadTrack(nextBeat, 0);
       await new Promise((resolve) => setTimeout(resolve, 800));
       if (this.skipCounter !== skipId) return;
-
       await loadPromise;
       if (this.skipCounter !== skipId) return;
-
-      this.continuousPlayAccumSec = 0;
-      await this.play();
-      return;
+    } else {
+      this.stopCurrentNode(false);
+      await this.loadTrack(nextBeat, 0);
     }
 
-    this.stopCurrentNode(false);
     this.continuousPlayAccumSec = 0;
-    await this.loadTrack(nextBeat, 0);
     await this.play();
-  }
-
-  /**
-   * Starts a live manual scratch session by muting background loop playback.
-   */
-  startManualScratch(): void {
-    const ctx = this.getContext();
-    if (ctx.state === "suspended") void ctx.resume();
-
-    const currentPos = this.getSnapshot().positionSec;
-    if (this.currentGain) {
-      this.currentGain.gain.setValueAtTime(0, ctx.currentTime);
-    }
-
-    if (this.currentBuffer) {
-      this.scratchController.start(
-        ctx,
-        this.currentBuffer,
-        this.analyser ?? this.masterGain!,
-        currentPos,
-      );
-    }
-  }
-
-  /**
-   * Updates scratch playback rate and direction from pointer movement velocity.
-   */
-  setScratchVelocity(velocity: number, deltaSec: number): void {
-    this.scratchController.update(velocity, deltaSec);
-  }
-
-  /**
-   * Ends the manual scratch session and returns to normal playback or paused state.
-   */
-  async stopManualScratch(): Promise<void> {
-    const finalPos = this.scratchController.stop();
-    if (finalPos === null) return;
-    this.pausedOffsetSec = finalPos;
-
-    if (this.isPlaying) {
-      this.isResumingFromPause = false;
-      await this.play();
-    }
   }
 
   /**
@@ -270,15 +228,7 @@ export class AudioEngine {
       (p) => {
         this.phase = p;
       },
-      (handoff) => {
-        this.currentBeat = handoff.currentBeat;
-        this.currentSource = handoff.currentSource;
-        this.currentGain = handoff.currentGain;
-        this.segmentStartTime = handoff.segmentStartTime;
-        this.initialOffsetSec = handoff.initialOffsetSec;
-        this.continuousPlayAccumSec = 0;
-        this.continuousPlayStartCtxTime = handoff.segmentStartTime;
-      },
+      (h) => this.handleHandoff(h),
       this.onTrackHandoff,
     );
 
@@ -290,7 +240,7 @@ export class AudioEngine {
         ? Math.max(0, now - this.continuousPlayStartCtxTime)
         : 0);
 
-    const snapshot = computeEngineSnapshot({
+    return computeEngineSnapshot({
       phase: this.phase,
       currentBeat: this.currentBeat,
       isPlaying: this.isPlaying,
@@ -302,11 +252,6 @@ export class AudioEngine {
       initialOffsetSec: this.initialOffsetSec,
       armedTransition: this.transitions.getArmedTransition(),
     });
-
-    const scratchPos = this.scratchController.getPosition();
-    return scratchPos !== null
-      ? { ...snapshot, positionSec: scratchPos }
-      : snapshot;
   }
 
   /**
@@ -320,19 +265,6 @@ export class AudioEngine {
     );
   }
 
-  /**
-   * Triggers an on-demand turntable scratch effect on the active track.
-   */
-  scratch(rateMultiplier = 1.6, durationSec = 0.16): void {
-    if (!this.currentSource || !this.ctx || !this.isPlaying) return;
-    applyVinylScratch({
-      source: this.currentSource,
-      currentTime: this.ctx.currentTime,
-      rateMultiplier,
-      durationSec,
-    });
-  }
-
   private stopCurrentNode(withBrake = false): void {
     if (!this.currentSource) return;
 
@@ -342,12 +274,10 @@ export class AudioEngine {
         gain: this.currentGain,
         currentTime: this.ctx.currentTime,
       });
-      this.currentSource = null;
-      this.currentGain = null;
-      return;
+    } else {
+      teardownTrackNodes(this.currentSource, this.currentGain);
     }
 
-    teardownTrackNodes(this.currentSource, this.currentGain);
     this.currentSource = null;
     this.currentGain = null;
   }

@@ -86,7 +86,6 @@ function Consumer() {
     error,
     togglePlay,
     advanceTrack,
-    scratch,
   } = useAudioPlayer();
 
   return (
@@ -100,7 +99,6 @@ function Consumer() {
       <button onClick={togglePlay}>Toggle Play</button>
       <button onClick={() => advanceTrack()}>Advance</button>
       <button onClick={() => advanceTrack("auto")}>Auto Advance</button>
-      <button onClick={() => scratch?.(1.5)}>Scratch</button>
     </div>
   );
 }
@@ -602,20 +600,5 @@ describe("AudioPlayerProvider", () => {
       }),
     );
     vi.useRealTimers();
-  });
-
-  it("delegates scratch calls to the audio engine", async () => {
-    const scratchSpy = vi.spyOn(testHarness.engine, "scratch");
-    render(
-      <AudioPlayerProvider engine={testHarness.engine}>
-        <Consumer />
-      </AudioPlayerProvider>,
-    );
-
-    await act(async () => {
-      screen.getByRole("button", { name: "Scratch" }).click();
-    });
-
-    expect(scratchSpy).toHaveBeenCalledWith(1.5);
   });
 });

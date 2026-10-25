@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { applyVinylBrake, applyVinylScratch, applyVinylSpinUp } from "./vinyl";
+import { applyVinylBrake, applyVinylSpinUp } from "./vinyl";
 import type {
   AudioBufferSourceNodeLike,
   GainNodeLike,
@@ -183,59 +183,5 @@ describe("applyVinylBrake", () => {
     expect(() =>
       applyVinylBrake({ source, gain: null, currentTime: 1 }),
     ).not.toThrow();
-  });
-});
-
-describe("applyVinylScratch", () => {
-  it("does nothing when source has no playbackRate", () => {
-    const source = createMockSource(false);
-    expect(() =>
-      applyVinylScratch({ source, currentTime: 10, rateMultiplier: 1.5 }),
-    ).not.toThrow();
-  });
-
-  it("modulates playbackRate to multiplier and back to 1.0", () => {
-    const source = createMockSource(true);
-    applyVinylScratch({
-      source,
-      currentTime: 10,
-      rateMultiplier: 1.8,
-      durationSec: 0.2,
-    });
-
-    const param = source.playbackRate!;
-    expect(param.cancelScheduledValues).toHaveBeenCalledWith(10);
-    expect(param.setValueAtTime).toHaveBeenCalledWith(1, 10);
-    expect(param.exponentialRampToValueAtTime).toHaveBeenCalledWith(1.8, 10.1);
-    expect(param.exponentialRampToValueAtTime).toHaveBeenCalledWith(1, 10.2);
-  });
-
-  it("clamps extreme multipliers to safe range", () => {
-    const source = createMockSource(true);
-    applyVinylScratch({
-      source,
-      currentTime: 0,
-      rateMultiplier: 999,
-      durationSec: 0.2,
-    });
-
-    const param = source.playbackRate!;
-    expect(param.exponentialRampToValueAtTime).toHaveBeenCalledWith(3, 0.1);
-  });
-
-  it("falls back to linear ramp when exponential ramp is absent", () => {
-    const source = createMockSource(true);
-    delete source.playbackRate!.exponentialRampToValueAtTime;
-
-    applyVinylScratch({
-      source,
-      currentTime: 4,
-      rateMultiplier: 1.5,
-      durationSec: 0.2,
-    });
-
-    const param = source.playbackRate!;
-    expect(param.linearRampToValueAtTime).toHaveBeenCalledWith(1.5, 4.1);
-    expect(param.linearRampToValueAtTime).toHaveBeenCalledWith(1, 4.2);
   });
 });

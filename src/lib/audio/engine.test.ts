@@ -629,32 +629,6 @@ describe("AudioEngine", () => {
     ).toHaveBeenCalledWith(1, 25.35);
   });
 
-  it("modulates playbackRate when scratch is triggered", async () => {
-    const vinylEngine = new AudioEngine({
-      contextFactory: () => mockAudio.context,
-      bufferLoader: () => Promise.resolve(mockBuffer),
-    });
-
-    mockAudio.setTime(15);
-    await vinylEngine.loadTrack(trackA);
-    await vinylEngine.play();
-
-    const source = mockAudio.createdSources[0];
-    const rateParam = source?.playbackRate;
-
-    vinylEngine.scratch(1.8, 0.2);
-
-    expect(rateParam?.setValueAtTime).toHaveBeenCalledWith(1, 15);
-    expect(rateParam?.exponentialRampToValueAtTime).toHaveBeenCalledWith(
-      1.8,
-      15.1,
-    );
-    expect(rateParam?.exponentialRampToValueAtTime).toHaveBeenCalledWith(
-      1,
-      15.2,
-    );
-  });
-
   it("powers down with vinyl brake, waits, and starts new track directly on skip when vinylEffects is enabled", async () => {
     vi.useFakeTimers();
     const vinylEngine = new AudioEngine({
@@ -748,48 +722,5 @@ describe("AudioEngine", () => {
 
     expect(vinylEngine.getSnapshot().currentBeat?.id).toBe("track-c");
     vi.useRealTimers();
-  });
-
-  it("supports live manual scratching by adjusting velocity and resuming after release", async () => {
-    const channelData = new Float32Array(44100 * 60);
-    channelData[0] = 0.5;
-    const scratchMockBuffer: AudioBufferLike = {
-      duration: 60,
-      length: 44100 * 60,
-      numberOfChannels: 1,
-      sampleRate: 44100,
-      getChannelData: () => channelData,
-    };
-
-    mockAudio.context.createBuffer = (channels, length, sampleRate) => ({
-      duration: length / sampleRate,
-      length,
-      numberOfChannels: channels,
-      sampleRate,
-      getChannelData: () => new Float32Array(length),
-    });
-
-    const scratchEngine = new AudioEngine({
-      contextFactory: () => mockAudio.context,
-      bufferLoader: () => Promise.resolve(scratchMockBuffer),
-      vinylEffects: true,
-    });
-
-    mockAudio.setTime(10);
-    await scratchEngine.loadTrack(trackA);
-    await scratchEngine.play();
-
-    // Start manual scratch
-    scratchEngine.startManualScratch();
-    // Move forward at 1.5x speed
-    scratchEngine.setScratchVelocity(1.5, 0.05);
-    expect(scratchEngine.getSnapshot().positionSec).toBeGreaterThanOrEqual(0);
-    // Move reverse at -1.5x speed
-    scratchEngine.setScratchVelocity(-1.5, 0.05);
-    expect(scratchEngine.getSnapshot().positionSec).toBeGreaterThanOrEqual(0);
-
-    // Stop manual scratch returns to regular playback
-    await scratchEngine.stopManualScratch();
-    expect(scratchEngine.getSnapshot().isPlaying).toBe(true);
   });
 });

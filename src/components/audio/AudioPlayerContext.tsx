@@ -165,36 +165,6 @@ export interface AudioPlayerProviderProps {
   engine?: AudioEngine;
 }
 
-function useScratchActions(
-  engine: AudioEngine,
-  setPositionSec: (sec: number) => void,
-) {
-  const scratch = useCallback(
-    (rateMultiplier?: number) => engine.scratch(rateMultiplier),
-    [engine],
-  );
-  const startManualScratch = useCallback(() => {
-    engine.startManualScratch();
-    setPositionSec(engine.getSnapshot().positionSec);
-  }, [engine, setPositionSec]);
-
-  const setScratchVelocity = useCallback(
-    (velocity: number, deltaSec: number) => {
-      engine.setScratchVelocity(velocity, deltaSec);
-      setPositionSec(engine.getSnapshot().positionSec);
-    },
-    [engine, setPositionSec],
-  );
-
-  const stopManualScratch = useCallback(() => {
-    void engine.stopManualScratch().then(() => {
-      setPositionSec(engine.getSnapshot().positionSec);
-    });
-  }, [engine, setPositionSec]);
-
-  return { scratch, startManualScratch, setScratchVelocity, stopManualScratch };
-}
-
 function useBeatCommit(
   setCurrent: (beat: BeatView) => void,
   stateRef: React.MutableRefObject<{
@@ -282,7 +252,6 @@ export function AudioPlayerProvider({
   });
 
   const togglePlay = useCallback(() => setIsPlaying((prev) => !prev), []);
-  const scratchActions = useScratchActions(engine, setPositionSec);
 
   return (
     <AudioPlayerContext.Provider
@@ -296,7 +265,6 @@ export function AudioPlayerProvider({
         error,
         togglePlay,
         advanceTrack,
-        ...scratchActions,
       }}
     >
       {children}
