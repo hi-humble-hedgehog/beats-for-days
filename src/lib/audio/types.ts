@@ -35,6 +35,7 @@ export interface AudioBufferLike {
   length: number;
   numberOfChannels: number;
   sampleRate: number;
+  getChannelData?: (channel: number) => Float32Array;
 }
 
 export interface AudioBufferSourceNodeLike extends AudioNodeLike {
@@ -55,6 +56,11 @@ export interface AudioContextLike {
   createGain: () => GainNodeLike;
   createAnalyser?: () => AnalyserNodeLike;
   createBufferSource: () => AudioBufferSourceNodeLike;
+  createBuffer?: (
+    numberOfChannels: number,
+    length: number,
+    sampleRate: number,
+  ) => AudioBufferLike;
   resume: () => Promise<void>;
   close?: () => Promise<void>;
 }
@@ -94,4 +100,5 @@ export interface AudioEngineOptions {
   cacheCapacity?: number;
   onTrackHandoff?: (nextBeat: BeatView) => void;
   vinylEffects?: boolean;
+  startEffect?: "spin-up" | "baby-scratch";
 }

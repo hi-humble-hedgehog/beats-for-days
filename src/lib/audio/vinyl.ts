@@ -1,5 +1,8 @@
 import type {
+  AudioBufferLike,
   AudioBufferSourceNodeLike,
+  AudioContextLike,
+  AudioNodeLike,
   AudioParamLike,
   GainNodeLike,
 } from "./types";
@@ -127,4 +130,225 @@ export function applyVinylScratch(options: VinylScratchOptions): void {
   } catch {
     // Ignore parameter schedule conflicts
   }
+}
+
+export interface ReverseBufferOptions {
+  startSec?: number;
+  durationSec?: number;
+}
+
+function computeSliceRange(
+  sourceLength: number,
+  sampleRate: number,
+  options: ReverseBufferOptions,
+): { startSample: number; targetSamples: number } {
+  const startSec = Math.max(0, options.startSec ?? 0);
+  const startSample = Math.min(sourceLength, Math.floor(startSec * sampleRate));
+  const maxAvailable = sourceLength - startSample;
+  const targetSamples =
+    options.durationSec !== undefined
+      ? Math.min(maxAvailable, Math.floor(options.durationSec * sampleRate))
+      : maxAvailable;
+  return { startSample, targetSamples };
+}
+
+/**
+ * Creates a reversed copy of an AudioBuffer (or a specified time slice) for backward playback.
+ * Used for DJ baby scratches, reverse sound design, and bidirectional vinyl scrubbing.
+ */
+export function createReversedAudioBuffer(
+  ctx: AudioContextLike,
+  sourceBuffer: AudioBufferLike,
+  options: ReverseBufferOptions = {},
+): AudioBufferLike | null {
+  if (
+    !ctx.createBuffer ||
+    !sourceBuffer.getChannelData ||
+    sourceBuffer.length <= 0
+  ) {
+    return null;
+  }
+
+  const { startSample, targetSamples } = computeSliceRange(
+    sourceBuffer.length,
+    sourceBuffer.sampleRate,
+    options,
+  );
+  if (targetSamples <= 0) return null;
+
+  const reversed = ctx.createBuffer(
+    sourceBuffer.numberOfChannels,
+    targetSamples,
+    sourceBuffer.sampleRate,
+  );
+  if (!reversed.getChannelData) return reversed;
+
+  for (let c = 0; c < sourceBuffer.numberOfChannels; c++) {
+    const srcData = sourceBuffer.getChannelData(c);
+    const destData = reversed.getChannelData(c);
+    for (let i = 0; i < targetSamples; i++) {
+      destData[i] = srcData[startSample + targetSamples - 1 - i] ?? 0;
+    }
+  }
+
+  return reversed;
+}
+
+export interface BabyScratchDropParams {
+  ctx: AudioContextLike;
+  forwardBuffer: AudioBufferLike;
+  reverseBuffer: AudioBufferLike;
+  outputNode: AudioNodeLike;
+  startTime: number;
+  offsetSec?: number;
+  strokeCount?: number;
+  strokeDurationSec?: number;
+  strokeSpeed?: number;
+}
+
+export interface BabyScratchDropResult {
+  releaseTime: number;
+  strokeNodes: Array<{ source: AudioBufferSourceNodeLike; gain: GainNodeLike }>;
+}
+
+/**
+ * Schedules rhythmic forward and backward baby scratch strokes before dropping the beat on the 1.
+ * Renders the iconic hip-hop DJ needle cue pattern without manual turntable hardware.
+ */
+export function scheduleBabyScratchDrop(
+  params: BabyScratchDropParams,
+): BabyScratchDropResult {
+  const {
+    ctx,
+    forwardBuffer,
+    reverseBuffer,
+    outputNode,
+    startTime,
+    offsetSec = 0,
+    strokeCount = 4,
+    strokeDurationSec = 0.075,
+    strokeSpeed = 1.25,
+  } = params;
+
+  const strokeNodes: Array<{
+    source: AudioBufferSourceNodeLike;
+    gain: GainNodeLike;
+  }> = [];
+
+  for (let i = 0; i < strokeCount; i++) {
+    const isForward = i % 2 === 0;
+    const strokeStart = startTime + i * strokeDurationSec;
+    const strokeStop = strokeStart + strokeDurationSec;
+
+    const source = ctx.createBufferSource();
+    source.buffer = isForward ? forwardBuffer : reverseBuffer;
+    source.loop = false;
+
+    if (source.playbackRate) {
+      source.playbackRate.setValueAtTime(strokeSpeed, strokeStart);
+    }
+
+    const gain = ctx.createGain();
+    const g = gain.gain;
+    g.setValueAtTime(0, strokeStart);
+    if (typeof g.linearRampToValueAtTime === "function") {
+      g.linearRampToValueAtTime(1, strokeStart + 0.003);
+      g.setValueAtTime(1, strokeStop - 0.003);
+      g.linearRampToValueAtTime(0, strokeStop);
+    } else {
+      g.setValueAtTime(1, strokeStart);
+    }
+
+    source.connect(gain);
+    gain.connect(outputNode);
+
+    const bufferOffset = isForward ? offsetSec : 0;
+    source.start(strokeStart, bufferOffset, strokeDurationSec);
+    source.stop(strokeStop);
+
+    strokeNodes.push({ source, gain });
+  }
+
+  const releaseTime = startTime + strokeCount * strokeDurationSec;
+  return { releaseTime, strokeNodes };
+}
+
+/**
+ * Safely stops and disconnects all transient baby scratch nodes.
+ */
+export function teardownScratchNodes(nodes: AudioBufferSourceNodeLike[]): void {
+  for (const node of nodes) {
+    try {
+      node.stop();
+      node.disconnect();
+    } catch {
+      // Node was already stopped
+    }
+  }
+}
+
+export interface StartTrackVinylOptions {
+  ctx: AudioContextLike;
+  source: AudioBufferSourceNodeLike;
+  buffer: AudioBufferLike;
+  outputNode: AudioNodeLike;
+  offsetSec: number;
+  vinylEffects: boolean;
+  startEffect: "spin-up" | "baby-scratch";
+}
+
+export interface StartTrackVinylResult {
+  segmentStartTime: number;
+  strokeSources: AudioBufferSourceNodeLike[];
+}
+
+/**
+ * Starts track playback with either baby-scratch drop or motor spin-up based on configuration.
+ */
+export function startTrackWithVinylEffect(
+  options: StartTrackVinylOptions,
+): StartTrackVinylResult {
+  const {
+    ctx,
+    source,
+    buffer,
+    outputNode,
+    offsetSec,
+    vinylEffects,
+    startEffect,
+  } = options;
+
+  const revBuffer =
+    vinylEffects && startEffect === "baby-scratch"
+      ? createReversedAudioBuffer(ctx, buffer, {
+          startSec: offsetSec,
+          durationSec: 0.15,
+        })
+      : null;
+
+  if (revBuffer) {
+    const drop = scheduleBabyScratchDrop({
+      ctx,
+      forwardBuffer: buffer,
+      reverseBuffer: revBuffer,
+      outputNode,
+      startTime: ctx.currentTime,
+      offsetSec,
+    });
+    source.start(drop.releaseTime, offsetSec);
+    return {
+      segmentStartTime: drop.releaseTime,
+      strokeSources: drop.strokeNodes.map((n) => n.source),
+    };
+  }
+
+  source.start(ctx.currentTime, offsetSec);
+  if (vinylEffects) {
+    applyVinylSpinUp({ source, startTime: ctx.currentTime });
+  }
+
+  return {
+    segmentStartTime: ctx.currentTime,
+    strokeSources: [],
+  };
 }

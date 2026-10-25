@@ -23,7 +23,12 @@ import type {
   GainNodeLike,
   PlaybackPhase,
 } from "./types";
-import { applyVinylBrake, applyVinylScratch, applyVinylSpinUp } from "./vinyl";
+import {
+  applyVinylBrake,
+  applyVinylScratch,
+  startTrackWithVinylEffect,
+  teardownScratchNodes,
+} from "./vinyl";
 
 /**
  * Orchestrates Web Audio playback, native gapless looping, and 3-node transition splices.
@@ -34,6 +39,8 @@ export class AudioEngine {
   private readonly cache: BoundedAudioCache;
   private readonly onTrackHandoff?: (nextBeat: BeatView) => void;
   private readonly vinylEffects: boolean;
+  private readonly startEffect: "spin-up" | "baby-scratch";
+  private activeScratchNodes: AudioBufferSourceNodeLike[] = [];
   private ctx: AudioContextLike | null = null;
   private masterGain: GainNodeLike | null = null;
   private analyser: AnalyserNodeLike | null = null;
@@ -67,6 +74,9 @@ export class AudioEngine {
     });
     this.onTrackHandoff = options.onTrackHandoff;
     this.vinylEffects = options.vinylEffects ?? false;
+    this.startEffect =
+      options.startEffect ??
+      (options.vinylEffects ? "baby-scratch" : "spin-up");
   }
 
   /**
@@ -113,16 +123,19 @@ export class AudioEngine {
     this.currentGain.gain.setValueAtTime(1, ctx.currentTime);
     connectSourceToOutputs(this.currentGain, this.analyser, this.masterGain!);
 
-    this.segmentStartTime = ctx.currentTime;
     this.initialOffsetSec = this.pausedOffsetSec;
-    this.continuousPlayStartCtxTime = ctx.currentTime;
-    this.currentSource.start(ctx.currentTime, this.pausedOffsetSec);
-    if (this.vinylEffects) {
-      applyVinylSpinUp({
-        source: this.currentSource,
-        startTime: ctx.currentTime,
-      });
-    }
+    const startResult = startTrackWithVinylEffect({
+      ctx,
+      source: this.currentSource,
+      buffer,
+      outputNode: this.analyser ?? this.masterGain!,
+      offsetSec: this.pausedOffsetSec,
+      vinylEffects: this.vinylEffects,
+      startEffect: this.startEffect,
+    });
+    this.activeScratchNodes = startResult.strokeSources;
+    this.segmentStartTime = startResult.segmentStartTime;
+    this.continuousPlayStartCtxTime = startResult.segmentStartTime;
     this.isPlaying = true;
     this.phase = "playing";
   }
@@ -283,6 +296,11 @@ export class AudioEngine {
   }
 
   private stopCurrentNode(withBrake = false): void {
+    if (this.activeScratchNodes.length > 0) {
+      teardownScratchNodes(this.activeScratchNodes);
+      this.activeScratchNodes = [];
+    }
+
     if (!this.currentSource) return;
 
     if (withBrake && this.vinylEffects && this.ctx) {

@@ -1,7 +1,15 @@
 import { describe, expect, it, vi } from "vitest";
-import { applyVinylBrake, applyVinylScratch, applyVinylSpinUp } from "./vinyl";
+import {
+  applyVinylBrake,
+  applyVinylScratch,
+  applyVinylSpinUp,
+  createReversedAudioBuffer,
+  scheduleBabyScratchDrop,
+} from "./vinyl";
 import type {
+  AudioBufferLike,
   AudioBufferSourceNodeLike,
+  AudioContextLike,
   GainNodeLike,
   AudioParamLike,
 } from "./types";
@@ -215,5 +223,160 @@ describe("applyVinylScratch", () => {
     const param = source.playbackRate!;
     expect(param.linearRampToValueAtTime).toHaveBeenCalledWith(1.5, 4.1);
     expect(param.linearRampToValueAtTime).toHaveBeenCalledWith(1, 4.2);
+  });
+});
+
+describe("createReversedAudioBuffer", () => {
+  function createTestBuffer(
+    channelsData: number[][],
+    sampleRate = 1000,
+  ): AudioBufferLike {
+    const channelArrays = channelsData.map((arr) => new Float32Array(arr));
+    const firstLength = channelArrays[0]?.length ?? 0;
+    return {
+      duration: firstLength / sampleRate,
+      length: firstLength,
+      numberOfChannels: channelArrays.length,
+      sampleRate,
+      getChannelData: (ch: number) => channelArrays[ch] ?? new Float32Array(0),
+    };
+  }
+
+  function createTestContext(): AudioContextLike {
+    return {
+      currentTime: 0,
+      state: "running",
+      destination: { connect: vi.fn(), disconnect: vi.fn() },
+      createGain: () => createMockGain(),
+      createBufferSource: () => createMockSource(),
+      createBuffer: (
+        channels: number,
+        length: number,
+        sampleRate: number,
+      ): AudioBufferLike => {
+        const arrays: Float32Array[] = [];
+        for (let i = 0; i < channels; i++) {
+          arrays.push(new Float32Array(length));
+        }
+        return {
+          duration: length / sampleRate,
+          length,
+          numberOfChannels: channels,
+          sampleRate,
+          getChannelData: (ch: number) => arrays[ch] ?? new Float32Array(0),
+        };
+      },
+      resume: vi.fn().mockResolvedValue(undefined),
+    };
+  }
+
+  it("returns null if ctx lacks createBuffer or source lacks getChannelData or is empty", () => {
+    const ctx = createTestContext();
+    const buf = createTestBuffer([[1, 2, 3]]);
+
+    const noCreateBufferCtx = { ...ctx, createBuffer: undefined };
+    expect(createReversedAudioBuffer(noCreateBufferCtx, buf)).toBeNull();
+
+    const noGetChannelDataBuf = { ...buf, getChannelData: undefined };
+    expect(createReversedAudioBuffer(ctx, noGetChannelDataBuf)).toBeNull();
+
+    const emptyBuf = createTestBuffer([[]]);
+    expect(createReversedAudioBuffer(ctx, emptyBuf)).toBeNull();
+  });
+
+  it("reverses audio channel data backwards correctly", () => {
+    const ctx = createTestContext();
+    const buf = createTestBuffer([
+      [10, 20, 30, 40],
+      [100, 200, 300, 400],
+    ]);
+
+    const reversed = createReversedAudioBuffer(ctx, buf);
+    expect(reversed).not.toBeNull();
+    expect(Array.from(reversed!.getChannelData!(0))).toEqual([40, 30, 20, 10]);
+    expect(Array.from(reversed!.getChannelData!(1))).toEqual([
+      400, 300, 200, 100,
+    ]);
+  });
+
+  it("reverses a specific time slice given startSec and durationSec", () => {
+    const ctx = createTestContext();
+    // sampleRate = 1000, 1 sample = 0.001s
+    const buf = createTestBuffer([[0, 10, 20, 30, 40, 50, 60]], 1000);
+
+    // Slice from 0.002s (index 2) for 0.003s (3 samples: 20, 30, 40)
+    const reversed = createReversedAudioBuffer(ctx, buf, {
+      startSec: 0.002,
+      durationSec: 0.003,
+    });
+    expect(reversed).not.toBeNull();
+    expect(reversed!.length).toBe(3);
+    expect(Array.from(reversed!.getChannelData!(0))).toEqual([40, 30, 20]);
+  });
+});
+
+describe("scheduleBabyScratchDrop", () => {
+  it("schedules alternating forward and reverse strokes followed by main release time", () => {
+    const createdSources: AudioBufferSourceNodeLike[] = [];
+    const createdGains: GainNodeLike[] = [];
+
+    const mockCtx: AudioContextLike = {
+      currentTime: 10,
+      state: "running",
+      destination: { connect: vi.fn(), disconnect: vi.fn() },
+      createBufferSource: () => {
+        const s = createMockSource(true);
+        createdSources.push(s);
+        return s;
+      },
+      createGain: () => {
+        const g = createMockGain();
+        createdGains.push(g);
+        return g;
+      },
+      resume: vi.fn().mockResolvedValue(undefined),
+    };
+
+    const forwardBuffer = {
+      duration: 60,
+      length: 60000,
+      numberOfChannels: 2,
+      sampleRate: 1000,
+    };
+    const reverseBuffer = {
+      duration: 0.5,
+      length: 500,
+      numberOfChannels: 2,
+      sampleRate: 1000,
+    };
+    const outputNode: GainNodeLike = createMockGain();
+
+    const result = scheduleBabyScratchDrop({
+      ctx: mockCtx,
+      forwardBuffer,
+      reverseBuffer,
+      outputNode,
+      startTime: 10,
+      offsetSec: 0,
+      strokeCount: 4,
+      strokeDurationSec: 0.075,
+    });
+
+    // 4 strokes (forward, reverse, forward, reverse) created
+    expect(createdSources).toHaveLength(4);
+    expect(createdGains).toHaveLength(4);
+
+    // Release time should be startTime + 4 * 0.075 = 10.3s
+    expect(result.releaseTime).toBeCloseTo(10.3, 4);
+    expect(result.strokeNodes).toHaveLength(4);
+
+    // Stroke 0: forward
+    expect(createdSources[0]?.start).toHaveBeenCalledWith(10, 0, 0.075);
+    // Stroke 1: reverse
+    expect(createdSources[1]?.start).toHaveBeenCalledWith(10.075, 0, 0.075);
+    // Stroke 2: forward
+    expect(createdSources[2]?.start).toHaveBeenCalledWith(10.15, 0, 0.075);
+    // Stroke 3: reverse
+    expect(createdSources[3]?.start).toHaveBeenCalledWith(10.225, 0, 0.075);
   });
 });
