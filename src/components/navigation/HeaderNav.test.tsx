@@ -65,4 +65,28 @@ describe("HeaderNav", () => {
       "/beats",
     );
   });
+
+  it("relies on native browser focus without custom focus ring classes", () => {
+    render(
+      <AudioPlayerContext.Provider
+        value={{
+          current: null,
+          isPlaying: false,
+          secondsRemaining: 5,
+          isLoading: false,
+          error: null,
+          togglePlay: vi.fn(),
+          advanceTrack: vi.fn(),
+        }}
+      >
+        <HeaderNav />
+      </AudioPlayerContext.Provider>,
+    );
+
+    const links = screen.getAllByRole("link");
+    for (const link of links) {
+      expect(link.className).not.toMatch(/focus-visible:outline/);
+      expect(link.className).not.toMatch(/focus:ring/);
+    }
+  });
 });

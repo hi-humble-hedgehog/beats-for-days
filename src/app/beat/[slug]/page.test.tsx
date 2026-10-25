@@ -88,4 +88,17 @@ describe("BeatPage", () => {
       screen.getByText(/Automatic seamless AI transition queued in 15s/),
     ).toBeInTheDocument();
   });
+
+  it("relies on native browser focus without custom focus ring classes", () => {
+    mockUseParams.mockReturnValue({ slug: "0001" });
+    mockPlayerState.current = { id: "0001", name: "Brooklyn Sunset" };
+
+    render(<BeatPage />);
+
+    const buttons = screen.getAllByRole("button");
+    for (const button of buttons) {
+      expect(button.className).not.toMatch(/focus-visible:outline/);
+      expect(button.className).not.toMatch(/focus:ring/);
+    }
+  });
 });

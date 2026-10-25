@@ -30,7 +30,7 @@ export default function BeatPage() {
         <button
           type="button"
           onClick={togglePlay}
-          className="bg-primary px-6 py-3 text-sm font-bold tracking-wider text-primary-foreground uppercase shadow-md transition hover:opacity-90 focus-visible:outline-2 focus-visible:outline-primary"
+          className="bg-primary px-6 py-3 text-sm font-bold tracking-wider text-primary-foreground uppercase shadow-md transition hover:opacity-90"
         >
           {isPlaying ? "⏸ Pause Beat" : "▶ Play Beat"}
         </button>
@@ -38,7 +38,7 @@ export default function BeatPage() {
         <button
           type="button"
           onClick={advanceTrack}
-          className="border border-foreground bg-transparent px-6 py-3 text-sm font-bold tracking-wider text-foreground uppercase transition hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-foreground"
+          className="border border-foreground bg-transparent px-6 py-3 text-sm font-bold tracking-wider text-foreground uppercase transition hover:bg-foreground hover:text-background"
         >
           ⏭ Next Beat
         </button>

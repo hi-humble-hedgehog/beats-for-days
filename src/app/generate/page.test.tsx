@@ -61,4 +61,18 @@ describe("GeneratePage", () => {
       await screen.findByText(/1,499 of 1,500 free invites remaining/i),
     ).toBeInTheDocument();
   });
+
+  it("relies on native browser focus without custom focus ring classes", () => {
+    vi.mocked(waitlistApi.getStats).mockReturnValue(new Promise(() => {}));
+
+    render(<GeneratePage />);
+
+    const input = screen.getByLabelText(/Email address/i);
+    const button = screen.getByRole("button", { name: /Join Waitlist/i });
+
+    expect(input.className).not.toMatch(/focus-visible:outline/);
+    expect(input.className).not.toMatch(/focus:ring/);
+    expect(button.className).not.toMatch(/focus-visible:outline/);
+    expect(button.className).not.toMatch(/focus:ring/);
+  });
 });

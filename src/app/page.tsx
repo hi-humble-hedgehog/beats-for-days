@@ -36,7 +36,7 @@ export default function Home() {
         <button
           type="button"
           onClick={handleStartPlayback}
-          className="flex items-center gap-3 bg-primary px-8 py-4 text-base font-bold tracking-wider text-primary-foreground uppercase shadow-md transition hover:opacity-90 focus-visible:outline-2 focus-visible:outline-primary active:scale-95"
+          className="flex items-center gap-3 bg-primary px-8 py-4 text-base font-bold tracking-wider text-primary-foreground uppercase shadow-md transition hover:opacity-90 active:scale-95"
         >
           <span className="text-xl" aria-hidden="true">
             ▶

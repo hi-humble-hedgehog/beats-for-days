@@ -108,4 +108,28 @@ describe("PersistentPlayerBar", () => {
 
     expect(screen.getByText(/Transitioning \(5s\)/)).toBeInTheDocument();
   });
+
+  it("relies on native browser focus without custom focus ring classes", () => {
+    render(
+      <AudioPlayerContext.Provider
+        value={{
+          current: sampleBeat,
+          isPlaying: true,
+          secondsRemaining: 4,
+          isLoading: false,
+          error: null,
+          togglePlay: vi.fn(),
+          advanceTrack: vi.fn(),
+        }}
+      >
+        <PersistentPlayerBar />
+      </AudioPlayerContext.Provider>,
+    );
+
+    const buttons = screen.getAllByRole("button");
+    for (const button of buttons) {
+      expect(button.className).not.toMatch(/focus-visible:outline/);
+      expect(button.className).not.toMatch(/focus:ring/);
+    }
+  });
 });

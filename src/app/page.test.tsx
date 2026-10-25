@@ -51,4 +51,28 @@ describe("Home page", () => {
     expect(mockTogglePlay).toHaveBeenCalled();
     expect(mockPush).toHaveBeenCalledWith("/beat/0001");
   });
+
+  it("relies on native browser focus without custom focus ring classes", () => {
+    render(
+      <AudioPlayerContext.Provider
+        value={{
+          current: null,
+          isPlaying: false,
+          secondsRemaining: 0,
+          isLoading: false,
+          error: null,
+          togglePlay: vi.fn(),
+          advanceTrack: vi.fn(),
+        }}
+      >
+        <Home />
+      </AudioPlayerContext.Provider>,
+    );
+
+    const button = screen.getByRole("button", {
+      name: /Start Radio Stream/,
+    });
+    expect(button.className).not.toMatch(/focus-visible:outline/);
+    expect(button.className).not.toMatch(/focus:ring/);
+  });
 });

@@ -59,12 +59,12 @@ function WaitlistForm({ onSuccess }: WaitlistFormProps) {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="your@email.com"
           disabled={isSubmitting}
-          className="flex-1 border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-50"
+          className="flex-1 border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground disabled:opacity-50"
         />
         <button
           type="submit"
           disabled={isSubmitting}
-          className="bg-primary px-5 py-2.5 text-sm font-bold tracking-wider text-primary-foreground uppercase transition hover:opacity-90 focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-50"
+          className="bg-primary px-5 py-2.5 text-sm font-bold tracking-wider text-primary-foreground uppercase transition hover:opacity-90 disabled:opacity-50"
         >
           {isSubmitting ? "Joining..." : "Join Waitlist"}
         </button>

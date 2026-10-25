@@ -98,7 +98,7 @@ export function PersistentPlayerBar() {
             type="button"
             onClick={togglePlay}
             aria-label={isPlaying ? "Pause audio" : "Play audio"}
-            className="bg-primary px-3 py-1.5 text-xs font-bold tracking-wider text-primary-foreground uppercase transition hover:opacity-90 focus-visible:outline-2 focus-visible:outline-primary"
+            className="bg-primary px-3 py-1.5 text-xs font-bold tracking-wider text-primary-foreground uppercase transition hover:opacity-90"
           >
             {isPlaying ? "⏸ Pause" : "▶ Play"}
           </button>
@@ -113,7 +113,7 @@ export function PersistentPlayerBar() {
             type="button"
             onClick={advanceTrack}
             aria-label="Skip to next track"
-            className="border border-border bg-transparent px-3 py-1.5 text-xs font-bold tracking-wider text-foreground uppercase transition hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-border"
+            className="border border-border bg-transparent px-3 py-1.5 text-xs font-bold tracking-wider text-foreground uppercase transition hover:bg-foreground hover:text-background"
           >
             ⏭ Skip
           </button>
