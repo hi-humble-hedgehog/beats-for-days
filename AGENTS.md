@@ -21,6 +21,7 @@ plus a separate headless streaming worker for 24/7 YouTube. Architecture:
 | Mutation testing                | `pnpm test:mutation` (incremental, slower) |
 | Architecture boundaries         | `pnpm deps:check`                          |
 | Dead code / unused deps         | `pnpm knip`                                |
+| Convert WAV starter assets      | `pnpm audio:convert`                       |
 | Autofix lint + format           | `pnpm lint:fix && pnpm format`             |
 
 Use **pnpm** only. Never edit `pnpm-lock.yaml` by hand.

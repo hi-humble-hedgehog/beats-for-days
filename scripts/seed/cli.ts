@@ -2,14 +2,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import * as fs from "node:fs";
 import * as path from "node:path";
 
-interface ManifestSection {
-  key: string;
-  label: string;
-  bars: number;
-  duration_ms: number;
-}
-
-interface ManifestTrack {
+export interface SeedTrack {
   id: string;
   name: string;
   bpm: number;
@@ -22,36 +15,117 @@ interface ManifestTrack {
   loopStartMs: number;
   loopEndMs: number;
   loopDurationMs: number;
-  sections?: ManifestSection[];
 }
 
-interface ManifestTransition {
+export interface SeedTransition {
   id: string;
   from: string;
   to: string;
   fileName: string;
-  timing: Record<string, number>;
+  timing: {
+    handleMs: number;
+    crossfadeMs: number;
+    glueMs: number;
+    landMs: number;
+  };
   recipeVersion?: string;
 }
 
-interface Manifest {
-  tracks: Record<string, ManifestTrack>;
-  transitions: ManifestTransition[];
-}
-
-const SUPABASE_URL =
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "http://127.0.0.1:54521";
-const SUPABASE_KEY =
-  process.env.SUPABASE_SERVICE_ROLE_KEY ||
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-  "sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz";
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
-  auth: {
-    persistSession: false,
-    autoRefreshToken: false,
+export const SEED_TRACKS: SeedTrack[] = [
+  {
+    id: "track-a",
+    name: "Soul Rhodes & Piano",
+    bpm: 86,
+    key: "G minor",
+    genre: "Soul",
+    leadInstrument: "Rhodes Piano",
+    counterInstrument: "Low-Note Piano",
+    fileName: "track-a-soul-rhodes.m4a",
+    durationMs: 61395,
+    loopStartMs: 8372,
+    loopEndMs: 50233,
+    loopDurationMs: 41861,
   },
-});
+  {
+    id: "track-b",
+    name: "Jazz Flute & Vibraphone",
+    bpm: 86,
+    key: "C Dorian",
+    genre: "Jazz",
+    leadInstrument: "Jazz Flute",
+    counterInstrument: "Vibraphone",
+    fileName: "track-b-jazz-flute.m4a",
+    durationMs: 66976,
+    loopStartMs: 16743,
+    loopEndMs: 55814,
+    loopDurationMs: 39071,
+  },
+  {
+    id: "track-c",
+    name: "Soul Trumpet & Saxophone",
+    bpm: 94,
+    key: "G minor",
+    genre: "Soul",
+    leadInstrument: "Muted Trumpet",
+    counterInstrument: "Tenor Saxophone",
+    fileName: "track-c-soul-trumpet.m4a",
+    durationMs: 51064,
+    loopStartMs: 10213,
+    loopEndMs: 45958,
+    loopDurationMs: 35745,
+  },
+];
+
+export const SEED_TRANSITIONS: SeedTransition[] = [
+  {
+    id: "track-a-to-track-b",
+    from: "track-a",
+    to: "track-b",
+    fileName: "track-a-to-track-b.m4a",
+    timing: { handleMs: 250, crossfadeMs: 100, glueMs: 7206.7, landMs: 0 },
+    recipeVersion: "v12-intro-c4",
+  },
+  {
+    id: "track-b-to-track-a",
+    from: "track-b",
+    to: "track-a",
+    fileName: "track-b-to-track-a.m4a",
+    timing: { handleMs: 250, crossfadeMs: 100, glueMs: 7506.7, landMs: 0 },
+    recipeVersion: "v12-intro-c4",
+  },
+  {
+    id: "track-a-to-track-c",
+    from: "track-a",
+    to: "track-c",
+    fileName: "track-a-to-track-c.m4a",
+    timing: { handleMs: 250, crossfadeMs: 100, glueMs: 7605.3, landMs: 0 },
+    recipeVersion: "v12-intro-c4",
+  },
+  {
+    id: "track-c-to-track-a",
+    from: "track-c",
+    to: "track-a",
+    fileName: "track-c-to-track-a.m4a",
+    timing: { handleMs: 250, crossfadeMs: 100, glueMs: 11002.7, landMs: 0 },
+    recipeVersion: "v12-intro-c4",
+  },
+  {
+    id: "track-b-to-track-c",
+    from: "track-b",
+    to: "track-c",
+    fileName: "track-b-to-track-c.m4a",
+    timing: { handleMs: 250, crossfadeMs: 100, glueMs: 7508, landMs: 0 },
+    recipeVersion: "v12-intro-c4",
+  },
+  {
+    id: "track-c-to-track-b",
+    from: "track-c",
+    to: "track-b",
+    fileName: "track-c-to-track-b.m4a",
+    timing: { handleMs: 250, crossfadeMs: 100, glueMs: 6001.3, landMs: 0 },
+    recipeVersion: "v12-intro-c4",
+  },
+];
 
 async function uploadFile(
   client: SupabaseClient,
@@ -63,7 +137,7 @@ async function uploadFile(
   const { error } = await client.storage
     .from(bucket)
     .upload(storagePath, fileBuffer, {
-      contentType: "audio/wav",
+      contentType: "audio/mp4",
       upsert: true,
     });
 
@@ -74,7 +148,7 @@ async function uploadFile(
   }
 }
 
-async function ensureAudioBucket(client: SupabaseClient) {
+export async function ensureAudioBucket(client: SupabaseClient) {
   const { data: buckets } = await client.storage.listBuckets();
   const exists = buckets?.some((b) => b.name === "audio");
   if (!exists) {
@@ -82,15 +156,22 @@ async function ensureAudioBucket(client: SupabaseClient) {
   }
 }
 
-async function seedTrack(client: SupabaseClient, track: ManifestTrack) {
-  const localTrackFile = path.resolve(
-    "docs/ui-starter-pack/tracks",
-    track.fileName,
-  );
-  const storagePath = `tracks/${track.fileName}`;
+export function resolveAudioSource(
+  folder: string,
+  fileName: string,
+): string | null {
+  const m4aPath = path.resolve(`public/audio/${folder}`, fileName);
+  if (fs.existsSync(m4aPath)) return m4aPath;
+  return null;
+}
 
-  console.log(`Uploading track ${track.name} (${track.fileName})...`);
-  await uploadFile(client, "audio", storagePath, localTrackFile);
+export async function seedTrack(client: SupabaseClient, track: SeedTrack) {
+  const storagePath = `tracks/${track.fileName}`;
+  const fileToUpload = resolveAudioSource("tracks", track.fileName);
+
+  if (fileToUpload) {
+    await uploadFile(client, "audio", storagePath, fileToUpload);
+  }
 
   const { error } = await client.from("tracks").upsert(
     {
@@ -105,7 +186,7 @@ async function seedTrack(client: SupabaseClient, track: ManifestTrack) {
       loop_start_ms: track.loopStartMs,
       loop_end_ms: track.loopEndMs,
       loop_duration_ms: track.loopDurationMs,
-      sections: track.sections ?? [],
+      sections: [],
       audio_path: storagePath,
     },
     { onConflict: "id" },
@@ -116,18 +197,16 @@ async function seedTrack(client: SupabaseClient, track: ManifestTrack) {
   }
 }
 
-async function seedTransition(
+export async function seedTransition(
   client: SupabaseClient,
-  transition: ManifestTransition,
+  transition: SeedTransition,
 ) {
-  const localTransitionFile = path.resolve(
-    "docs/ui-starter-pack/transitions",
-    transition.fileName,
-  );
   const storagePath = `transitions/${transition.fileName}`;
+  const fileToUpload = resolveAudioSource("transitions", transition.fileName);
 
-  console.log(`Uploading transition ${transition.id}...`);
-  await uploadFile(client, "audio", storagePath, localTransitionFile);
+  if (fileToUpload) {
+    await uploadFile(client, "audio", storagePath, fileToUpload);
+  }
 
   const { error } = await client.from("transitions").upsert(
     {
@@ -148,36 +227,38 @@ async function seedTransition(
   }
 }
 
-async function seedTracks(
-  client: SupabaseClient,
-  tracks: Record<string, ManifestTrack>,
-) {
-  for (const track of Object.values(tracks)) {
+export async function seedDatabase(client: SupabaseClient) {
+  await ensureAudioBucket(client);
+  for (const track of SEED_TRACKS) {
     await seedTrack(client, track);
   }
-}
-
-async function seedTransitions(
-  client: SupabaseClient,
-  transitions: ManifestTransition[],
-) {
-  for (const transition of transitions) {
+  for (const transition of SEED_TRANSITIONS) {
     await seedTransition(client, transition);
   }
 }
 
-async function seed() {
-  const manifestPath = path.resolve("docs/ui-starter-pack/manifest.json");
-  const manifest: Manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
+function runCli() {
+  const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "http://127.0.0.1:54521";
+  const supabaseKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    "sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz";
 
-  await ensureAudioBucket(supabase);
-  await seedTracks(supabase, manifest.tracks);
-  await seedTransitions(supabase, manifest.transitions);
+  const supabase = createClient(supabaseUrl, supabaseKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
 
-  console.log("Seeding completed successfully!");
+  seedDatabase(supabase)
+    .then(() => {
+      console.log("Seeding completed successfully!");
+    })
+    .catch((err) => {
+      console.error(err);
+      process.exit(1);
+    });
 }
 
-seed().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+if (process.argv[1]?.endsWith("seed/cli.ts")) {
+  runCli();
+}

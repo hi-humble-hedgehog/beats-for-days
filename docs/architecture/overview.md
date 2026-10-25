@@ -93,3 +93,11 @@ waitlist, paid instant pass, and BYOK) and the on-the-fly directed transition
 graph playback model are detailed in
 [`generation-policy.md`](generation-policy.md) and
 [ADR 0009](../decisions/0009-beat-generation-access-and-queue-policy.md).
+
+## Audio asset delivery
+
+Audio stems and transitions are delivered via:
+
+- **Local development:** Direct static asset serving from `public/audio/` (`/audio/...`) or streaming route handlers for zero-dependency offline playback ([ADR 0011](../decisions/0011-local-static-audio-asset-delivery.md)).
+- **Production:** Supabase Storage CDN public bucket URLs.
+- **Format:** AAC (`.m4a`) at 192 kbps with `+faststart` (generated via `pnpm audio:convert`), avoiding MP3 encoder delay and preserving sample-accurate loop points (`loopStartMs`, `loopEndMs`).

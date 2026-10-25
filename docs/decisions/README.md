@@ -26,3 +26,4 @@ and its consequences. Format: lightweight [MADR](https://adr.github.io/madr/).
 | [0008](0008-gdpr-and-wcag-accessibility-compliance.md)  | Enforce GDPR privacy and WCAG 2.2 AA accessibility | Accepted |
 | [0009](0009-beat-generation-access-and-queue-policy.md) | Phased beat generation access & transition graph   | Accepted |
 | [0010](0010-history-based-next-track-api.md)            | Deliver next beat via history-based graph API      | Accepted |
+| [0011](0011-local-static-audio-asset-delivery.md)       | Local static audio asset delivery                  | Accepted |

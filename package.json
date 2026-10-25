@@ -19,6 +19,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "audio:convert": "tsx scripts/audio/convert.ts",
     "crap": "tsx scripts/crap/cli.ts",
     "test:crap": "pnpm test:coverage && pnpm crap",
     "test:mutation": "stryker run",
