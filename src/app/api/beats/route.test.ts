@@ -3,9 +3,36 @@ import { GET } from "./route";
 
 vi.mock("@/lib/tracks", () => ({
   fetchBeatViews: vi.fn().mockResolvedValue([
-    { id: "track-a", name: "A", audioUrl: "http://a.wav", transitions: [] },
-    { id: "track-b", name: "B", audioUrl: "http://b.wav", transitions: [] },
-    { id: "track-c", name: "C", audioUrl: "http://c.wav", transitions: [] },
+    {
+      id: "track-a",
+      name: "A",
+      audioUrl: "http://a.m4a",
+      durationMs: 60000,
+      loopStartMs: 10000,
+      loopEndMs: 50000,
+      bpm: 86,
+      transitions: [],
+    },
+    {
+      id: "track-b",
+      name: "B",
+      audioUrl: "http://b.m4a",
+      durationMs: 60000,
+      loopStartMs: 10000,
+      loopEndMs: 50000,
+      bpm: 86,
+      transitions: [],
+    },
+    {
+      id: "track-c",
+      name: "C",
+      audioUrl: "http://c.m4a",
+      durationMs: 60000,
+      loopStartMs: 10000,
+      loopEndMs: 50000,
+      bpm: 86,
+      transitions: [],
+    },
   ]),
 }));
 

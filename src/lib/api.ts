@@ -15,6 +15,7 @@ export interface NextBeatRequest {
 export interface NextBeatResponse {
   beat: BeatView;
   transition: TransitionView | null;
+  resolveAfterSec?: number;
 }
 
 export interface WaitlistStatsResponse {

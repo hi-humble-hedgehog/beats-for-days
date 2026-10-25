@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getServerEnv } from "@/lib/env";
 import { resolveNextBeat } from "@/lib/player/graph";
 import { fetchBeatViews } from "@/lib/tracks";
 
@@ -41,7 +42,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No beats available" }, { status: 404 });
   }
 
-  return NextResponse.json(result);
+  return NextResponse.json({
+    ...result,
+    resolveAfterSec: getServerEnv().NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS,
+  });
 }
 
 /**
@@ -59,5 +63,8 @@ export async function GET(_request?: Request) {
     return NextResponse.json({ error: "No beats available" }, { status: 404 });
   }
 
-  return NextResponse.json(result);
+  return NextResponse.json({
+    ...result,
+    resolveAfterSec: getServerEnv().NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS,
+  });
 }

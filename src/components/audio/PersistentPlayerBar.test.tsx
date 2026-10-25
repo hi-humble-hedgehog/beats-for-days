@@ -12,7 +12,11 @@ describe("PersistentPlayerBar", () => {
   const sampleBeat: BeatView = {
     id: "0001",
     name: "Soul Rhodes & Piano",
-    audioUrl: "http://storage/track-a.wav",
+    audioUrl: "http://storage/track-a.m4a",
+    durationMs: 60000,
+    loopStartMs: 10000,
+    loopEndMs: 50000,
+    bpm: 86,
     transitions: [],
   };
 

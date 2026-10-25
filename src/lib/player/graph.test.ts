@@ -21,20 +21,33 @@ describe("updatePlayedTrackIds", () => {
 });
 
 describe("selectNextGraphTrack", () => {
+  const defaultTiming = {
+    handleMs: 250,
+    crossfadeMs: 100,
+    glueMs: 7000,
+    landMs: 0,
+  };
+
   const trackA: BeatView = {
     id: "0001",
     name: "Beat One",
-    audioUrl: "http://storage/1.wav",
+    audioUrl: "http://storage/1.m4a",
+    durationMs: 60000,
+    loopStartMs: 10000,
+    loopEndMs: 50000,
+    bpm: 86,
     transitions: [
       {
         id: "t-1-2",
         targetTrackId: "0002",
-        audioUrl: "http://storage/t1-2.wav",
+        audioUrl: "http://storage/t1-2.m4a",
+        timing: defaultTiming,
       },
       {
         id: "t-1-3",
         targetTrackId: "0003",
-        audioUrl: "http://storage/t1-3.wav",
+        audioUrl: "http://storage/t1-3.m4a",
+        timing: defaultTiming,
       },
     ],
   };
@@ -42,28 +55,44 @@ describe("selectNextGraphTrack", () => {
   const trackB: BeatView = {
     id: "0002",
     name: "Beat Two",
-    audioUrl: "http://storage/2.wav",
+    audioUrl: "http://storage/2.m4a",
+    durationMs: 60000,
+    loopStartMs: 10000,
+    loopEndMs: 50000,
+    bpm: 86,
     transitions: [],
   };
 
   const trackC: BeatView = {
     id: "0003",
     name: "Beat Three",
-    audioUrl: "http://storage/3.wav",
+    audioUrl: "http://storage/3.m4a",
+    durationMs: 60000,
+    loopStartMs: 10000,
+    loopEndMs: 50000,
+    bpm: 86,
     transitions: [],
   };
 
   const trackD: BeatView = {
     id: "0004",
     name: "Beat Four",
-    audioUrl: "http://storage/4.wav",
+    audioUrl: "http://storage/4.m4a",
+    durationMs: 60000,
+    loopStartMs: 10000,
+    loopEndMs: 50000,
+    bpm: 86,
     transitions: [],
   };
 
   const trackE: BeatView = {
     id: "0005",
     name: "Beat Five",
-    audioUrl: "http://storage/5.wav",
+    audioUrl: "http://storage/5.m4a",
+    durationMs: 60000,
+    loopStartMs: 10000,
+    loopEndMs: 50000,
+    bpm: 86,
     transitions: [],
   };
 
@@ -199,20 +228,33 @@ describe("selectNextGraphTrack", () => {
 });
 
 describe("resolveNextBeat", () => {
+  const defaultTiming = {
+    handleMs: 250,
+    crossfadeMs: 100,
+    glueMs: 7000,
+    landMs: 0,
+  };
+
   const trackA: BeatView = {
     id: "0001",
     name: "Beat One",
-    audioUrl: "http://storage/1.wav",
+    audioUrl: "http://storage/1.m4a",
+    durationMs: 60000,
+    loopStartMs: 10000,
+    loopEndMs: 50000,
+    bpm: 86,
     transitions: [
       {
         id: "t-1-2",
         targetTrackId: "0002",
-        audioUrl: "http://storage/t1-2.wav",
+        audioUrl: "http://storage/t1-2.m4a",
+        timing: defaultTiming,
       },
       {
         id: "t-1-3",
         targetTrackId: "0003",
-        audioUrl: "http://storage/t1-3.wav",
+        audioUrl: "http://storage/t1-3.m4a",
+        timing: defaultTiming,
       },
     ],
   };
@@ -220,14 +262,22 @@ describe("resolveNextBeat", () => {
   const trackB: BeatView = {
     id: "0002",
     name: "Beat Two",
-    audioUrl: "http://storage/2.wav",
+    audioUrl: "http://storage/2.m4a",
+    durationMs: 60000,
+    loopStartMs: 10000,
+    loopEndMs: 50000,
+    bpm: 86,
     transitions: [],
   };
 
   const trackC: BeatView = {
     id: "0003",
     name: "Beat Three",
-    audioUrl: "http://storage/3.wav",
+    audioUrl: "http://storage/3.m4a",
+    durationMs: 60000,
+    loopStartMs: 10000,
+    loopEndMs: 50000,
+    bpm: 86,
     transitions: [],
   };
 
@@ -254,7 +304,7 @@ describe("resolveNextBeat", () => {
 
     expect(result?.beat.id).toBe("0003");
     expect(result?.transition?.id).toBe("t-1-3");
-    expect(result?.transition?.audioUrl).toBe("http://storage/t1-3.wav");
+    expect(result?.transition?.audioUrl).toBe("http://storage/t1-3.m4a");
   });
 
   it("defaults to auto mode when mode parameter is omitted", () => {

@@ -19,7 +19,11 @@ describe("Home page", () => {
           current: {
             id: "0001",
             name: "Soul Rhodes",
-            audioUrl: "http://storage/1.wav",
+            audioUrl: "http://storage/1.m4a",
+            durationMs: 60000,
+            loopStartMs: 10000,
+            loopEndMs: 50000,
+            bpm: 86,
             transitions: [],
           },
           isPlaying: false,

@@ -4,30 +4,52 @@ import { GET, POST } from "./route";
 
 const spyResolveNextBeat = vi.spyOn(graph, "resolveNextBeat");
 
+const { defaultTiming } = vi.hoisted(() => ({
+  defaultTiming: {
+    handleMs: 250,
+    crossfadeMs: 100,
+    glueMs: 7000,
+    landMs: 0,
+  },
+}));
+
 vi.mock("@/lib/tracks", () => ({
   fetchBeatViews: vi.fn().mockResolvedValue([
     {
       id: "track-a",
       name: "Track A",
-      audioUrl: "http://a.wav",
+      audioUrl: "http://a.m4a",
+      durationMs: 60000,
+      loopStartMs: 10000,
+      loopEndMs: 50000,
+      bpm: 86,
       transitions: [
         {
           id: "tr-a-b",
           targetTrackId: "track-b",
-          audioUrl: "http://tr-ab.wav",
+          audioUrl: "http://tr-ab.m4a",
+          timing: defaultTiming,
         },
       ],
     },
     {
       id: "track-b",
       name: "Track B",
-      audioUrl: "http://b.wav",
+      audioUrl: "http://b.m4a",
+      durationMs: 60000,
+      loopStartMs: 10000,
+      loopEndMs: 50000,
+      bpm: 86,
       transitions: [],
     },
     {
       id: "track-c",
       name: "Track C",
-      audioUrl: "http://c.wav",
+      audioUrl: "http://c.m4a",
+      durationMs: 60000,
+      loopStartMs: 10000,
+      loopEndMs: 50000,
+      bpm: 86,
       transitions: [],
     },
   ]),
@@ -53,7 +75,8 @@ describe("POST /api/beats/next", () => {
     expect(data.transition).toEqual({
       id: "tr-a-b",
       targetTrackId: "track-b",
-      audioUrl: "http://tr-ab.wav",
+      audioUrl: "http://tr-ab.m4a",
+      timing: defaultTiming,
     });
   });
 

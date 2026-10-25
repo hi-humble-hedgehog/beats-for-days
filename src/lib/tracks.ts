@@ -1,10 +1,16 @@
 import "server-only";
 import { type SupabaseClient } from "@supabase/supabase-js";
+import { getServerEnv } from "./env";
 import { getSupabaseServerClient } from "./supabase";
+import type { BeatView, TransitionTiming } from "./types/beat";
 
 export interface TrackRow {
   id: string;
   name: string;
+  bpm: number;
+  duration_ms: number;
+  loop_start_ms: number;
+  loop_end_ms: number;
   audio_path: string;
 }
 
@@ -13,14 +19,14 @@ export interface TransitionRow {
   from_track_id: string;
   to_track_id: string;
   audio_path: string;
+  timing: TransitionTiming;
 }
 
-import type { BeatView } from "./types/beat";
-export type { BeatView };
+export type { BeatView, TransitionTiming };
 
 /**
- * Combines `tracks` and `transitions` table rows into `BeatView` objects.
- * Kept separate from `fetchBeatViews` so we can test this logic without a database.
+ * Maps raw database track and transition rows into presentation-ready beat views.
+ * Resolves storage paths to URLs and links transition timings to parent tracks.
  */
 export function buildBeatViews(
   tracks: TrackRow[],
@@ -34,29 +40,40 @@ export function buildBeatViews(
         id: tr.id,
         targetTrackId: tr.to_track_id,
         audioUrl: resolveAudioUrl(tr.audio_path),
+        timing: tr.timing,
       }));
 
     return {
       id: track.id,
       name: track.name,
       audioUrl: resolveAudioUrl(track.audio_path),
+      durationMs: track.duration_ms,
+      loopStartMs: track.loop_start_ms,
+      loopEndMs: track.loop_end_ms,
+      bpm: track.bpm,
       transitions: trackTransitions,
     };
   });
 }
 
 /**
- * Loads all tracks and transitions from Supabase and turns storage paths into public URLs.
- * Designed for the Phase 1 catalog (30–40 tracks). Phase 2 will load one beat at a time.
+ * Loads all beats and transitions from Supabase with loop points and timing.
+ * Serves audio from local static files or the Supabase Storage CDN based on configuration.
  */
 export async function fetchBeatViews(
   client: SupabaseClient = getSupabaseServerClient(),
+  useLocalAudio: boolean = getServerEnv().USE_LOCAL_AUDIO,
 ): Promise<BeatView[]> {
   const [tracksResult, transitionsResult] = await Promise.all([
-    client.from("tracks").select("id, name, audio_path").order("name"),
+    client
+      .from("tracks")
+      .select(
+        "id, name, bpm, duration_ms, loop_start_ms, loop_end_ms, audio_path",
+      )
+      .order("name"),
     client
       .from("transitions")
-      .select("id, from_track_id, to_track_id, audio_path"),
+      .select("id, from_track_id, to_track_id, audio_path, timing"),
   ]);
 
   if (tracksResult.error) {
@@ -71,7 +88,12 @@ export async function fetchBeatViews(
   const tracks = (tracksResult.data ?? []) as TrackRow[];
   const transitions = (transitionsResult.data ?? []) as TransitionRow[];
 
+  const shouldUseLocalAudio = useLocalAudio || !client?.storage;
+
   const resolveAudioUrl = (audioPath: string) => {
+    if (shouldUseLocalAudio) {
+      return audioPath.startsWith("/") ? audioPath : `/audio/${audioPath}`;
+    }
     const { data } = client.storage.from("audio").getPublicUrl(audioPath);
     return data.publicUrl;
   };

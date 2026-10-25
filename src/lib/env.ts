@@ -7,6 +7,7 @@ import { z } from "zod";
  */
 const serverEnvSchema = z
   .object({
+    NODE_ENV: z.string().optional(),
     ALLOW_LIVE_AI_CALLS: z
       .enum(["true", "false"])
       .default("false")
@@ -26,6 +27,39 @@ const serverEnvSchema = z
     SUPABASE_SERVICE_ROLE_KEY: z
       .string()
       .default("sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz"),
+    USE_LOCAL_AUDIO: z.enum(["true", "false"]).optional(),
+    NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS: z
+      .string()
+      .default("30")
+      .transform((val, ctx) => {
+        const num = Number(val);
+        if (!Number.isFinite(num) || num <= 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "must be a positive number",
+          });
+          return z.NEVER;
+        }
+        return num;
+      }),
+  })
+  .transform((env) => {
+    const isProd = (env.NODE_ENV ?? process.env.NODE_ENV) === "production";
+    const useLocalAudio =
+      env.USE_LOCAL_AUDIO !== undefined
+        ? env.USE_LOCAL_AUDIO === "true"
+        : !isProd;
+
+    return {
+      ALLOW_LIVE_AI_CALLS: env.ALLOW_LIVE_AI_CALLS,
+      ELEVENLABS_API_KEY: env.ELEVENLABS_API_KEY,
+      NEXT_PUBLIC_SUPABASE_URL: env.NEXT_PUBLIC_SUPABASE_URL,
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      SUPABASE_SERVICE_ROLE_KEY: env.SUPABASE_SERVICE_ROLE_KEY,
+      USE_LOCAL_AUDIO: useLocalAudio,
+      NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS:
+        env.NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS,
+    };
   })
   .refine(
     (env) => !env.ALLOW_LIVE_AI_CALLS || Boolean(env.ELEVENLABS_API_KEY),

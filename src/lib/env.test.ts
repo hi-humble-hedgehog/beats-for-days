@@ -10,7 +10,52 @@ describe("parseServerEnv", () => {
       NEXT_PUBLIC_SUPABASE_ANON_KEY:
         "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH",
       SUPABASE_SERVICE_ROLE_KEY: "sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz",
+      USE_LOCAL_AUDIO: true,
+      NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS: 30,
     });
+  });
+
+  it("parses custom USE_LOCAL_AUDIO and NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS", () => {
+    expect(
+      parseServerEnv({
+        USE_LOCAL_AUDIO: "false",
+        NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS: "45",
+      }),
+    ).toMatchObject({
+      USE_LOCAL_AUDIO: false,
+      NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS: 45,
+    });
+  });
+
+  it("defaults USE_LOCAL_AUDIO to false in production and honors explicit true override", () => {
+    expect(
+      parseServerEnv({
+        NODE_ENV: "production",
+      }),
+    ).toMatchObject({
+      USE_LOCAL_AUDIO: false,
+    });
+
+    expect(
+      parseServerEnv({
+        NODE_ENV: "production",
+        USE_LOCAL_AUDIO: "true",
+      }),
+    ).toMatchObject({
+      USE_LOCAL_AUDIO: true,
+    });
+  });
+
+  it("rejects non-positive NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS", () => {
+    expect(() =>
+      parseServerEnv({ NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS: "-5" }),
+    ).toThrow(/NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS/);
+    expect(() =>
+      parseServerEnv({ NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS: "0" }),
+    ).toThrow(/NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS/);
+    expect(() =>
+      parseServerEnv({ NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS: "abc" }),
+    ).toThrow(/NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS/);
   });
 
   it("normalizes blank ELEVENLABS_API_KEY to undefined when ALLOW_LIVE_AI_CALLS is false", () => {
@@ -26,6 +71,8 @@ describe("parseServerEnv", () => {
       NEXT_PUBLIC_SUPABASE_ANON_KEY:
         "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH",
       SUPABASE_SERVICE_ROLE_KEY: "sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz",
+      USE_LOCAL_AUDIO: true,
+      NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS: 30,
     });
   });
 
@@ -43,6 +90,8 @@ describe("parseServerEnv", () => {
       NEXT_PUBLIC_SUPABASE_ANON_KEY:
         "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH",
       SUPABASE_SERVICE_ROLE_KEY: "sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz",
+      USE_LOCAL_AUDIO: true,
+      NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS: 30,
     });
   });
 

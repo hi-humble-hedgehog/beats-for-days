@@ -11,7 +11,11 @@ describe("HeaderNav", () => {
           current: {
             id: "0003",
             name: "Trumpet Beat",
-            audioUrl: "http://storage/3.wav",
+            audioUrl: "http://storage/3.m4a",
+            durationMs: 60000,
+            loopStartMs: 10000,
+            loopEndMs: 50000,
+            bpm: 86,
             transitions: [],
           },
           isPlaying: false,
