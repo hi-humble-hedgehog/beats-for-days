@@ -100,5 +100,4 @@ export interface AudioEngineOptions {
   cacheCapacity?: number;
   onTrackHandoff?: (nextBeat: BeatView) => void;
   vinylEffects?: boolean;
-  startEffect?: "spin-up" | "baby-scratch";
 }

@@ -73,11 +73,11 @@ Both curves sum to constant power: $\sin^2(t) + \cos^2(t) = 1$.
 To recreate an authentic 90s turntable and hardware sampler feel without altering sample-accurate loop bounds:
 
 1. **Motor spin-up on play (`applyVinylSpinUp`):**
-   When resuming playback after pause, the engine ramps `source.playbackRate` from `0.25` to `1.0` over 250 ms using exponential curves (`AudioParam.exponentialRampToValueAtTime`). Initial play or playing after skipping begins immediately at normal speed.
+   When resuming playback after pause, the engine ramps `source.playbackRate` from `0.25` to `1.0` over 350 ms using exponential curves (`AudioParam.exponentialRampToValueAtTime`). Initial play or playing after skipping begins immediately at normal speed.
 2. **Motor brake on pause and skip (`applyVinylBrake`):**
-   When pausing playback or advancing to the next track, the engine ramps `source.playbackRate` and `gain.gain` down to `0.001` over 450 ms before stopping the node, simulating turntable motor power-down without clicks.
+   When pausing playback or advancing to the next track, the engine ramps `source.playbackRate` and `gain.gain` down to `0.001` over 750 ms before stopping the node, simulating turntable motor power-down without clicks.
 3. **Skip sequence (power-down, pause gap, direct play):**
-   When skipping a track during active playback, `engine.skipToTrack` triggers a motor brake on the playing track, pauses briefly (~400 ms total across brake and silence) while pre-loading the incoming buffer, and starts the new track directly at standard playback speed. Superseded rapid skips are safely cancelled.
+   When skipping a track during active playback, `engine.skipToTrack` triggers a motor brake on the playing track, pauses briefly (~800 ms total across brake and silence) while pre-loading the incoming buffer, and starts the new track directly at standard playback speed. Superseded rapid skips are safely cancelled.
 4. **Interactive vinyl platter & manual scratching (`VinylPlatter`, `ScratchController`):**
    The UI renders an interactive turntable platter with a high-contrast radial orientation line that spins continuously at 33⅓ RPM during playback. Users can grab the platter via pointer (mouse, touch) or keyboard (arrow keys).
    - Hand velocity and angular direction dynamically drive audio speed and direction.

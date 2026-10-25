@@ -92,6 +92,13 @@ describe("applyVinylSpinUp", () => {
     const param = source.playbackRate!;
     expect(param.setValueAtTime).toHaveBeenCalledWith(1, 1);
   });
+
+  it("uses default durationSec of 0.35s when unspecified", () => {
+    const source = createMockSource(true);
+    applyVinylSpinUp({ source, startTime: 1 });
+    const param = source.playbackRate!;
+    expect(param.exponentialRampToValueAtTime).toHaveBeenCalledWith(1, 1.35);
+  });
 });
 
 describe("applyVinylBrake", () => {
@@ -99,6 +106,21 @@ describe("applyVinylBrake", () => {
     expect(() =>
       applyVinylBrake({ source: null, gain: null, currentTime: 10 }),
     ).not.toThrow();
+  });
+
+  it("uses default durationSec of 0.75s when unspecified", () => {
+    const source = createMockSource(true);
+    const gain = createMockGain(1);
+
+    applyVinylBrake({ source, gain, currentTime: 2 });
+    expect(
+      source.playbackRate!.exponentialRampToValueAtTime,
+    ).toHaveBeenCalledWith(0.001, 2.75);
+    expect(gain.gain.exponentialRampToValueAtTime).toHaveBeenCalledWith(
+      0.001,
+      2.75,
+    );
+    expect(source.stop).toHaveBeenCalledWith(2.75);
   });
 
   it("ramps down playbackRate and gain then schedules stop", () => {

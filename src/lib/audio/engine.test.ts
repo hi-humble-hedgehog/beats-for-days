@@ -609,14 +609,14 @@ describe("AudioEngine", () => {
     mockAudio.setTime(20);
     vinylEngine.pause();
 
-    // Pause triggers vinyl brake power-down
+    // Pause triggers vinyl brake power-down (750ms duration)
     expect(rateParam?.exponentialRampToValueAtTime).toHaveBeenCalledWith(
       0.001,
-      20.45,
+      20.75,
     );
-    expect(source?.stop).toHaveBeenCalledWith(20.45);
+    expect(source?.stop).toHaveBeenCalledWith(20.75);
 
-    // Play after pause triggers spin-up
+    // Play after pause triggers spin-up (350ms duration)
     mockAudio.setTime(25);
     await vinylEngine.play();
     const secondSource = mockAudio.createdSources[1];
@@ -626,7 +626,7 @@ describe("AudioEngine", () => {
     );
     expect(
       secondSource?.playbackRate?.exponentialRampToValueAtTime,
-    ).toHaveBeenCalledWith(1, 25.25);
+    ).toHaveBeenCalledWith(1, 25.35);
   });
 
   it("modulates playbackRate when scratch is triggered", async () => {
@@ -670,13 +670,13 @@ describe("AudioEngine", () => {
     const firstSource = mockAudio.createdSources[0];
     const skipPromise = vinylEngine.skipToTrack(trackB);
 
-    // Initial brake was scheduled on first source
+    // Initial brake was scheduled on first source (750ms duration)
     expect(
       firstSource?.playbackRate?.exponentialRampToValueAtTime,
-    ).toHaveBeenCalledWith(0.001, 10.45);
+    ).toHaveBeenCalledWith(0.001, 10.75);
 
-    // Advance fake timer through the power-down and pause gap (400ms)
-    await vi.advanceTimersByTimeAsync(400);
+    // Advance fake timer through the power-down and pause gap (800ms)
+    await vi.advanceTimersByTimeAsync(800);
     await skipPromise;
 
     // Second source for track B was created and started directly without spin-up
@@ -708,14 +708,14 @@ describe("AudioEngine", () => {
       firstSource?.playbackRate?.exponentialRampToValueAtTime,
     ).not.toHaveBeenCalled();
 
-    // Pause triggers power-down vinyl brake
+    // Pause triggers power-down vinyl brake (750ms duration)
     mockAudio.setTime(20);
     vinylEngine.pause();
     expect(
       firstSource?.playbackRate?.exponentialRampToValueAtTime,
-    ).toHaveBeenCalledWith(0.001, 20.45);
+    ).toHaveBeenCalledWith(0.001, 20.75);
 
-    // Play after pause triggers motor spin-up
+    // Play after pause triggers motor spin-up (350ms duration)
     mockAudio.setTime(25);
     await vinylEngine.play();
     const secondSource = mockAudio.createdSources[1];
@@ -725,7 +725,7 @@ describe("AudioEngine", () => {
     );
     expect(
       secondSource?.playbackRate?.exponentialRampToValueAtTime,
-    ).toHaveBeenCalledWith(1, 25.25);
+    ).toHaveBeenCalledWith(1, 25.35);
   });
 
   it("aborts superseded skip when user skips multiple times quickly with vinylEffects", async () => {
@@ -743,7 +743,7 @@ describe("AudioEngine", () => {
     const skip1 = vinylEngine.skipToTrack(trackB);
     const skip2 = vinylEngine.skipToTrack(trackC);
 
-    await vi.advanceTimersByTimeAsync(400);
+    await vi.advanceTimersByTimeAsync(800);
     await Promise.all([skip1, skip2]);
 
     expect(vinylEngine.getSnapshot().currentBeat?.id).toBe("track-c");

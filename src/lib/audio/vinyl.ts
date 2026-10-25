@@ -51,7 +51,7 @@ function rampParamDown(
  * Ramps smoothly from a low pitch up to normal playback speed.
  */
 export function applyVinylSpinUp(options: VinylSpinUpOptions): void {
-  const { source, startTime, durationSec = 0.25, startRate = 0.25 } = options;
+  const { source, startTime, durationSec = 0.35, startRate = 0.25 } = options;
   if (!source?.playbackRate) return;
 
   try {
@@ -77,7 +77,7 @@ export function applyVinylSpinUp(options: VinylSpinUpOptions): void {
  * Drops playback pitch and volume exponentially to mimic turntable power-down without digital clicks.
  */
 export function applyVinylBrake(options: VinylBrakeOptions): void {
-  const { source, gain, currentTime, durationSec = 0.45 } = options;
+  const { source, gain, currentTime, durationSec = 0.75 } = options;
   if (!source) return;
 
   const stopTime = currentTime + durationSec;

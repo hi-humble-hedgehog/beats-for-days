@@ -201,7 +201,7 @@ export class AudioEngine {
     if (wasPlaying && this.vinylEffects && this.ctx) {
       this.stopCurrentNode(true);
       const loadPromise = this.loadTrack(nextBeat, 0);
-      await new Promise((resolve) => setTimeout(resolve, 400));
+      await new Promise((resolve) => setTimeout(resolve, 800));
       if (this.skipCounter !== skipId) return;
 
       await loadPromise;
