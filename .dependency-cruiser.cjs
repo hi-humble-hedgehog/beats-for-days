@@ -54,10 +54,10 @@ module.exports = {
     {
       name: "app-code-not-to-tooling",
       comment:
-        "Repo tooling (scripts/, test/) is not part of the shipped application.",
+        "Repo tooling (scripts/, test/, e2e/) is not part of the shipped application.",
       severity: "error",
       from: { path: "^src/" },
-      to: { path: "^(scripts|test)/" },
+      to: { path: "^(scripts|test|e2e)/" },
     },
     {
       name: "stream-worker-is-isolated",

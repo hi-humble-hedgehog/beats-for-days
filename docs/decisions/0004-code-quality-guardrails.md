@@ -17,10 +17,12 @@ automatic, fast where they run often, and thorough where they run rarely.
 | Types                   | `tsc` strict+                                                     | pre-commit, CI                |
 | Secrets                 | gitleaks                                                          | pre-commit (if installed), CI |
 | Commit messages         | commitlint (Conventional)                                         | commit-msg                    |
+| Accessibility lint      | Born-Accessible UI (`pnpm lint:a11y`)                             | pre-push, CI                  |
 | Tests                   | Vitest                                                            | pre-push, CI                  |
 | Architecture boundaries | dependency-cruiser                                                | pre-push, CI                  |
 | Dead code / unused deps | knip                                                              | pre-push, CI                  |
 | CRAP gate               | `scripts/crap`                                                    | pre-push, CI                  |
+| E2E & browser a11y      | Playwright + axe-core (`pnpm test:e2e`)                           | pre-push, CI                  |
 | Mutation testing        | Stryker (incremental)                                             | CI, on demand                 |
 | Build                   | `next build`                                                      | CI                            |
 | Dependency updates      | Dependabot (grouped, weekly)                                      | GitHub                        |

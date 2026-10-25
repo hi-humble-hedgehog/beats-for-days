@@ -27,3 +27,4 @@ and its consequences. Format: lightweight [MADR](https://adr.github.io/madr/).
 | [0009](0009-beat-generation-access-and-queue-policy.md) | Phased beat generation access & transition graph   | Accepted |
 | [0010](0010-history-based-next-track-api.md)            | Deliver next beat via history-based graph API      | Accepted |
 | [0011](0011-local-static-audio-asset-delivery.md)       | Local static audio asset delivery                  | Accepted |
+| [0012](0012-playwright-e2e-user-flow-testing.md)        | Playwright, Born-Accessible UI & OKLCH tokens      | Accepted |

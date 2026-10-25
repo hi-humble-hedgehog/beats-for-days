@@ -16,13 +16,14 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   colorScheme: "light",
-  themeColor: "#eceae4",
+  themeColor: PALETTE.sleeve,
 };
 
 import { AudioPlayerProvider } from "@/components/audio/AudioPlayerContext";
 import { PersistentPlayerBar } from "@/components/audio/PersistentPlayerBar";
 import { HeaderNav } from "@/components/navigation/HeaderNav";
 import { API_ROUTES } from "@/lib/constants";
+import { PALETTE } from "@/lib/design-tokens";
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

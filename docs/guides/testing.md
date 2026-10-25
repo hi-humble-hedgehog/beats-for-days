@@ -1,6 +1,6 @@
 # Testing guide
 
-Why we test this way: [ADR 0003](../decisions/0003-testing-strategy.md).
+Why we test this way: [ADR 0003](../decisions/0003-testing-strategy.md) and [ADR 0012](../decisions/0012-playwright-e2e-user-flow-testing.md).
 
 ## Where tests go
 
@@ -9,6 +9,7 @@ Why we test this way: [ADR 0003](../decisions/0003-testing-strategy.md).
 | `src/lib/audio/loop.ts`     | `src/lib/audio/loop.test.ts`     | Node (`unit` project)                       |
 | `src/components/Player.tsx` | `src/components/Player.test.tsx` | happy-dom + Testing Library (`dom` project) |
 | `scripts/**.ts`             | next to the file                 | Node                                        |
+| End-to-end user flows       | `e2e/*.spec.ts`                  | Playwright (`chromium`, real browser)       |
 
 Shared setup lives in `test/` (`setup-dom.ts`, `stubs/`).
 
@@ -74,3 +75,15 @@ For each survivor:
 
 Scope: `.ts` files in `src/` and `scripts/` (excluding tests and `cli.ts`).
 Break threshold: **75%**, target **≥ 90%**.
+
+## End-to-end browser & accessibility testing (Playwright + Born-Accessible UI)
+
+```bash
+pnpm test:e2e             # run headless Chromium E2E + axe-core + 320px reflow tests
+pnpm test:e2e:ui          # open interactive Playwright UI mode
+pnpm lint:a11y            # verify CSS Contrast: comments & non-semantic click handlers
+pnpm audit:a11y           # generate full Born-Accessible HTML/JSON audit in reports/a11y/
+pnpm exec playwright show-report reports/playwright
+```
+
+Playwright tests live in `e2e/*.spec.ts` and run against `http://localhost:3000` backed by the live local Next.js API routes and local Supabase stack (`supabase start`). Every route is also checked with `@axe-core/playwright` (`wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa`, `best-practice`), `placeholder-only-label` detection, and 320px viewport reflow. `pnpm verify` runs both `pnpm lint:a11y` and `pnpm test:e2e` automatically before every push ([ADR 0012](../decisions/0012-playwright-e2e-user-flow-testing.md)).

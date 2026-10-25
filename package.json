@@ -14,11 +14,15 @@
     "typecheck": "next typegen && tsc --noEmit",
     "lint": "eslint --max-warnings=0 .",
     "lint:fix": "eslint --fix .",
+    "lint:a11y": "node .agents/skills/born-accessible-ui/scripts/lint.mjs --strict src/",
+    "audit:a11y": "node .agents/skills/born-accessible-ui/scripts/audit.mjs http://localhost:3000/ http://localhost:3000/beat/0001 http://localhost:3000/generate http://localhost:3000/about http://localhost:3000/terms-of-service http://localhost:3000/privacy-policy --out reports/a11y",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "audio:convert": "tsx scripts/audio/convert.ts",
     "crap": "tsx scripts/crap/cli.ts",
     "test:crap": "pnpm test:coverage && pnpm crap",
@@ -26,7 +30,7 @@
     "deps:check": "depcruise src scripts",
     "deps:graph": "depcruise src --output-type mermaid --output-to reports/dependency-graph.mmd",
     "knip": "knip",
-    "verify": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm deps:check && pnpm knip && pnpm test:crap",
+    "verify": "pnpm typecheck && pnpm lint && pnpm lint:a11y && pnpm format:check && pnpm deps:check && pnpm knip && pnpm test:crap && pnpm test:e2e",
     "verify:full": "pnpm verify && pnpm test:mutation"
   },
   "dependencies": {
@@ -38,8 +42,10 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
+    "@playwright/test": "^1.64.1",
     "@stryker-mutator/core": "^10.0.0",
     "@stryker-mutator/typescript-checker": "^10.0.0",
     "@stryker-mutator/vitest-runner": "^10.0.0",
@@ -60,6 +66,7 @@
     "happy-dom": "^21.0.4",
     "knip": "^6.42.1",
     "lefthook": "^2.2.2",
+    "playwright": "^1.64.1",
     "prettier": "^3.9.10",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4",

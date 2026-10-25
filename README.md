@@ -74,6 +74,7 @@ beats-for-days/
 │   └── lib/                 # Framework-agnostic logic (.ts): audio, visualizer, elevenlabs, env
 ├── scripts/crap/            # In-repo CRAP (complexity × coverage) gate
 ├── test/                    # Shared test setup & stubs
+├── e2e/                     # Playwright + axe-core end-to-end browser tests
 ├── docs/                    # Architecture, decisions (ADRs) & guides
 ├── .agents/                 # Agent skills & hooks (Antigravity)
 ├── AGENTS.md                # Instructions for AI coding agents
@@ -106,7 +107,7 @@ pnpm dev                     # http://localhost:3000
 ### Quality gate
 
 ```bash
-pnpm verify          # typecheck · lint · format · boundaries · knip · tests · CRAP
+pnpm verify          # typecheck · lint · a11y lint · format · boundaries · knip · tests · CRAP · E2E + axe-core
 pnpm test:mutation   # Stryker mutation testing (incremental)
 ```
 

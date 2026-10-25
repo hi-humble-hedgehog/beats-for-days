@@ -47,6 +47,7 @@ src/
     └── env.ts           # Validated server env (server-only)
 scripts/                 # Repo tooling (e.g. CRAP gate). Not shipped.
 test/                    # Shared test setup & stubs
+e2e/                     # Playwright end-to-end browser tests (ADR 0012)
 stream-worker/           # Headless streaming worker (separate deploy, isolated)
 docs/                    # You are here
 ```
@@ -72,7 +73,7 @@ flowchart LR
 | `lib-is-ui-agnostic`         | Keeps core logic testable in Node and reusable by the stream worker |
 | `components-not-to-app`      | Routes compose components, never the reverse                        |
 | `server-code-not-in-client`  | Secrets & server clients must never reach the browser bundle        |
-| `app-code-not-to-tooling`    | `scripts/` and `test/` are not part of the shipped app              |
+| `app-code-not-to-tooling`    | `scripts/`, `test/`, and `e2e/` are not part of the shipped app     |
 | `stream-worker-is-isolated`  | Separate deployable; share code via an explicit package             |
 | `no-circular`, `no-orphans`… | From `dependency-cruiser/configs/recommended-strict`                |
 

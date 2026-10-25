@@ -21,6 +21,8 @@ pnpm dev
 
 ```bash
 pnpm test:watch         # fast feedback while coding
+pnpm lint:a11y          # static OKLCH/hex contrast & semantic control lint
+pnpm test:e2e           # end-to-end browser + axe-core + 320px reflow tests
 pnpm verify             # full local gate before pushing / declaring done
 pnpm test:mutation      # after logic-heavy changes
 ```
@@ -44,8 +46,8 @@ pnpm test:mutation      # after logic-heavy changes
 flowchart LR
     commit["git commit"] --> pc["pre-commit (~5s): gitleaks · eslint --fix · prettier · typecheck"]
     commit --> cm["commit-msg: commitlint"]
-    push["git push"] --> pp["pre-push: full verify (tests, CRAP, boundaries, knip)"]
-    pr["Pull request"] --> ci["CI: verify + build · mutation (incremental) · gitleaks"]
+    push["git push"] --> pp["pre-push: full verify (tests, CRAP, a11y, E2E, boundaries, knip)"]
+    pr["Pull request"] --> ci["CI: full quality gate (verify + build) · mutation · gitleaks"]
 ```
 
 Hooks only touch staged files where possible. Emergency bypass:
@@ -72,9 +74,11 @@ Recommended: protect `main` and require all three checks to pass.
 
 ## Reports (git-ignored)
 
-| Path                           | Produced by          |
-| ------------------------------ | -------------------- |
-| `coverage/index.html`          | `pnpm test:coverage` |
-| `reports/crap.json`            | `pnpm crap`          |
-| `reports/mutation/index.html`  | `pnpm test:mutation` |
-| `reports/dependency-graph.mmd` | `pnpm deps:graph`    |
+| Path                            | Produced by          |
+| ------------------------------- | -------------------- |
+| `coverage/index.html`           | `pnpm test:coverage` |
+| `reports/crap.json`             | `pnpm crap`          |
+| `reports/mutation/index.html`   | `pnpm test:mutation` |
+| `reports/playwright/index.html` | `pnpm test:e2e`      |
+| `reports/a11y/report.html`      | `pnpm audit:a11y`    |
+| `reports/dependency-graph.mmd`  | `pnpm deps:graph`    |

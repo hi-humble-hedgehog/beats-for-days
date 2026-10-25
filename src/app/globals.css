@@ -6,29 +6,29 @@
 */
 :root {
   color-scheme: light;
-  --sleeve: #eceae4;
-  --vinyl: #141414;
-  --stamp: #d62718;
-  --pencil: #6f6d67;
+  --sleeve: oklch(0.9369 0.0083 91.49);
+  --vinyl: oklch(0.1913 0 0); /* Contrast: 15.3:1 vs --sleeve (AAA) */
+  --stamp: oklch(0.5371 0.2035 29.91); /* Contrast: 4.7:1 vs --sleeve (AA) */
+  --pencil: oklch(0.5102 0.0096 91.57); /* Contrast: 4.7:1 vs --sleeve (AA) */
 
   --background: var(--sleeve);
-  --foreground: var(--vinyl);
+  --foreground: var(--vinyl); /* Contrast: 15.3:1 vs --sleeve (AAA) */
   --card: var(--sleeve);
-  --card-foreground: var(--vinyl);
+  --card-foreground: var(--vinyl); /* Contrast: 15.3:1 vs --sleeve (AAA) */
   --popover: var(--sleeve);
-  --popover-foreground: var(--vinyl);
+  --popover-foreground: var(--vinyl); /* Contrast: 15.3:1 vs --sleeve (AAA) */
   --primary: var(--stamp);
-  --primary-foreground: var(--sleeve);
+  --primary-foreground: var(--sleeve); /* Contrast: 4.7:1 vs --stamp (AA) */
   --secondary: var(--vinyl);
-  --secondary-foreground: var(--sleeve);
+  --secondary-foreground: var(--sleeve); /* Contrast: 15.3:1 vs --vinyl (AAA) */
   --muted: var(--sleeve);
-  --muted-foreground: var(--pencil);
+  --muted-foreground: var(--pencil); /* Contrast: 4.7:1 vs --sleeve (AA) */
   --accent: var(--stamp);
-  --accent-foreground: var(--sleeve);
-  --destructive: var(--stamp);
-  --border: var(--vinyl);
-  --input: var(--vinyl);
-  --ring: var(--stamp);
+  --accent-foreground: var(--sleeve); /* Contrast: 4.7:1 vs --stamp (AA) */
+  --destructive: var(--stamp); /* Contrast: 4.7:1 vs --sleeve (AA) */
+  --border: var(--vinyl); /* Contrast: 15.3:1 vs --sleeve (UI) */
+  --input: var(--vinyl); /* Contrast: 15.3:1 vs --sleeve (UI) */
+  --ring: var(--stamp); /* Contrast: 4.7:1 vs --sleeve (UI) */
   --radius: 0rem;
 }
 

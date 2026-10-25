@@ -1,15 +1,15 @@
 /**
  * Design tokens and typography treatments inspired by 90s white-label promo pressings.
  *
- * This module defines the core palette, semantic token mappings,
- * corner radius constants, and reusable typography presets for the Swiss modernist aesthetic.
+ * Uses perceptual OKLCH (`oklch(L C H)`) values calibrated for WCAG 2.2 AA/AAA contrast
+ * against sleeve paper (`--sleeve`). Verified statically by `pnpm lint:a11y`.
  */
 
 export const PALETTE = {
-  sleeve: "#eceae4",
-  vinyl: "#141414",
-  stamp: "#d62718",
-  pencil: "#6f6d67",
+  sleeve: "oklch(0.9369 0.0083 91.49)",
+  vinyl: "oklch(0.1913 0 0)",
+  stamp: "oklch(0.5371 0.2035 29.91)",
+  pencil: "oklch(0.5102 0.0096 91.57)",
 } as const;
 
 export const SEMANTIC_TOKENS = {

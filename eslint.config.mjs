@@ -82,7 +82,7 @@ const eslintConfig = defineConfig([
   },
   {
     name: "bfd/tests",
-    files: ["**/*.test.{ts,tsx}"],
+    files: ["**/*.test.{ts,tsx}", "e2e/**/*.spec.ts"],
     rules: {
       "max-lines-per-function": "off",
       "max-lines": "off",
@@ -105,6 +105,7 @@ const eslintConfig = defineConfig([
     "coverage/**",
     "reports/**",
     ".stryker-tmp/**",
+    ".agents/skills/born-accessible-ui/scripts/**",
   ]),
 ]);
 

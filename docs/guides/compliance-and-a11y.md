@@ -44,5 +44,6 @@ Beats for Days is **GDPR compliant by design** and targets **WCAG 2.2 Level AA**
    - Add `aria-hidden="true"` to decorative `<canvas>` elements and keep track titles and status in normal DOM text.
 5. **Contrast, target size & zoom**
    - Keep normal text contrast ≥ **4.5:1**, and large text or icons ≥ **3:1**.
+   - Annotate every foreground and UI color token in `src/app/globals.css` (defined in `oklch(L C H)`) with its computed contrast ratio (`/* Contrast: X.X:1 vs --bg (level) */`) and verify with `pnpm lint:a11y` (`.agents/skills/born-accessible-ui/`, [ADR 0012](../decisions/0012-playwright-e2e-user-flow-testing.md)).
    - Make clickable targets at least **24×24 CSS pixels** (aim for **44×44 CSS pixels** on main player buttons).
-   - Pages must work at 200% browser zoom and down to a 320px screen width without horizontal scrolling or clipped buttons.
+   - Pages must work at 200% browser zoom and down to a 320px screen width without horizontal scrolling or clipped buttons (verified automatically via `pnpm test:e2e` and `pnpm audit:a11y`).
