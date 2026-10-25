@@ -1,6 +1,35 @@
 "use client";
 
+import { useEffect } from "react";
 import { useAudioPlayer } from "./AudioPlayerContext";
+
+function useScratchShortcut(
+  scratch: ((rateMultiplier?: number) => void) | undefined,
+  isPlaying: boolean,
+) {
+  useEffect(() => {
+    if (!isPlaying || !scratch) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.isContentEditable
+      ) {
+        return;
+      }
+
+      if (e.key === "s" || e.key === "S") {
+        e.preventDefault();
+        scratch(1.7);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isPlaying, scratch]);
+}
 
 function PlayerStatusBanner({
   message,
@@ -56,7 +85,10 @@ export function PersistentPlayerBar() {
     error,
     togglePlay,
     advanceTrack,
+    scratch,
   } = useAudioPlayer();
+
+  useScratchShortcut(scratch, isPlaying);
 
   if (isLoading) {
     return <PlayerStatusBanner message="Loading beat catalog..." />;

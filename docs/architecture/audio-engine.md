@@ -67,3 +67,14 @@ Equal-power fades preserve constant acoustic power (-3 dB at center):
 - **Fade-out curve:** $\cos(t \times \frac{\pi}{2})$ for $t \in [0, 1]$.
 
 Both curves sum to constant power: $\sin^2(t) + \cos^2(t) = 1$.
+
+## Turntable & vinyl effects
+
+To recreate an authentic 90s turntable and hardware sampler feel without altering sample-accurate loop bounds:
+
+1. **Motor spin-up on play (`applyVinylSpinUp`):**
+   When starting or resuming playback, the engine ramps `source.playbackRate` from `0.25` to `1.0` over 250 ms using exponential curves (`AudioParam.exponentialRampToValueAtTime`).
+2. **Motor brake on pause (`applyVinylBrake`):**
+   When pausing playback, the engine ramps `source.playbackRate` and `gain.gain` down to `0.001` over 450 ms before stopping the node, simulating turntable motor power-down without clicks.
+3. **On-demand scratching (`applyVinylScratch`):**
+   Users can trigger scratch modulation (via `engine.scratch()` or pressing `S` while playing). The engine temporarily modulates `source.playbackRate` up/down and returns to `1.0` over 160 ms.

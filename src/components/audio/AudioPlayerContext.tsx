@@ -178,7 +178,9 @@ export function AudioPlayerProvider({
   const { current, setCurrent, resolveAfterSec, isLoading, error, setError } =
     useInitialBeat(playedHistory);
 
-  const [defaultEngine] = useState(() => injectedEngine ?? new AudioEngine());
+  const [defaultEngine] = useState(
+    () => injectedEngine ?? new AudioEngine({ vinylEffects: true }),
+  );
   const engine = injectedEngine ?? defaultEngine;
   const isResolvingRef = useRef<boolean>(false);
   const stateRef = useRef({ current, pathname, playedHistory });
@@ -226,6 +228,10 @@ export function AudioPlayerProvider({
   });
 
   const togglePlay = useCallback(() => setIsPlaying((prev) => !prev), []);
+  const scratch = useCallback(
+    (rateMultiplier?: number) => engine.scratch(rateMultiplier),
+    [engine],
+  );
 
   return (
     <AudioPlayerContext.Provider
@@ -238,6 +244,7 @@ export function AudioPlayerProvider({
         error,
         togglePlay,
         advanceTrack,
+        scratch,
       }}
     >
       {children}

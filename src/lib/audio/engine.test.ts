@@ -59,6 +59,14 @@ function createMockAudioContext() {
         loop: false,
         loopStart: 0,
         loopEnd: 0,
+        playbackRate: {
+          value: 1,
+          setValueAtTime: vi.fn(),
+          setValueCurveAtTime: vi.fn(),
+          cancelScheduledValues: vi.fn(),
+          exponentialRampToValueAtTime: vi.fn(),
+          linearRampToValueAtTime: vi.fn(),
+        },
         start: vi.fn(),
         stop: vi.fn(),
         connect: vi.fn(),
@@ -580,5 +588,60 @@ describe("AudioEngine", () => {
     // The stale armTransition must not have armed track B on top of track C
     expect(delayedEngine.getSnapshot().phase).toBe("playing");
     expect(delayedEngine.getSnapshot().currentBeat?.id).toBe("track-c");
+  });
+
+  it("applies vinyl spin-up on play and brake on pause when vinylEffects is enabled", async () => {
+    const vinylEngine = new AudioEngine({
+      contextFactory: () => mockAudio.context,
+      bufferLoader: () => Promise.resolve(mockBuffer),
+      vinylEffects: true,
+    });
+
+    mockAudio.setTime(10);
+    await vinylEngine.loadTrack(trackA);
+    await vinylEngine.play();
+
+    const source = mockAudio.createdSources[0];
+    const rateParam = source?.playbackRate;
+    expect(rateParam?.setValueAtTime).toHaveBeenCalledWith(0.25, 10);
+    expect(rateParam?.exponentialRampToValueAtTime).toHaveBeenCalledWith(
+      1,
+      10.25,
+    );
+
+    mockAudio.setTime(20);
+    vinylEngine.pause();
+
+    expect(rateParam?.exponentialRampToValueAtTime).toHaveBeenCalledWith(
+      0.001,
+      20.45,
+    );
+    expect(source?.stop).toHaveBeenCalledWith(20.45);
+  });
+
+  it("modulates playbackRate when scratch is triggered", async () => {
+    const vinylEngine = new AudioEngine({
+      contextFactory: () => mockAudio.context,
+      bufferLoader: () => Promise.resolve(mockBuffer),
+    });
+
+    mockAudio.setTime(15);
+    await vinylEngine.loadTrack(trackA);
+    await vinylEngine.play();
+
+    const source = mockAudio.createdSources[0];
+    const rateParam = source?.playbackRate;
+
+    vinylEngine.scratch(1.8, 0.2);
+
+    expect(rateParam?.setValueAtTime).toHaveBeenCalledWith(1, 15);
+    expect(rateParam?.exponentialRampToValueAtTime).toHaveBeenCalledWith(
+      1.8,
+      15.1,
+    );
+    expect(rateParam?.exponentialRampToValueAtTime).toHaveBeenCalledWith(
+      1,
+      15.2,
+    );
   });
 });

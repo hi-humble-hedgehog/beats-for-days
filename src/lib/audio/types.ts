@@ -11,6 +11,8 @@ export interface AudioParamLike {
     duration: number,
   ) => void;
   cancelScheduledValues: (cancelTime: number) => void;
+  exponentialRampToValueAtTime?: (value: number, endTime: number) => void;
+  linearRampToValueAtTime?: (value: number, endTime: number) => void;
 }
 
 export interface AudioNodeLike {
@@ -40,6 +42,7 @@ export interface AudioBufferSourceNodeLike extends AudioNodeLike {
   loop: boolean;
   loopStart: number;
   loopEnd: number;
+  playbackRate?: AudioParamLike;
   start: (when?: number, offset?: number, duration?: number) => void;
   stop: (when?: number) => void;
   onended?: (() => void) | null;
@@ -90,4 +93,5 @@ export interface AudioEngineOptions {
   bufferLoader?: BufferLoader;
   cacheCapacity?: number;
   onTrackHandoff?: (nextBeat: BeatView) => void;
+  vinylEffects?: boolean;
 }

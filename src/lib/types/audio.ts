@@ -11,4 +11,5 @@ export interface AudioPlayerState {
   error: string | null;
   togglePlay: () => void;
   advanceTrack: (mode?: "auto" | "skip" | unknown) => void;
+  scratch?: (rateMultiplier?: number) => void;
 }

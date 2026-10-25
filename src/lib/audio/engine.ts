@@ -23,6 +23,7 @@ import type {
   GainNodeLike,
   PlaybackPhase,
 } from "./types";
+import { applyVinylBrake, applyVinylScratch, applyVinylSpinUp } from "./vinyl";
 
 /**
  * Orchestrates Web Audio playback, native gapless looping, and 3-node transition splices.
@@ -32,6 +33,7 @@ export class AudioEngine {
   private readonly contextFactory?: () => AudioContextLike;
   private readonly cache: BoundedAudioCache;
   private readonly onTrackHandoff?: (nextBeat: BeatView) => void;
+  private readonly vinylEffects: boolean;
   private ctx: AudioContextLike | null = null;
   private masterGain: GainNodeLike | null = null;
   private analyser: AnalyserNodeLike | null = null;
@@ -63,6 +65,7 @@ export class AudioEngine {
       loader,
     });
     this.onTrackHandoff = options.onTrackHandoff;
+    this.vinylEffects = options.vinylEffects ?? false;
   }
 
   /**
@@ -113,6 +116,12 @@ export class AudioEngine {
     this.initialOffsetSec = this.pausedOffsetSec;
     this.continuousPlayStartCtxTime = ctx.currentTime;
     this.currentSource.start(ctx.currentTime, this.pausedOffsetSec);
+    if (this.vinylEffects) {
+      applyVinylSpinUp({
+        source: this.currentSource,
+        startTime: ctx.currentTime,
+      });
+    }
     this.isPlaying = true;
     this.phase = "playing";
   }
@@ -126,7 +135,7 @@ export class AudioEngine {
     this.pausedOffsetSec = snapshot.positionSec;
     this.continuousPlayAccumSec = snapshot.continuousPlaySec;
     this.cancelArmedTransition();
-    this.stopCurrentNode();
+    this.stopCurrentNode(true);
     this.isPlaying = false;
     this.phase = "idle";
   }
@@ -242,7 +251,33 @@ export class AudioEngine {
     );
   }
 
-  private stopCurrentNode(): void {
+  /**
+   * Triggers an on-demand turntable scratch effect on the active track.
+   */
+  scratch(rateMultiplier = 1.6, durationSec = 0.16): void {
+    if (!this.currentSource || !this.ctx || !this.isPlaying) return;
+    applyVinylScratch({
+      source: this.currentSource,
+      currentTime: this.ctx.currentTime,
+      rateMultiplier,
+      durationSec,
+    });
+  }
+
+  private stopCurrentNode(withBrake = false): void {
+    if (!this.currentSource) return;
+
+    if (withBrake && this.vinylEffects && this.ctx) {
+      applyVinylBrake({
+        source: this.currentSource,
+        gain: this.currentGain,
+        currentTime: this.ctx.currentTime,
+      });
+      this.currentSource = null;
+      this.currentGain = null;
+      return;
+    }
+
     teardownTrackNodes(this.currentSource, this.currentGain);
     this.currentSource = null;
     this.currentGain = null;
