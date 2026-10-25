@@ -68,4 +68,44 @@ describe("PersistentPlayerBar", () => {
 
     expect(screen.getByText(/Loading beat catalog/)).toBeInTheDocument();
   });
+
+  it("displays armed and bridge status labels when transitioning", () => {
+    const { rerender } = render(
+      <AudioPlayerContext.Provider
+        value={{
+          current: sampleBeat,
+          isPlaying: true,
+          phase: "armed",
+          secondsRemaining: 12,
+          isLoading: false,
+          error: null,
+          togglePlay: vi.fn(),
+          advanceTrack: vi.fn(),
+        }}
+      >
+        <PersistentPlayerBar />
+      </AudioPlayerContext.Provider>,
+    );
+
+    expect(screen.getByText(/Transition in 12s/)).toBeInTheDocument();
+
+    rerender(
+      <AudioPlayerContext.Provider
+        value={{
+          current: sampleBeat,
+          isPlaying: true,
+          phase: "bridge",
+          secondsRemaining: 5,
+          isLoading: false,
+          error: null,
+          togglePlay: vi.fn(),
+          advanceTrack: vi.fn(),
+        }}
+      >
+        <PersistentPlayerBar />
+      </AudioPlayerContext.Provider>,
+    );
+
+    expect(screen.getByText(/Transitioning \(5s\)/)).toBeInTheDocument();
+  });
 });

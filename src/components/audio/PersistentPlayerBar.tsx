@@ -33,10 +33,24 @@ function PlayerStatusBanner({
   );
 }
 
+function formatCountdownLabel(
+  phase: string | undefined,
+  secondsRemaining: number,
+): string {
+  if (phase === "bridge") {
+    return `Transitioning (${secondsRemaining}s)`;
+  }
+  if (phase === "armed") {
+    return `Transition in ${secondsRemaining}s`;
+  }
+  return `Next in ${secondsRemaining}s`;
+}
+
 export function PersistentPlayerBar() {
   const {
     current,
     isPlaying,
+    phase,
     secondsRemaining,
     isLoading,
     error,
@@ -90,13 +104,9 @@ export function PersistentPlayerBar() {
           </button>
 
           <div className="flex items-center gap-2 border border-border bg-card px-3 py-1 text-xs font-bold tracking-widest text-foreground uppercase tabular-nums">
-            <span>Next in {secondsRemaining}s</span>
-            <div className="h-1.5 w-16 overflow-hidden bg-muted-foreground/20">
-              <div
-                className="h-full bg-primary transition-all duration-1000 ease-linear"
-                style={{ width: `${((5 - secondsRemaining) / 5) * 100}%` }}
-              />
-            </div>
+            <span aria-live="polite">
+              {formatCountdownLabel(phase, secondsRemaining)}
+            </span>
           </div>
 
           <button

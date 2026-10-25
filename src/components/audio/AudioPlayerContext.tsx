@@ -11,19 +11,24 @@ import {
 } from "react";
 import { usePathname } from "next/navigation";
 import { beatsApi } from "@/lib/api";
-import { LIMITS, STORAGE_KEYS } from "@/lib/constants";
+import { AudioEngine } from "@/lib/audio/engine";
+import { STORAGE_KEYS } from "@/lib/constants";
 import { updatePlayedTrackIds } from "@/lib/player/graph";
 import { syncBeatUrl } from "@/lib/player/url";
-import type { AudioPlayerState } from "@/lib/types/audio";
+import type { AudioPlayerState, PlaybackPhase } from "@/lib/types/audio";
 import type { BeatView } from "@/lib/types/beat";
+import { useEngineHandoff, useEngineSync } from "./useEngineSync";
 
 export const AudioPlayerContext = createContext<AudioPlayerState | null>(null);
 
 function loadPlayedHistory(): string[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEYS.PLAYED_TRACKS);
-    return raw ? (JSON.parse(raw) as string[]) : [];
+    return (
+      (JSON.parse(
+        window.localStorage.getItem(STORAGE_KEYS.PLAYED_TRACKS) || "[]",
+      ) as string[]) || []
+    );
   } catch {
     return [];
   }
@@ -41,30 +46,9 @@ function savePlayedHistory(history: string[]) {
   }
 }
 
-function useCountdownTimer(isActive: boolean, onExpire: () => void) {
-  const [secondsRemaining, setSecondsRemaining] = useState<number>(
-    LIMITS.CYCLE_TIMER_SECONDS,
-  );
-
-  useEffect(() => {
-    if (!isActive) return;
-    const interval = setInterval(() => {
-      setSecondsRemaining((prev) => {
-        if (prev <= 1) {
-          onExpire();
-          return LIMITS.CYCLE_TIMER_SECONDS;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [isActive, onExpire]);
-
-  return secondsRemaining;
-}
-
 function useInitialBeat(initialHistory: string[]) {
   const [current, setCurrent] = useState<BeatView | null>(null);
+  const [resolveAfterSec, setResolveAfterSec] = useState<number>(30);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const historyRef = useRef(initialHistory);
@@ -76,6 +60,7 @@ function useInitialBeat(initialHistory: string[]) {
       .then((res) => {
         if (!active) return;
         setCurrent(res.beat);
+        if (res.resolveAfterSec) setResolveAfterSec(res.resolveAfterSec);
         setIsLoading(false);
       })
       .catch((err) => {
@@ -88,77 +73,166 @@ function useInitialBeat(initialHistory: string[]) {
     };
   }, []);
 
-  return { current, setCurrent, isLoading, error, setError };
+  return { current, setCurrent, resolveAfterSec, isLoading, error, setError };
 }
 
-export function AudioPlayerProvider({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [playedHistory, setPlayedHistory] =
-    useState<string[]>(loadPlayedHistory);
-  const { current, setCurrent, isLoading, error, setError } =
-    useInitialBeat(playedHistory);
+interface TrackAdvanceOptions {
+  engine: AudioEngine;
+  stateRef: React.MutableRefObject<{
+    current: BeatView | null;
+    pathname: string;
+    playedHistory: string[];
+  }>;
+  isResolvingRef: React.MutableRefObject<boolean>;
+  commitNextBeat: (beat: BeatView) => void;
+  setPhase: (phase: PlaybackPhase) => void;
+  setSecondsRemaining: (sec: number) => void;
+  setError: (err: string | null) => void;
+}
 
-  const stateRef = useRef({ current, pathname, playedHistory });
-  useEffect(() => {
-    stateRef.current = { current, pathname, playedHistory };
-  });
+function useTrackAdvancer(opts: TrackAdvanceOptions) {
+  const {
+    engine,
+    stateRef,
+    isResolvingRef,
+    commitNextBeat,
+    setPhase,
+    setSecondsRemaining,
+    setError,
+  } = opts;
 
-  const advanceTrack = useCallback(
+  return useCallback(
     (modeOrEvent?: unknown) => {
-      const {
-        current: cur,
-        pathname: path,
-        playedHistory: hist,
-      } = stateRef.current;
-      if (!cur) return;
+      const snap = engine.getSnapshot();
+      let cur = stateRef.current.current;
+      let hist = stateRef.current.playedHistory;
+
+      if (snap.currentBeat && snap.currentBeat.id !== cur?.id) {
+        cur = snap.currentBeat;
+        hist = updatePlayedTrackIds(hist, cur.id);
+        commitNextBeat(cur);
+      }
+
+      if (!cur || isResolvingRef.current) return;
 
       const mode = modeOrEvent === "auto" ? "auto" : "skip";
+      isResolvingRef.current = true;
 
       beatsApi
-        .getNextBeat({
-          currentTrackId: cur.id,
-          playedTrackIds: hist,
-          mode,
-        })
-        .then((res) => {
+        .getNextBeat({ currentTrackId: cur.id, playedTrackIds: hist, mode })
+        .then(async (res) => {
           const nextBeat = res.beat;
-          const nextHistory = updatePlayedTrackIds(hist, nextBeat.id);
-          setPlayedHistory(nextHistory);
-          savePlayedHistory(nextHistory);
-          setCurrent(nextBeat);
-          syncBeatUrl(path, nextBeat.id);
+
+          if (mode === "auto" && res.transition) {
+            await engine.armTransition(nextBeat, res.transition);
+            const snap = engine.getSnapshot();
+            setPhase(snap.phase);
+            setSecondsRemaining(snap.secondsRemaining);
+            return;
+          }
+
+          if (engine.getSnapshot().isPlaying) {
+            await engine.skipToTrack(nextBeat);
+            const snap = engine.getSnapshot();
+            setPhase(snap.phase);
+            setSecondsRemaining(snap.secondsRemaining);
+          }
+          commitNextBeat(nextBeat);
         })
         .catch((err) => {
           setError(
             err instanceof Error ? err.message : "Failed to advance track",
           );
+        })
+        .finally(() => {
+          isResolvingRef.current = false;
         });
     },
-    [setCurrent, setError],
+    [
+      commitNextBeat,
+      engine,
+      isResolvingRef,
+      setError,
+      setPhase,
+      setSecondsRemaining,
+      stateRef,
+    ],
+  );
+}
+
+export interface AudioPlayerProviderProps {
+  children: ReactNode;
+  engine?: AudioEngine;
+}
+
+export function AudioPlayerProvider({
+  children,
+  engine: injectedEngine,
+}: AudioPlayerProviderProps) {
+  const pathname = usePathname();
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [phase, setPhase] = useState<PlaybackPhase>("idle");
+  const [secondsRemaining, setSecondsRemaining] = useState<number>(0);
+  const [playedHistory, setPlayedHistory] =
+    useState<string[]>(loadPlayedHistory);
+  const { current, setCurrent, resolveAfterSec, isLoading, error, setError } =
+    useInitialBeat(playedHistory);
+
+  const [defaultEngine] = useState(() => injectedEngine ?? new AudioEngine());
+  const engine = injectedEngine ?? defaultEngine;
+  const isResolvingRef = useRef<boolean>(false);
+  const stateRef = useRef({ current, pathname, playedHistory });
+
+  useEffect(() => {
+    stateRef.current = { current, pathname, playedHistory };
+  });
+
+  const commitNextBeat = useCallback(
+    (nextBeat: BeatView) => {
+      const { pathname: path, playedHistory: hist } = stateRef.current;
+      const nextHistory = updatePlayedTrackIds(hist, nextBeat.id);
+      setPlayedHistory(nextHistory);
+      savePlayedHistory(nextHistory);
+      setCurrent(nextBeat);
+      syncBeatUrl(path, nextBeat.id);
+    },
+    [setCurrent],
   );
 
-  // Derived state: home landing page "/" is always paused
+  useEngineHandoff(engine, commitNextBeat, setPhase, setSecondsRemaining);
+
+  const advanceTrack = useTrackAdvancer({
+    engine,
+    stateRef,
+    isResolvingRef,
+    commitNextBeat,
+    setPhase,
+    setSecondsRemaining,
+    setError,
+  });
+
   const activePlaying = isPlaying && pathname !== "/";
+  useEngineSync({
+    engine,
+    activePlaying,
+    isLoading,
+    current,
+    resolveAfterSec,
+    isResolvingRef,
+    commitNextBeat,
+    advanceTrack,
+    setPhase,
+    setSecondsRemaining,
+  });
 
-  const handleAutoAdvance = useCallback(() => {
-    advanceTrack("auto");
-  }, [advanceTrack]);
-
-  const secondsRemaining = useCountdownTimer(
-    activePlaying && !isLoading && current !== null,
-    handleAutoAdvance,
-  );
-
-  const togglePlay = useCallback(() => {
-    setIsPlaying((prev) => !prev);
-  }, []);
+  const togglePlay = useCallback(() => setIsPlaying((prev) => !prev), []);
 
   return (
     <AudioPlayerContext.Provider
       value={{
         current,
         isPlaying: activePlaying,
+        phase,
         secondsRemaining,
         isLoading,
         error,
