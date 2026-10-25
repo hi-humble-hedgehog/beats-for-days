@@ -24,6 +24,7 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "audio:convert": "tsx scripts/audio/convert.ts",
+    "db:seed": "tsx scripts/seed/cli.ts",
     "crap": "tsx scripts/crap/cli.ts",
     "test:crap": "pnpm test:coverage && pnpm crap",
     "test:mutation": "stryker run",

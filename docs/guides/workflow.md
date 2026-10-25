@@ -7,7 +7,7 @@ nvm use                           # Node from .nvmrc
 pnpm install                      # also installs git hooks (lefthook)
 cp .env.example .env.local
 supabase start                    # local Supabase (requires Docker running)
-pnpm exec tsx scripts/seed/cli.ts # upload starter tracks & transitions
+pnpm db:seed                      # upload starter tracks & transitions
 brew install gitleaks             # optional: local secret scanning (CI always scans)
 pnpm dev
 ```

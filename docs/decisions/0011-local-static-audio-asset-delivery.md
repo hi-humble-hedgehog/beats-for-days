@@ -22,10 +22,11 @@ We will support direct static serving from Next.js `public/audio/` for local dev
 
 `fetchBeatViews` in `src/lib/tracks.ts` and the seed pipeline resolve audio paths as follows:
 
-- **Production (`NODE_ENV=production`):** `USE_LOCAL_AUDIO` defaults to `false`. Audio paths resolve to Supabase Storage public CDN URLs (`https://<project-ref>.supabase.co/storage/v1/object/public/audio/...`).
+- **Production (`NODE_ENV=production`):** `USE_LOCAL_AUDIO` defaults to `false`. Audio paths resolve to Supabase Storage URLs (public CDN or short-lived signed URLs from a private bucket).
 - **Local Dev and Tests (`NODE_ENV !== "production"`):** `USE_LOCAL_AUDIO` defaults to `true`. Audio paths resolve to `/audio/...` mapped to `public/audio/`.
 - **Storage Client Fallback:** If the Supabase storage client is absent (`!client?.storage`), asset resolution falls back to local `/audio/...` paths.
 - **Explicit Override:** Operators can explicitly set `USE_LOCAL_AUDIO=true` or `USE_LOCAL_AUDIO=false` in `.env` to override the environment default.
+- **Database Seeding (`pnpm db:seed`):** Seeds relative paths (`tracks/<file>.m4a`, `transitions/<file>.m4a`) into database tables and uploads assets to the Supabase `audio` bucket.
 
 Track and transition metadata queries still depend on a running local Supabase container (`supabase start`). If the local database is absent or unreachable, metadata queries fail as expected.
 

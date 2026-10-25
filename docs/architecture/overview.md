@@ -95,10 +95,11 @@ graph playback model are detailed in
 [`generation-policy.md`](generation-policy.md) and
 [ADR 0009](../decisions/0009-beat-generation-access-and-queue-policy.md).
 
-## Audio asset delivery
+## Audio asset delivery & stream protection
 
 Audio stems and transitions are delivered via:
 
-- **Local development:** Direct static asset serving from `public/audio/` (`/audio/...`) or streaming route handlers for zero-dependency offline playback ([ADR 0011](../decisions/0011-local-static-audio-asset-delivery.md)).
-- **Production:** Supabase Storage CDN public bucket URLs.
+- **Local development:** Direct static asset serving from `public/audio/` (`/audio/...`) for zero-dependency offline playback ([ADR 0011](../decisions/0011-local-static-audio-asset-delivery.md)).
+- **Production stream protection:** Audio assets reside in a private Supabase Storage bucket. The server resolves requests using short-lived signed URLs (e.g. 60-second TTL), or proxied streaming. The browser fetches raw bytes directly into memory (`fetch() -> ArrayBuffer`) and decodes them into an `AudioBuffer` for the Web Audio API, preventing direct file scraping, hotlinking, and raw downloads without requiring heavy DRM or Vercel serverless proxy overhead.
+- **Database contract:** The `tracks` and `transitions` tables store relative paths (e.g., `tracks/track-a-soul-rhodes.m4a`). The resolver handles environment-specific URL generation. Seeded via `pnpm db:seed`.
 - **Format:** AAC (`.m4a`) at 192 kbps with `+faststart` (generated via `pnpm audio:convert`), avoiding MP3 encoder delay and preserving sample-accurate loop points (`loopStartMs`, `loopEndMs`).

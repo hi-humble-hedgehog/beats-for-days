@@ -25,6 +25,7 @@ plus a separate headless streaming worker for 24/7 YouTube. Architecture:
 | Architecture boundaries         | `pnpm deps:check`                          |
 | Dead code / unused deps         | `pnpm knip`                                |
 | Convert WAV starter assets      | `pnpm audio:convert`                       |
+| Seed database & storage         | `pnpm db:seed`                             |
 | Autofix lint + format           | `pnpm lint:fix && pnpm format`             |
 
 Use **pnpm** only. Never edit `pnpm-lock.yaml` by hand.
