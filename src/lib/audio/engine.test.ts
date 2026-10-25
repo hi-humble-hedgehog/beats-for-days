@@ -741,7 +741,13 @@ describe("AudioEngine", () => {
 
     // Main source was created first by createLoopingTrackNodes, followed by 4 scratch sources
     const mainSource = mockAudio.createdSources[0];
-    expect(mainSource?.start).toHaveBeenCalledWith(10.3, 0);
+    const expectedRelease = 10 + 4 * (60 / 86);
+    expect(
+      (mainSource?.start as ReturnType<typeof vi.fn>).mock.calls[0]?.[0],
+    ).toBeCloseTo(expectedRelease, 4);
+    expect(
+      (mainSource?.start as ReturnType<typeof vi.fn>).mock.calls[0]?.[1],
+    ).toBe(0);
 
     // If paused during scratch intro, active scratch nodes are stopped and cleaned up
     scratchEngine.pause();

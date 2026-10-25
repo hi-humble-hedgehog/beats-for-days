@@ -23,12 +23,11 @@ import type {
   GainNodeLike,
   PlaybackPhase,
 } from "./types";
+import { applyVinylBrake, applyVinylScratch } from "./vinyl";
 import {
-  applyVinylBrake,
-  applyVinylScratch,
   startTrackWithVinylEffect,
   teardownScratchNodes,
-} from "./vinyl";
+} from "./baby-scratch";
 
 /**
  * Orchestrates Web Audio playback, native gapless looping, and 3-node transition splices.
@@ -132,6 +131,7 @@ export class AudioEngine {
       offsetSec: this.pausedOffsetSec,
       vinylEffects: this.vinylEffects,
       startEffect: this.startEffect,
+      bpm: targetBeat.bpm,
     });
     this.activeScratchNodes = startResult.strokeSources;
     this.segmentStartTime = startResult.segmentStartTime;

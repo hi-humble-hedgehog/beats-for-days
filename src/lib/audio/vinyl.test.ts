@@ -1,11 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
+import { applyVinylBrake, applyVinylScratch, applyVinylSpinUp } from "./vinyl";
 import {
-  applyVinylBrake,
-  applyVinylScratch,
-  applyVinylSpinUp,
   createReversedAudioBuffer,
   scheduleBabyScratchDrop,
-} from "./vinyl";
+} from "./baby-scratch";
 import type {
   AudioBufferLike,
   AudioBufferSourceNodeLike,
@@ -316,7 +314,7 @@ describe("createReversedAudioBuffer", () => {
 });
 
 describe("scheduleBabyScratchDrop", () => {
-  it("schedules alternating forward and reverse strokes followed by main release time", () => {
+  it("schedules alternating forward and reverse strokes aligned to 4th notes based on BPM", () => {
     const createdSources: AudioBufferSourceNodeLike[] = [];
     const createdGains: GainNodeLike[] = [];
 
@@ -344,13 +342,14 @@ describe("scheduleBabyScratchDrop", () => {
       sampleRate: 1000,
     };
     const reverseBuffer = {
-      duration: 0.5,
-      length: 500,
+      duration: 2.0,
+      length: 2000,
       numberOfChannels: 2,
       sampleRate: 1000,
     };
     const outputNode: GainNodeLike = createMockGain();
 
+    // At 120 BPM, a 4th note (quarter note) is 60 / 120 = 0.5 seconds
     const result = scheduleBabyScratchDrop({
       ctx: mockCtx,
       forwardBuffer,
@@ -358,25 +357,54 @@ describe("scheduleBabyScratchDrop", () => {
       outputNode,
       startTime: 10,
       offsetSec: 0,
-      strokeCount: 4,
-      strokeDurationSec: 0.075,
+      bpm: 120,
     });
 
     // 4 strokes (forward, reverse, forward, reverse) created
     expect(createdSources).toHaveLength(4);
     expect(createdGains).toHaveLength(4);
 
-    // Release time should be startTime + 4 * 0.075 = 10.3s
-    expect(result.releaseTime).toBeCloseTo(10.3, 4);
+    // Release time should be startTime + 4 * 0.5 = 12.0s
+    expect(result.releaseTime).toBeCloseTo(12.0, 4);
     expect(result.strokeNodes).toHaveLength(4);
 
     // Stroke 0: forward
-    expect(createdSources[0]?.start).toHaveBeenCalledWith(10, 0, 0.075);
+    expect(createdSources[0]?.start).toHaveBeenCalledWith(10, 0, 0.5);
     // Stroke 1: reverse
-    expect(createdSources[1]?.start).toHaveBeenCalledWith(10.075, 0, 0.075);
+    expect(createdSources[1]?.start).toHaveBeenCalledWith(10.5, 0, 0.5);
     // Stroke 2: forward
-    expect(createdSources[2]?.start).toHaveBeenCalledWith(10.15, 0, 0.075);
+    expect(createdSources[2]?.start).toHaveBeenCalledWith(11.0, 0, 0.5);
     // Stroke 3: reverse
-    expect(createdSources[3]?.start).toHaveBeenCalledWith(10.225, 0, 0.075);
+    expect(createdSources[3]?.start).toHaveBeenCalledWith(11.5, 0, 0.5);
+  });
+
+  it("defaults to 90 BPM when bpm is missing or invalid", () => {
+    const mockCtx: AudioContextLike = {
+      currentTime: 0,
+      state: "running",
+      destination: { connect: vi.fn(), disconnect: vi.fn() },
+      createBufferSource: () => createMockSource(true),
+      createGain: () => createMockGain(),
+      resume: vi.fn().mockResolvedValue(undefined),
+    };
+
+    const dummyBuf = {
+      duration: 10,
+      length: 10000,
+      numberOfChannels: 1,
+      sampleRate: 1000,
+    };
+
+    // 60 / 90 = 2/3s per stroke, 4 strokes = 8/3s (~2.6667s)
+    const result = scheduleBabyScratchDrop({
+      ctx: mockCtx,
+      forwardBuffer: dummyBuf,
+      reverseBuffer: dummyBuf,
+      outputNode: createMockGain(),
+      startTime: 0,
+      bpm: 0,
+    });
+
+    expect(result.releaseTime).toBeCloseTo(8 / 3, 4);
   });
 });

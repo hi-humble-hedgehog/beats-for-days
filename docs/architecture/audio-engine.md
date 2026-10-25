@@ -77,8 +77,8 @@ To recreate an authentic 90s turntable and hardware sampler feel without alterin
 2. **Motor brake on pause (`applyVinylBrake`):**
    When pausing playback, the engine ramps `source.playbackRate` and `gain.gain` down to `0.001` over 450 ms before stopping the node, simulating turntable motor power-down without clicks.
 3. **On-demand scratching (`applyVinylScratch`):**
-   Users can trigger scratch modulation (via `engine.scratch()` or pressing `S` while playing). The engine temporarily modulates `source.playbackRate` up/down and returns to `1.0` over 160 ms.
+   The engine provides programmatic scratch modulation via `engine.scratch()`. The engine temporarily modulates `source.playbackRate` up/down and returns to `1.0` over 160 ms.
 4. **Skip sequence (power-down, pause gap, power-up):**
    When skipping a track during active playback, `engine.skipToTrack` triggers a motor brake on the playing track, pauses briefly (~400 ms total across brake and silence) while pre-loading the incoming buffer, and then starts the new track with a turntable spin-up. Superseded rapid skips are safely cancelled.
 5. **Reversed audio buffers & baby scratch cue drop (`scheduleBabyScratchDrop`):**
-   The engine creates reversed buffer copies or slices via `createReversedAudioBuffer` by reversing channel `Float32Array` data. With `startEffect: "baby-scratch"`, starting or skipping into a beat plays alternating forward and reverse cue strokes (~75 ms each with micro-fades) before releasing the main looping track node precisely on the "one" at `releaseTime`.
+   The engine creates reversed buffer copies or slices via `createReversedAudioBuffer` by reversing channel `Float32Array` data. With `startEffect: "baby-scratch"`, starting or skipping into a beat plays alternating forward and reverse cue strokes matching 4th notes (quarter notes based on track BPM, 4 beats in 4/4 time) with micro-fades before releasing the main looping track node precisely on the "one" at `releaseTime`.
