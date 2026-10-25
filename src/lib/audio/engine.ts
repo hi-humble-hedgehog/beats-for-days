@@ -290,7 +290,7 @@ export class AudioEngine {
         ? Math.max(0, now - this.continuousPlayStartCtxTime)
         : 0);
 
-    return computeEngineSnapshot({
+    const snapshot = computeEngineSnapshot({
       phase: this.phase,
       currentBeat: this.currentBeat,
       isPlaying: this.isPlaying,
@@ -302,6 +302,11 @@ export class AudioEngine {
       initialOffsetSec: this.initialOffsetSec,
       armedTransition: this.transitions.getArmedTransition(),
     });
+
+    const scratchPos = this.scratchController.getPosition();
+    return scratchPos !== null
+      ? { ...snapshot, positionSec: scratchPos }
+      : snapshot;
   }
 
   /**

@@ -165,26 +165,60 @@ export interface AudioPlayerProviderProps {
   engine?: AudioEngine;
 }
 
-function useScratchActions(engine: AudioEngine) {
+function useScratchActions(
+  engine: AudioEngine,
+  setPositionSec: (sec: number) => void,
+) {
   const scratch = useCallback(
     (rateMultiplier?: number) => engine.scratch(rateMultiplier),
     [engine],
   );
-  const startManualScratch = useCallback(
-    () => engine.startManualScratch(),
-    [engine],
-  );
+  const startManualScratch = useCallback(() => {
+    engine.startManualScratch();
+    setPositionSec(engine.getSnapshot().positionSec);
+  }, [engine, setPositionSec]);
+
   const setScratchVelocity = useCallback(
-    (velocity: number, deltaSec: number) =>
-      engine.setScratchVelocity(velocity, deltaSec),
-    [engine],
-  );
-  const stopManualScratch = useCallback(
-    () => void engine.stopManualScratch(),
-    [engine],
+    (velocity: number, deltaSec: number) => {
+      engine.setScratchVelocity(velocity, deltaSec);
+      setPositionSec(engine.getSnapshot().positionSec);
+    },
+    [engine, setPositionSec],
   );
 
+  const stopManualScratch = useCallback(() => {
+    void engine.stopManualScratch().then(() => {
+      setPositionSec(engine.getSnapshot().positionSec);
+    });
+  }, [engine, setPositionSec]);
+
   return { scratch, startManualScratch, setScratchVelocity, stopManualScratch };
+}
+
+function useBeatCommit(
+  setCurrent: (beat: BeatView) => void,
+  stateRef: React.MutableRefObject<{
+    pathname: string;
+    playedHistory: string[];
+  }>,
+  setPlayedHistory: React.Dispatch<React.SetStateAction<string[]>>,
+) {
+  return useCallback(
+    (nextBeat: BeatView) => {
+      const { pathname: path, playedHistory: hist } = stateRef.current;
+      const nextHistory = updatePlayedTrackIds(hist, nextBeat.id);
+      setPlayedHistory(nextHistory);
+      savePlayedHistory(nextHistory);
+      setCurrent(nextBeat);
+      const isHome =
+        path === "/" ||
+        (typeof window !== "undefined" && window.location.pathname === "/");
+      if (!isHome) {
+        syncBeatUrl(path, nextBeat.id);
+      }
+    },
+    [setCurrent, stateRef, setPlayedHistory],
+  );
 }
 
 export function AudioPlayerProvider({
@@ -195,6 +229,7 @@ export function AudioPlayerProvider({
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [phase, setPhase] = useState<PlaybackPhase>("idle");
   const [secondsRemaining, setSecondsRemaining] = useState<number>(0);
+  const [positionSec, setPositionSec] = useState<number>(0);
   const [playedHistory, setPlayedHistory] =
     useState<string[]>(loadPlayedHistory);
   const { current, setCurrent, resolveAfterSec, isLoading, error, setError } =
@@ -211,19 +246,15 @@ export function AudioPlayerProvider({
     stateRef.current = { current, pathname, playedHistory };
   });
 
-  const commitNextBeat = useCallback(
-    (nextBeat: BeatView) => {
-      const { pathname: path, playedHistory: hist } = stateRef.current;
-      const nextHistory = updatePlayedTrackIds(hist, nextBeat.id);
-      setPlayedHistory(nextHistory);
-      savePlayedHistory(nextHistory);
-      setCurrent(nextBeat);
-      syncBeatUrl(path, nextBeat.id);
-    },
-    [setCurrent],
-  );
+  const commitNextBeat = useBeatCommit(setCurrent, stateRef, setPlayedHistory);
 
-  useEngineHandoff(engine, commitNextBeat, setPhase, setSecondsRemaining);
+  useEngineHandoff({
+    engine,
+    commitNextBeat,
+    setPhase,
+    setSecondsRemaining,
+    setPositionSec,
+  });
 
   const advanceTrack = useTrackAdvancer({
     engine,
@@ -247,10 +278,11 @@ export function AudioPlayerProvider({
     advanceTrack,
     setPhase,
     setSecondsRemaining,
+    setPositionSec,
   });
 
   const togglePlay = useCallback(() => setIsPlaying((prev) => !prev), []);
-  const scratchActions = useScratchActions(engine);
+  const scratchActions = useScratchActions(engine, setPositionSec);
 
   return (
     <AudioPlayerContext.Provider
@@ -259,6 +291,7 @@ export function AudioPlayerProvider({
         isPlaying: activePlaying,
         phase,
         secondsRemaining,
+        positionSec,
         isLoading,
         error,
         togglePlay,

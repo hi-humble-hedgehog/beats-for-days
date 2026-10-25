@@ -17,6 +17,7 @@ export interface EngineSyncOptions {
   advanceTrack: (mode?: unknown) => void;
   setPhase: (phase: PlaybackPhase) => void;
   setSecondsRemaining: (sec: number) => void;
+  setPositionSec?: (sec: number) => void;
 }
 
 interface PlaybackControlOptions {
@@ -25,17 +26,26 @@ interface PlaybackControlOptions {
   current: BeatView | null;
   setPhase: (phase: PlaybackPhase) => void;
   setSecondsRemaining: (sec: number) => void;
+  setPositionSec?: (sec: number) => void;
 }
 
 function usePlaybackControl(opts: PlaybackControlOptions) {
-  const { engine, activePlaying, current, setPhase, setSecondsRemaining } =
-    opts;
+  const {
+    engine,
+    activePlaying,
+    current,
+    setPhase,
+    setSecondsRemaining,
+    setPositionSec,
+  } = opts;
 
   useEffect(() => {
     if (!current) return;
     if (!activePlaying) {
       engine.pause();
-      setPhase(engine.getSnapshot().phase);
+      const snap = engine.getSnapshot();
+      setPhase(snap.phase);
+      setPositionSec?.(snap.positionSec);
       return;
     }
 
@@ -54,28 +64,48 @@ function usePlaybackControl(opts: PlaybackControlOptions) {
           const updated = engine.getSnapshot();
           setPhase(updated.phase);
           setSecondsRemaining(updated.secondsRemaining);
+          setPositionSec?.(updated.positionSec);
         });
     }
     return () => {
       cancelled = true;
     };
-  }, [engine, activePlaying, current, setPhase, setSecondsRemaining]);
+  }, [
+    engine,
+    activePlaying,
+    current,
+    setPhase,
+    setSecondsRemaining,
+    setPositionSec,
+  ]);
 }
 
-export function useEngineHandoff(
-  engine: AudioEngine,
-  commitNextBeat: (beat: BeatView) => void,
-  setPhase: (phase: PlaybackPhase) => void,
-  setSecondsRemaining: (sec: number) => void,
-) {
+export interface EngineHandoffOptions {
+  engine: AudioEngine;
+  commitNextBeat: (beat: BeatView) => void;
+  setPhase: (phase: PlaybackPhase) => void;
+  setSecondsRemaining: (sec: number) => void;
+  setPositionSec?: (sec: number) => void;
+}
+
+export function useEngineHandoff(opts: EngineHandoffOptions) {
+  const {
+    engine,
+    commitNextBeat,
+    setPhase,
+    setSecondsRemaining,
+    setPositionSec,
+  } = opts;
+
   useEffect(() => {
     return engine.setOnTrackHandoff((nextBeat) => {
       commitNextBeat(nextBeat);
       const snap = engine.getSnapshot();
       setPhase(snap.phase);
       setSecondsRemaining(snap.secondsRemaining);
+      setPositionSec?.(snap.positionSec);
     });
-  }, [engine, commitNextBeat, setPhase, setSecondsRemaining]);
+  }, [engine, commitNextBeat, setPhase, setSecondsRemaining, setPositionSec]);
 }
 
 export function useEngineSync(opts: EngineSyncOptions) {
@@ -90,6 +120,7 @@ export function useEngineSync(opts: EngineSyncOptions) {
     advanceTrack,
     setPhase,
     setSecondsRemaining,
+    setPositionSec,
   } = opts;
 
   const latestRef = useRef({ current, resolveAfterSec });
@@ -103,6 +134,7 @@ export function useEngineSync(opts: EngineSyncOptions) {
     current,
     setPhase,
     setSecondsRemaining,
+    setPositionSec,
   });
 
   useEffect(() => {
@@ -113,6 +145,7 @@ export function useEngineSync(opts: EngineSyncOptions) {
       const snap = engine.getSnapshot();
       setPhase(snap.phase);
       setSecondsRemaining(snap.secondsRemaining);
+      setPositionSec?.(snap.positionSec);
 
       if (snap.currentBeat && snap.currentBeat.id !== prevBeatId) {
         commitNextBeat(snap.currentBeat);
@@ -128,7 +161,7 @@ export function useEngineSync(opts: EngineSyncOptions) {
       ) {
         advanceTrack("auto");
       }
-    }, 200);
+    }, 100);
 
     return () => clearInterval(interval);
   }, [
@@ -141,5 +174,6 @@ export function useEngineSync(opts: EngineSyncOptions) {
     isResolvingRef,
     setPhase,
     setSecondsRemaining,
+    setPositionSec,
   ]);
 }

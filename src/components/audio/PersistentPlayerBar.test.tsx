@@ -109,6 +109,35 @@ describe("PersistentPlayerBar", () => {
     expect(screen.getByText(/Transitioning \(5s\)/)).toBeInTheDocument();
   });
 
+  it("renders progress bar and timestamp readout", () => {
+    render(
+      <AudioPlayerContext.Provider
+        value={{
+          current: sampleBeat,
+          isPlaying: true,
+          positionSec: 15,
+          secondsRemaining: 4,
+          isLoading: false,
+          error: null,
+          togglePlay: vi.fn(),
+          advanceTrack: vi.fn(),
+        }}
+      >
+        <PersistentPlayerBar />
+      </AudioPlayerContext.Provider>,
+    );
+
+    const progressBar = screen.getByRole("progressbar", {
+      name: "Playback progress",
+    });
+    expect(progressBar).toBeInTheDocument();
+    expect(progressBar).toHaveAttribute("aria-valuenow", "15");
+    expect(progressBar).toHaveAttribute("aria-valuemin", "0");
+    expect(progressBar).toHaveAttribute("aria-valuemax", "60");
+    expect(progressBar).toHaveAttribute("aria-valuetext", "0:15 of 1:00");
+    expect(screen.getByText("0:15 / 1:00")).toBeInTheDocument();
+  });
+
   it("relies on native browser focus without custom focus ring classes", () => {
     render(
       <AudioPlayerContext.Provider

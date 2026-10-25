@@ -783,8 +783,10 @@ describe("AudioEngine", () => {
     scratchEngine.startManualScratch();
     // Move forward at 1.5x speed
     scratchEngine.setScratchVelocity(1.5, 0.05);
+    expect(scratchEngine.getSnapshot().positionSec).toBeGreaterThanOrEqual(0);
     // Move reverse at -1.5x speed
     scratchEngine.setScratchVelocity(-1.5, 0.05);
+    expect(scratchEngine.getSnapshot().positionSec).toBeGreaterThanOrEqual(0);
 
     // Stop manual scratch returns to regular playback
     await scratchEngine.stopManualScratch();

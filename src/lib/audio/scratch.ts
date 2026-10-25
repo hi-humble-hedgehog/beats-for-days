@@ -246,6 +246,13 @@ export class ScratchController {
   }
 
   /**
+   * Returns active needle position in seconds if a scratch session is ongoing.
+   */
+  getPosition(): number | null {
+    return this.session ? this.session.positionSec : null;
+  }
+
+  /**
    * Resets internal cached buffers when unloading or changing tracks.
    */
   reset(): void {

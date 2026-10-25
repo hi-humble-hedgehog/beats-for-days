@@ -7,6 +7,7 @@ export interface AudioPlayerState {
   isPlaying: boolean;
   phase?: PlaybackPhase;
   secondsRemaining: number;
+  positionSec?: number;
   isLoading: boolean;
   error: string | null;
   togglePlay: () => void;
