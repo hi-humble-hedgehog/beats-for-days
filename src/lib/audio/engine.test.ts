@@ -590,7 +590,7 @@ describe("AudioEngine", () => {
     expect(delayedEngine.getSnapshot().currentBeat?.id).toBe("track-c");
   });
 
-  it("applies vinyl spin-up on play and brake on pause when vinylEffects is enabled", async () => {
+  it("starts directly on initial play, powers down on pause, and spins up when playing after pause", async () => {
     const vinylEngine = new AudioEngine({
       contextFactory: () => mockAudio.context,
       bufferLoader: () => Promise.resolve(mockBuffer),
@@ -603,20 +603,30 @@ describe("AudioEngine", () => {
 
     const source = mockAudio.createdSources[0];
     const rateParam = source?.playbackRate;
-    expect(rateParam?.setValueAtTime).toHaveBeenCalledWith(0.25, 10);
-    expect(rateParam?.exponentialRampToValueAtTime).toHaveBeenCalledWith(
-      1,
-      10.25,
-    );
+    // Initial play does not spin-up; starts directly
+    expect(rateParam?.exponentialRampToValueAtTime).not.toHaveBeenCalled();
 
     mockAudio.setTime(20);
     vinylEngine.pause();
 
+    // Pause triggers vinyl brake power-down
     expect(rateParam?.exponentialRampToValueAtTime).toHaveBeenCalledWith(
       0.001,
       20.45,
     );
     expect(source?.stop).toHaveBeenCalledWith(20.45);
+
+    // Play after pause triggers spin-up
+    mockAudio.setTime(25);
+    await vinylEngine.play();
+    const secondSource = mockAudio.createdSources[1];
+    expect(secondSource?.playbackRate?.setValueAtTime).toHaveBeenCalledWith(
+      0.25,
+      25,
+    );
+    expect(
+      secondSource?.playbackRate?.exponentialRampToValueAtTime,
+    ).toHaveBeenCalledWith(1, 25.25);
   });
 
   it("modulates playbackRate when scratch is triggered", async () => {
@@ -645,7 +655,7 @@ describe("AudioEngine", () => {
     );
   });
 
-  it("powers down with vinyl brake, waits, and spins up new track on skip when vinylEffects is enabled", async () => {
+  it("powers down with vinyl brake, waits, and starts new track directly on skip when vinylEffects is enabled", async () => {
     vi.useFakeTimers();
     const vinylEngine = new AudioEngine({
       contextFactory: () => mockAudio.context,
@@ -669,19 +679,53 @@ describe("AudioEngine", () => {
     await vi.advanceTimersByTimeAsync(400);
     await skipPromise;
 
-    // Second source for track B was created and started with spin-up
+    // Second source for track B was created and started directly without spin-up
     expect(mockAudio.createdSources).toHaveLength(2);
     const secondSource = mockAudio.createdSources[1];
-    expect(secondSource?.playbackRate?.setValueAtTime).toHaveBeenCalledWith(
-      0.25,
-      10,
-    );
+    expect(secondSource?.start).toHaveBeenCalledWith(10, 0);
     expect(
       secondSource?.playbackRate?.exponentialRampToValueAtTime,
-    ).toHaveBeenCalledWith(1, 10.25);
+    ).not.toHaveBeenCalled();
     expect(vinylEngine.getSnapshot().currentBeat?.id).toBe("track-b");
 
     vi.useRealTimers();
+  });
+
+  it("powers down on pause and spins up when playing after pause", async () => {
+    const vinylEngine = new AudioEngine({
+      contextFactory: () => mockAudio.context,
+      bufferLoader: () => Promise.resolve(mockBuffer),
+      vinylEffects: true,
+    });
+
+    mockAudio.setTime(10);
+    await vinylEngine.loadTrack(trackA);
+    await vinylEngine.play();
+
+    // First source starts directly
+    const firstSource = mockAudio.createdSources[0];
+    expect(
+      firstSource?.playbackRate?.exponentialRampToValueAtTime,
+    ).not.toHaveBeenCalled();
+
+    // Pause triggers power-down vinyl brake
+    mockAudio.setTime(20);
+    vinylEngine.pause();
+    expect(
+      firstSource?.playbackRate?.exponentialRampToValueAtTime,
+    ).toHaveBeenCalledWith(0.001, 20.45);
+
+    // Play after pause triggers motor spin-up
+    mockAudio.setTime(25);
+    await vinylEngine.play();
+    const secondSource = mockAudio.createdSources[1];
+    expect(secondSource?.playbackRate?.setValueAtTime).toHaveBeenCalledWith(
+      0.25,
+      25,
+    );
+    expect(
+      secondSource?.playbackRate?.exponentialRampToValueAtTime,
+    ).toHaveBeenCalledWith(1, 25.25);
   });
 
   it("aborts superseded skip when user skips multiple times quickly with vinylEffects", async () => {
@@ -706,7 +750,7 @@ describe("AudioEngine", () => {
     vi.useRealTimers();
   });
 
-  it("plays baby scratch cue pattern before releasing track on the 1 when startEffect is baby-scratch", async () => {
+  it("supports live manual scratching by adjusting velocity and resuming after release", async () => {
     const channelData = new Float32Array(44100 * 60);
     channelData[0] = 0.5;
     const scratchMockBuffer: AudioBufferLike = {
@@ -729,31 +773,21 @@ describe("AudioEngine", () => {
       contextFactory: () => mockAudio.context,
       bufferLoader: () => Promise.resolve(scratchMockBuffer),
       vinylEffects: true,
-      startEffect: "baby-scratch",
     });
 
     mockAudio.setTime(10);
     await scratchEngine.loadTrack(trackA);
     await scratchEngine.play();
 
-    // 4 scratch stroke sources created + 1 main loop source = 5 total sources
-    expect(mockAudio.createdSources).toHaveLength(5);
+    // Start manual scratch
+    scratchEngine.startManualScratch();
+    // Move forward at 1.5x speed
+    scratchEngine.setScratchVelocity(1.5, 0.05);
+    // Move reverse at -1.5x speed
+    scratchEngine.setScratchVelocity(-1.5, 0.05);
 
-    // Main source was created first by createLoopingTrackNodes, followed by 4 scratch sources
-    const mainSource = mockAudio.createdSources[0];
-    const expectedRelease = 10 + 4 * (60 / 86);
-    expect(
-      (mainSource?.start as ReturnType<typeof vi.fn>).mock.calls[0]?.[0],
-    ).toBeCloseTo(expectedRelease, 4);
-    expect(
-      (mainSource?.start as ReturnType<typeof vi.fn>).mock.calls[0]?.[1],
-    ).toBe(0);
-
-    // If paused during scratch intro, active scratch nodes are stopped and cleaned up
-    scratchEngine.pause();
-    for (let i = 1; i <= 4; i++) {
-      expect(mockAudio.createdSources[i]?.stop).toHaveBeenCalled();
-      expect(mockAudio.createdSources[i]?.disconnect).toHaveBeenCalled();
-    }
+    // Stop manual scratch returns to regular playback
+    await scratchEngine.stopManualScratch();
+    expect(scratchEngine.getSnapshot().isPlaying).toBe(true);
   });
 });

@@ -165,6 +165,28 @@ export interface AudioPlayerProviderProps {
   engine?: AudioEngine;
 }
 
+function useScratchActions(engine: AudioEngine) {
+  const scratch = useCallback(
+    (rateMultiplier?: number) => engine.scratch(rateMultiplier),
+    [engine],
+  );
+  const startManualScratch = useCallback(
+    () => engine.startManualScratch(),
+    [engine],
+  );
+  const setScratchVelocity = useCallback(
+    (velocity: number, deltaSec: number) =>
+      engine.setScratchVelocity(velocity, deltaSec),
+    [engine],
+  );
+  const stopManualScratch = useCallback(
+    () => void engine.stopManualScratch(),
+    [engine],
+  );
+
+  return { scratch, startManualScratch, setScratchVelocity, stopManualScratch };
+}
+
 export function AudioPlayerProvider({
   children,
   engine: injectedEngine,
@@ -228,10 +250,7 @@ export function AudioPlayerProvider({
   });
 
   const togglePlay = useCallback(() => setIsPlaying((prev) => !prev), []);
-  const scratch = useCallback(
-    (rateMultiplier?: number) => engine.scratch(rateMultiplier),
-    [engine],
-  );
+  const scratchActions = useScratchActions(engine);
 
   return (
     <AudioPlayerContext.Provider
@@ -244,7 +263,7 @@ export function AudioPlayerProvider({
         error,
         togglePlay,
         advanceTrack,
-        scratch,
+        ...scratchActions,
       }}
     >
       {children}

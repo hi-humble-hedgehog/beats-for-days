@@ -1,21 +1,19 @@
 import type { BeatView, TransitionView } from "../types/beat";
 import { BoundedAudioCache } from "./cache";
 import { createLoopingTrackNodes } from "./scheduler";
+import { ScratchController } from "./scratch";
 import {
-  buildArmedTransitionState,
   computeEngineSnapshot,
   connectSourceToOutputs,
   createDefaultAudioContext,
   fetchAndDecodeAudio,
-  resolveHandoffState,
-  scheduleTrackTransition,
   setupMasterAudioGraph,
-  teardownArmedTransition,
   teardownTrackNodes,
 } from "./snapshot";
+import { TransitionCoordinator } from "./transition-coordinator";
 import type {
   AnalyserNodeLike,
-  ArmedTransitionState,
+  AudioBufferLike,
   AudioBufferSourceNodeLike,
   AudioContextLike,
   AudioEngineOptions,
@@ -23,23 +21,21 @@ import type {
   GainNodeLike,
   PlaybackPhase,
 } from "./types";
-import { applyVinylBrake, applyVinylScratch } from "./vinyl";
-import {
-  startTrackWithVinylEffect,
-  teardownScratchNodes,
-} from "./baby-scratch";
+import { applyVinylBrake, applyVinylScratch, applyVinylSpinUp } from "./vinyl";
 
 /**
  * Orchestrates Web Audio playback, native gapless looping, and 3-node transition splices.
- * Manages gain, buffer caching, and clock-accurate state synchronization.
+ * Manages gain, buffer caching, turntable physics, and clock-accurate state synchronization.
  */
 export class AudioEngine {
   private readonly contextFactory?: () => AudioContextLike;
   private readonly cache: BoundedAudioCache;
   private readonly onTrackHandoff?: (nextBeat: BeatView) => void;
   private readonly vinylEffects: boolean;
-  private readonly startEffect: "spin-up" | "baby-scratch";
-  private activeScratchNodes: AudioBufferSourceNodeLike[] = [];
+  private readonly scratchController = new ScratchController();
+  private readonly transitions = new TransitionCoordinator();
+  private isResumingFromPause = false;
+  private currentBuffer: AudioBufferLike | null = null;
   private ctx: AudioContextLike | null = null;
   private masterGain: GainNodeLike | null = null;
   private analyser: AnalyserNodeLike | null = null;
@@ -51,13 +47,9 @@ export class AudioEngine {
   private pausedOffsetSec = 0;
   private isPlaying = false;
   private phase: PlaybackPhase = "idle";
-  private armedTransition: ArmedTransitionState | null = null;
   private continuousPlayStartCtxTime = 0;
   private continuousPlayAccumSec = 0;
-  private armCounter = 0;
   private skipCounter = 0;
-  private readonly handoffListeners = new Set<(nextBeat: BeatView) => void>();
-  private handoffTimer: ReturnType<typeof setTimeout> | null = null;
 
   /**
    * Initializes the audio engine controller with cache and factory options.
@@ -73,9 +65,6 @@ export class AudioEngine {
     });
     this.onTrackHandoff = options.onTrackHandoff;
     this.vinylEffects = options.vinylEffects ?? false;
-    this.startEffect =
-      options.startEffect ??
-      (options.vinylEffects ? "baby-scratch" : "spin-up");
   }
 
   /**
@@ -100,11 +89,14 @@ export class AudioEngine {
     this.currentBeat = beat;
     this.initialOffsetSec = initialOffsetSec;
     this.pausedOffsetSec = initialOffsetSec;
-    await this.cache.get(beat.audioUrl);
+    this.isResumingFromPause = false;
+    this.currentBuffer = await this.cache.get(beat.audioUrl);
+    this.scratchController.reset();
   }
 
   /**
    * Starts playback of the loaded track using sample-accurate loop points.
+   * Spins up playback rate only when resuming from a pause state.
    */
   async play(): Promise<void> {
     const targetBeat = this.currentBeat;
@@ -114,6 +106,7 @@ export class AudioEngine {
 
     const buffer = await this.cache.get(targetBeat.audioUrl);
     if (this.currentBeat?.id !== targetBeat.id) return;
+    this.currentBuffer = buffer;
     this.stopCurrentNode();
 
     const { source, gain } = createLoopingTrackNodes(ctx, buffer, targetBeat);
@@ -123,106 +116,87 @@ export class AudioEngine {
     connectSourceToOutputs(this.currentGain, this.analyser, this.masterGain!);
 
     this.initialOffsetSec = this.pausedOffsetSec;
-    const startResult = startTrackWithVinylEffect({
-      ctx,
-      source: this.currentSource,
-      buffer,
-      outputNode: this.analyser ?? this.masterGain!,
-      offsetSec: this.pausedOffsetSec,
-      vinylEffects: this.vinylEffects,
-      startEffect: this.startEffect,
-      bpm: targetBeat.bpm,
-    });
-    this.activeScratchNodes = startResult.strokeSources;
-    this.segmentStartTime = startResult.segmentStartTime;
-    this.continuousPlayStartCtxTime = startResult.segmentStartTime;
+    source.start(ctx.currentTime, this.pausedOffsetSec);
+
+    // Motor spin-up applies only when resuming playback after pause
+    if (this.vinylEffects && this.isResumingFromPause) {
+      applyVinylSpinUp({ source, startTime: ctx.currentTime });
+    }
+    this.isResumingFromPause = false;
+
+    this.segmentStartTime = ctx.currentTime;
+    this.continuousPlayStartCtxTime = ctx.currentTime;
     this.isPlaying = true;
     this.phase = "playing";
   }
 
   /**
-   * Pauses playback, records the playhead position, and cancels armed transitions.
+   * Pauses playback, records the playhead position, and powers down with vinyl brake.
    */
   pause(): void {
     if (!this.isPlaying) return;
     const snapshot = this.getSnapshot();
     this.pausedOffsetSec = snapshot.positionSec;
     this.continuousPlayAccumSec = snapshot.continuousPlaySec;
-    this.cancelArmedTransition();
+    this.transitions.cancel(this.currentGain, this.ctx);
     this.stopCurrentNode(true);
+    this.isResumingFromPause = true;
     this.isPlaying = false;
     this.phase = "idle";
   }
 
-  private isArmTargetValid(sourceBeatId: string, armId: number): boolean {
-    if (!this.currentBeat || this.currentBeat.id !== sourceBeatId) return false;
-    return (
-      this.isPlaying && this.phase !== "bridge" && this.armCounter === armId
-    );
-  }
-
   /**
    * Pre-loads transition and next track buffers to schedule the three-node splice.
-   * Cancels any previously armed transition to prevent duplicate scheduled splices.
    */
   async armTransition(
     nextBeat: BeatView,
     transition: TransitionView,
   ): Promise<void> {
-    if (!this.currentBeat || !this.isPlaying || this.phase === "bridge") return;
-    const sourceBeatId = this.currentBeat.id;
-    this.cancelArmedTransition();
-    const armId = this.armCounter;
     const ctx = this.getContext();
-    const [transBuffer, nextBuffer] = await Promise.all([
-      this.cache.get(transition.audioUrl),
-      this.cache.get(nextBeat.audioUrl),
-    ]);
-
-    if (!this.isArmTargetValid(sourceBeatId, armId)) return;
-
-    const schedule = scheduleTrackTransition({
-      beat: this.currentBeat,
+    await this.transitions.arm({
+      nextBeat,
       transition,
-      audioCtxNow: ctx.currentTime,
+      ctx,
+      masterGain: this.masterGain!,
+      cache: this.cache,
+      currentBeat: this.currentBeat,
+      currentSource: this.currentSource,
+      currentGain: this.currentGain,
       segmentStartTime: this.segmentStartTime,
       initialOffsetSec: this.initialOffsetSec,
-    });
-
-    const { armed, delayMs } = buildArmedTransitionState(
-      {
-        ctx,
-        masterGain: this.masterGain!,
-        transBuffer,
-        nextBuffer,
-        nextBeat,
-        transition,
-        schedule,
+      isPlaying: this.isPlaying,
+      phase: this.phase,
+      onPhaseChange: (p) => {
+        this.phase = p;
       },
-      this.currentGain,
-      this.currentSource,
-    );
-    this.armedTransition = armed;
-    this.handoffTimer = setTimeout(() => this.checkHandoff(), delayMs);
-    this.phase = "armed";
+      onHandoffSuccess: (handoff) => {
+        this.currentBeat = handoff.currentBeat;
+        this.currentSource = handoff.currentSource;
+        this.currentGain = handoff.currentGain;
+        this.segmentStartTime = handoff.segmentStartTime;
+        this.initialOffsetSec = handoff.initialOffsetSec;
+        this.continuousPlayAccumSec = 0;
+        this.continuousPlayStartCtxTime = handoff.segmentStartTime;
+      },
+      onTrackHandoff: this.onTrackHandoff,
+    });
   }
 
   /**
    * Registers a callback invoked whenever an armed transition hands off to the next beat.
-   * Returns an unregister function to remove the listener.
    */
   setOnTrackHandoff(listener: (nextBeat: BeatView) => void): () => void {
-    this.handoffListeners.add(listener);
-    return () => void this.handoffListeners.delete(listener);
+    return this.transitions.addListener(listener);
   }
 
   /**
-   * Skips to the next track. If playing with vinyl effects, powers down, pauses briefly, and spins up.
+   * Skips to the next track, powering down active audio and starting the next track directly.
    */
   async skipToTrack(nextBeat: BeatView): Promise<void> {
-    this.cancelArmedTransition();
+    this.transitions.cancel(this.currentGain, this.ctx);
     const wasPlaying = this.isPlaying;
     const skipId = ++this.skipCounter;
+    this.isResumingFromPause = false;
 
     if (wasPlaying && this.vinylEffects && this.ctx) {
       this.stopCurrentNode(true);
@@ -245,10 +219,69 @@ export class AudioEngine {
   }
 
   /**
+   * Starts a live manual scratch session by muting background loop playback.
+   */
+  startManualScratch(): void {
+    const ctx = this.getContext();
+    if (ctx.state === "suspended") void ctx.resume();
+
+    const currentPos = this.getSnapshot().positionSec;
+    if (this.currentGain) {
+      this.currentGain.gain.setValueAtTime(0, ctx.currentTime);
+    }
+
+    if (this.currentBuffer) {
+      this.scratchController.start(
+        ctx,
+        this.currentBuffer,
+        this.analyser ?? this.masterGain!,
+        currentPos,
+      );
+    }
+  }
+
+  /**
+   * Updates scratch playback rate and direction from pointer movement velocity.
+   */
+  setScratchVelocity(velocity: number, deltaSec: number): void {
+    this.scratchController.update(velocity, deltaSec);
+  }
+
+  /**
+   * Ends the manual scratch session and returns to normal playback or paused state.
+   */
+  async stopManualScratch(): Promise<void> {
+    const finalPos = this.scratchController.stop();
+    if (finalPos === null) return;
+    this.pausedOffsetSec = finalPos;
+
+    if (this.isPlaying) {
+      this.isResumingFromPause = false;
+      await this.play();
+    }
+  }
+
+  /**
    * Returns a snapshot of playback position, loop pass count, countdown, and active phase.
    */
   getSnapshot(): AudioEngineSnapshot {
-    this.checkHandoff();
+    this.transitions.check(
+      this.ctx,
+      (p) => {
+        this.phase = p;
+      },
+      (handoff) => {
+        this.currentBeat = handoff.currentBeat;
+        this.currentSource = handoff.currentSource;
+        this.currentGain = handoff.currentGain;
+        this.segmentStartTime = handoff.segmentStartTime;
+        this.initialOffsetSec = handoff.initialOffsetSec;
+        this.continuousPlayAccumSec = 0;
+        this.continuousPlayStartCtxTime = handoff.segmentStartTime;
+      },
+      this.onTrackHandoff,
+    );
+
     const ctx = this.ctx;
     const now = ctx ? ctx.currentTime : 0;
     const continuousPlaySec =
@@ -267,7 +300,7 @@ export class AudioEngine {
       continuousPlaySec,
       segmentStartTime: this.segmentStartTime,
       initialOffsetSec: this.initialOffsetSec,
-      armedTransition: this.armedTransition,
+      armedTransition: this.transitions.getArmedTransition(),
     });
   }
 
@@ -296,11 +329,6 @@ export class AudioEngine {
   }
 
   private stopCurrentNode(withBrake = false): void {
-    if (this.activeScratchNodes.length > 0) {
-      teardownScratchNodes(this.activeScratchNodes);
-      this.activeScratchNodes = [];
-    }
-
     if (!this.currentSource) return;
 
     if (withBrake && this.vinylEffects && this.ctx) {
@@ -317,52 +345,5 @@ export class AudioEngine {
     teardownTrackNodes(this.currentSource, this.currentGain);
     this.currentSource = null;
     this.currentGain = null;
-  }
-
-  private clearHandoffTimer(): void {
-    if (this.handoffTimer) {
-      clearTimeout(this.handoffTimer);
-      this.handoffTimer = null;
-    }
-  }
-
-  private cancelArmedTransition(): void {
-    this.armCounter++;
-    this.clearHandoffTimer();
-    if (!this.armedTransition) return;
-    if (this.currentGain && this.ctx) {
-      this.currentGain.gain.cancelScheduledValues(this.ctx.currentTime);
-      this.currentGain.gain.setValueAtTime(1, this.ctx.currentTime);
-    }
-    teardownArmedTransition(this.armedTransition);
-    this.armedTransition = null;
-    if (this.isPlaying && this.phase === "armed") {
-      this.phase = "playing";
-    }
-  }
-
-  private checkHandoff(): void {
-    if (!this.armedTransition || !this.ctx) return;
-    const now = this.ctx.currentTime;
-    const armed = this.armedTransition;
-
-    if (now >= armed.schedule.nextStart) {
-      this.clearHandoffTimer();
-      const nextBeat = armed.nextBeat;
-      const handoff = resolveHandoffState(armed);
-      this.currentBeat = handoff.currentBeat;
-      this.currentSource = handoff.currentSource;
-      this.currentGain = handoff.currentGain;
-      this.segmentStartTime = handoff.segmentStartTime;
-      this.initialOffsetSec = handoff.initialOffsetSec;
-      this.continuousPlayAccumSec = 0;
-      this.continuousPlayStartCtxTime = handoff.segmentStartTime;
-      this.armedTransition = null;
-      this.phase = "playing";
-      this.onTrackHandoff?.(nextBeat);
-      this.handoffListeners.forEach((listener) => listener(nextBeat));
-    } else {
-      this.phase = now >= armed.schedule.bridgeStart ? "bridge" : "armed";
-    }
   }
 }

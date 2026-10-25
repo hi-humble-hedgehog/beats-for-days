@@ -73,12 +73,13 @@ Both curves sum to constant power: $\sin^2(t) + \cos^2(t) = 1$.
 To recreate an authentic 90s turntable and hardware sampler feel without altering sample-accurate loop bounds:
 
 1. **Motor spin-up on play (`applyVinylSpinUp`):**
-   When starting or resuming playback, the engine ramps `source.playbackRate` from `0.25` to `1.0` over 250 ms using exponential curves (`AudioParam.exponentialRampToValueAtTime`).
-2. **Motor brake on pause (`applyVinylBrake`):**
-   When pausing playback, the engine ramps `source.playbackRate` and `gain.gain` down to `0.001` over 450 ms before stopping the node, simulating turntable motor power-down without clicks.
-3. **On-demand scratching (`applyVinylScratch`):**
-   The engine provides programmatic scratch modulation via `engine.scratch()`. The engine temporarily modulates `source.playbackRate` up/down and returns to `1.0` over 160 ms.
-4. **Skip sequence (power-down, pause gap, power-up):**
-   When skipping a track during active playback, `engine.skipToTrack` triggers a motor brake on the playing track, pauses briefly (~400 ms total across brake and silence) while pre-loading the incoming buffer, and then starts the new track with a turntable spin-up. Superseded rapid skips are safely cancelled.
-5. **Reversed audio buffers & baby scratch cue drop (`scheduleBabyScratchDrop`):**
-   The engine creates reversed buffer copies or slices via `createReversedAudioBuffer` by reversing channel `Float32Array` data. With `startEffect: "baby-scratch"`, starting or skipping into a beat plays alternating forward and reverse cue strokes matching 4th notes (quarter notes based on track BPM, 4 beats in 4/4 time) with micro-fades before releasing the main looping track node precisely on the "one" at `releaseTime`.
+   When resuming playback after pause, the engine ramps `source.playbackRate` from `0.25` to `1.0` over 250 ms using exponential curves (`AudioParam.exponentialRampToValueAtTime`). Initial play or playing after skipping begins immediately at normal speed.
+2. **Motor brake on pause and skip (`applyVinylBrake`):**
+   When pausing playback or advancing to the next track, the engine ramps `source.playbackRate` and `gain.gain` down to `0.001` over 450 ms before stopping the node, simulating turntable motor power-down without clicks.
+3. **Skip sequence (power-down, pause gap, direct play):**
+   When skipping a track during active playback, `engine.skipToTrack` triggers a motor brake on the playing track, pauses briefly (~400 ms total across brake and silence) while pre-loading the incoming buffer, and starts the new track directly at standard playback speed. Superseded rapid skips are safely cancelled.
+4. **Interactive vinyl platter & manual scratching (`VinylPlatter`, `ScratchController`):**
+   The UI renders an interactive turntable platter with a high-contrast radial orientation line that spins continuously at 33⅓ RPM during playback. Users can grab the platter via pointer (mouse, touch) or keyboard (arrow keys).
+   - Hand velocity and angular direction dynamically drive audio speed and direction.
+   - Forward motion scrubs through the standard audio buffer; backward motion scrubs through a reversed in-memory buffer (`createReversedAudioBuffer`).
+   - Releasing the platter seamlessly drops the needle back into forward looping playback from the scrubbed position.

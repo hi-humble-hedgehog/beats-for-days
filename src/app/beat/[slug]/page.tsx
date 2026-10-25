@@ -2,6 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useAudioPlayer } from "@/components/audio/AudioPlayerContext";
+import { VinylPlatter } from "@/components/audio/VinylPlatter";
 
 export default function BeatPage() {
   const params = useParams<{ slug: string }>();
@@ -25,6 +26,8 @@ export default function BeatPage() {
           Track ID: {current?.id ?? slug}
         </p>
       </div>
+
+      <VinylPlatter />
 
       <div className="flex flex-wrap items-center justify-center gap-4">
         <button

@@ -12,4 +12,7 @@ export interface AudioPlayerState {
   togglePlay: () => void;
   advanceTrack: (mode?: "auto" | "skip" | unknown) => void;
   scratch?: (rateMultiplier?: number) => void;
+  startManualScratch?: () => void;
+  setScratchVelocity?: (velocity: number, deltaSec: number) => void;
+  stopManualScratch?: () => void;
 }
