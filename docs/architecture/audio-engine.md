@@ -78,3 +78,5 @@ To recreate an authentic 90s turntable and hardware sampler feel without alterin
    When pausing playback, the engine ramps `source.playbackRate` and `gain.gain` down to `0.001` over 450 ms before stopping the node, simulating turntable motor power-down without clicks.
 3. **On-demand scratching (`applyVinylScratch`):**
    Users can trigger scratch modulation (via `engine.scratch()` or pressing `S` while playing). The engine temporarily modulates `source.playbackRate` up/down and returns to `1.0` over 160 ms.
+4. **Skip sequence (power-down, pause gap, power-up):**
+   When skipping a track during active playback, `engine.skipToTrack` triggers a motor brake on the playing track, pauses briefly (~400 ms total across brake and silence) while pre-loading the incoming buffer, and then starts the new track with a turntable spin-up. Superseded rapid skips are safely cancelled.

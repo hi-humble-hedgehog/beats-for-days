@@ -644,4 +644,65 @@ describe("AudioEngine", () => {
       15.2,
     );
   });
+
+  it("powers down with vinyl brake, waits, and spins up new track on skip when vinylEffects is enabled", async () => {
+    vi.useFakeTimers();
+    const vinylEngine = new AudioEngine({
+      contextFactory: () => mockAudio.context,
+      bufferLoader: () => Promise.resolve(mockBuffer),
+      vinylEffects: true,
+    });
+
+    mockAudio.setTime(10);
+    await vinylEngine.loadTrack(trackA);
+    await vinylEngine.play();
+
+    const firstSource = mockAudio.createdSources[0];
+    const skipPromise = vinylEngine.skipToTrack(trackB);
+
+    // Initial brake was scheduled on first source
+    expect(
+      firstSource?.playbackRate?.exponentialRampToValueAtTime,
+    ).toHaveBeenCalledWith(0.001, 10.45);
+
+    // Advance fake timer through the power-down and pause gap (400ms)
+    await vi.advanceTimersByTimeAsync(400);
+    await skipPromise;
+
+    // Second source for track B was created and started with spin-up
+    expect(mockAudio.createdSources).toHaveLength(2);
+    const secondSource = mockAudio.createdSources[1];
+    expect(secondSource?.playbackRate?.setValueAtTime).toHaveBeenCalledWith(
+      0.25,
+      10,
+    );
+    expect(
+      secondSource?.playbackRate?.exponentialRampToValueAtTime,
+    ).toHaveBeenCalledWith(1, 10.25);
+    expect(vinylEngine.getSnapshot().currentBeat?.id).toBe("track-b");
+
+    vi.useRealTimers();
+  });
+
+  it("aborts superseded skip when user skips multiple times quickly with vinylEffects", async () => {
+    vi.useFakeTimers();
+    const vinylEngine = new AudioEngine({
+      contextFactory: () => mockAudio.context,
+      bufferLoader: () => Promise.resolve(mockBuffer),
+      vinylEffects: true,
+    });
+
+    await vinylEngine.loadTrack(trackA);
+    await vinylEngine.play();
+
+    // Trigger skip to B, then immediately skip to C before the pause delay completes
+    const skip1 = vinylEngine.skipToTrack(trackB);
+    const skip2 = vinylEngine.skipToTrack(trackC);
+
+    await vi.advanceTimersByTimeAsync(400);
+    await Promise.all([skip1, skip2]);
+
+    expect(vinylEngine.getSnapshot().currentBeat?.id).toBe("track-c");
+    vi.useRealTimers();
+  });
 });

@@ -49,6 +49,7 @@ export class AudioEngine {
   private continuousPlayStartCtxTime = 0;
   private continuousPlayAccumSec = 0;
   private armCounter = 0;
+  private skipCounter = 0;
   private readonly handoffListeners = new Set<(nextBeat: BeatView) => void>();
   private handoffTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -203,11 +204,28 @@ export class AudioEngine {
   }
 
   /**
-   * Stops playback immediately and starts the destination track from zero without crossfading.
+   * Skips to the next track. If playing with vinyl effects, powers down, pauses briefly, and spins up.
    */
   async skipToTrack(nextBeat: BeatView): Promise<void> {
     this.cancelArmedTransition();
-    this.stopCurrentNode();
+    const wasPlaying = this.isPlaying;
+    const skipId = ++this.skipCounter;
+
+    if (wasPlaying && this.vinylEffects && this.ctx) {
+      this.stopCurrentNode(true);
+      const loadPromise = this.loadTrack(nextBeat, 0);
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      if (this.skipCounter !== skipId) return;
+
+      await loadPromise;
+      if (this.skipCounter !== skipId) return;
+
+      this.continuousPlayAccumSec = 0;
+      await this.play();
+      return;
+    }
+
+    this.stopCurrentNode(false);
     this.continuousPlayAccumSec = 0;
     await this.loadTrack(nextBeat, 0);
     await this.play();
