@@ -3,49 +3,42 @@
 import { useEffect, useRef } from "react";
 import type { AudioEngine } from "@/lib/audio/engine";
 import { shouldTriggerAutoResolution } from "@/lib/audio/scheduler";
-import type { PlaybackPhase } from "@/lib/types/audio";
+import type { PlayerAction } from "@/lib/player/decisions";
 import type { BeatView } from "@/lib/types/beat";
 
 export interface EngineSyncOptions {
   engine: AudioEngine;
-  activePlaying: boolean;
+  isPlaying: boolean;
   isLoading: boolean;
   current: BeatView | null;
   resolveAfterSec: number;
   isResolvingRef: React.MutableRefObject<boolean>;
   commitNextBeat: (beat: BeatView) => void;
-  advanceTrack: (mode?: unknown) => void;
-  setPhase: (phase: PlaybackPhase) => void;
-  setSecondsRemaining: (sec: number) => void;
-  setPositionSec?: (sec: number) => void;
+  autoAdvance: () => void;
+  dispatch: React.Dispatch<PlayerAction>;
 }
 
 interface PlaybackControlOptions {
   engine: AudioEngine;
-  activePlaying: boolean;
+  isPlaying: boolean;
   current: BeatView | null;
-  setPhase: (phase: PlaybackPhase) => void;
-  setSecondsRemaining: (sec: number) => void;
-  setPositionSec?: (sec: number) => void;
+  dispatch: React.Dispatch<PlayerAction>;
 }
 
 function usePlaybackControl(opts: PlaybackControlOptions) {
-  const {
-    engine,
-    activePlaying,
-    current,
-    setPhase,
-    setSecondsRemaining,
-    setPositionSec,
-  } = opts;
+  const { engine, isPlaying, current, dispatch } = opts;
 
   useEffect(() => {
     if (!current) return;
-    if (!activePlaying) {
+    if (!isPlaying) {
       engine.pause();
       const snap = engine.getSnapshot();
-      setPhase(snap.phase);
-      setPositionSec?.(snap.positionSec);
+      dispatch({
+        type: "sync_snapshot",
+        phase: snap.phase,
+        secondsRemaining: snap.secondsRemaining,
+        positionSec: snap.positionSec,
+      });
       return;
     }
 
@@ -62,65 +55,54 @@ function usePlaybackControl(opts: PlaybackControlOptions) {
         .then(() => {
           if (cancelled) return;
           const updated = engine.getSnapshot();
-          setPhase(updated.phase);
-          setSecondsRemaining(updated.secondsRemaining);
-          setPositionSec?.(updated.positionSec);
+          dispatch({
+            type: "sync_snapshot",
+            phase: updated.phase,
+            secondsRemaining: updated.secondsRemaining,
+            positionSec: updated.positionSec,
+          });
         });
     }
     return () => {
       cancelled = true;
     };
-  }, [
-    engine,
-    activePlaying,
-    current,
-    setPhase,
-    setSecondsRemaining,
-    setPositionSec,
-  ]);
+  }, [engine, isPlaying, current, dispatch]);
 }
 
 export interface EngineHandoffOptions {
   engine: AudioEngine;
   commitNextBeat: (beat: BeatView) => void;
-  setPhase: (phase: PlaybackPhase) => void;
-  setSecondsRemaining: (sec: number) => void;
-  setPositionSec?: (sec: number) => void;
+  dispatch: React.Dispatch<PlayerAction>;
 }
 
 export function useEngineHandoff(opts: EngineHandoffOptions) {
-  const {
-    engine,
-    commitNextBeat,
-    setPhase,
-    setSecondsRemaining,
-    setPositionSec,
-  } = opts;
+  const { engine, commitNextBeat, dispatch } = opts;
 
   useEffect(() => {
     return engine.setOnTrackHandoff((nextBeat) => {
       commitNextBeat(nextBeat);
       const snap = engine.getSnapshot();
-      setPhase(snap.phase);
-      setSecondsRemaining(snap.secondsRemaining);
-      setPositionSec?.(snap.positionSec);
+      dispatch({
+        type: "sync_snapshot",
+        phase: snap.phase,
+        secondsRemaining: snap.secondsRemaining,
+        positionSec: snap.positionSec,
+      });
     });
-  }, [engine, commitNextBeat, setPhase, setSecondsRemaining, setPositionSec]);
+  }, [engine, commitNextBeat, dispatch]);
 }
 
 export function useEngineSync(opts: EngineSyncOptions) {
   const {
     engine,
-    activePlaying,
+    isPlaying,
     isLoading,
     current,
     resolveAfterSec,
     isResolvingRef,
     commitNextBeat,
-    advanceTrack,
-    setPhase,
-    setSecondsRemaining,
-    setPositionSec,
+    autoAdvance,
+    dispatch,
   } = opts;
 
   const latestRef = useRef({ current, resolveAfterSec });
@@ -130,22 +112,23 @@ export function useEngineSync(opts: EngineSyncOptions) {
 
   usePlaybackControl({
     engine,
-    activePlaying,
+    isPlaying,
     current,
-    setPhase,
-    setSecondsRemaining,
-    setPositionSec,
+    dispatch,
   });
 
   useEffect(() => {
-    if (!activePlaying || isLoading || !current) return;
+    if (!isPlaying || isLoading || !current) return;
 
     const interval = setInterval(() => {
       const prevBeatId = latestRef.current.current?.id;
       const snap = engine.getSnapshot();
-      setPhase(snap.phase);
-      setSecondsRemaining(snap.secondsRemaining);
-      setPositionSec?.(snap.positionSec);
+      dispatch({
+        type: "sync_snapshot",
+        phase: snap.phase,
+        secondsRemaining: snap.secondsRemaining,
+        positionSec: snap.positionSec,
+      });
 
       if (snap.currentBeat && snap.currentBeat.id !== prevBeatId) {
         commitNextBeat(snap.currentBeat);
@@ -159,21 +142,19 @@ export function useEngineSync(opts: EngineSyncOptions) {
           isResolving: isResolvingRef.current,
         })
       ) {
-        advanceTrack("auto");
+        autoAdvance();
       }
     }, 100);
 
     return () => clearInterval(interval);
   }, [
     engine,
-    activePlaying,
+    isPlaying,
     isLoading,
     current,
-    advanceTrack,
+    autoAdvance,
     commitNextBeat,
     isResolvingRef,
-    setPhase,
-    setSecondsRemaining,
-    setPositionSec,
+    dispatch,
   ]);
 }

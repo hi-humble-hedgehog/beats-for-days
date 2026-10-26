@@ -9,6 +9,7 @@ const mockAdvanceTrack = vi.fn();
 
 let mockPlayerState = {
   current: null as { id: string; name: string } | null,
+  activePathname: undefined as string | undefined,
   isPlaying: false,
   secondsRemaining: 30,
   togglePlay: mockTogglePlay,
@@ -29,6 +30,7 @@ describe("BeatPage", () => {
     vi.clearAllMocks();
     mockPlayerState = {
       current: null,
+      activePathname: undefined,
       isPlaying: false,
       secondsRemaining: 30,
       togglePlay: mockTogglePlay,
@@ -114,5 +116,19 @@ describe("BeatPage", () => {
       expect(button.className).not.toMatch(/focus-visible:outline/);
       expect(button.className).not.toMatch(/focus:ring/);
     }
+  });
+
+  it("uses activePathname from player state when usePathname stays stale after history.pushState", () => {
+    mockUseParams.mockReturnValue({ slug: "0001" });
+    mockUsePathname.mockReturnValue("/beat/0001");
+    mockPlayerState.activePathname = "/beat/0002";
+    mockPlayerState.current = { id: "0002", name: "Jazz Flute" };
+
+    render(<BeatPage />);
+
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+      "#Jazz Flute",
+    );
+    expect(screen.getByText("Track ID: 0002")).toBeInTheDocument();
   });
 });

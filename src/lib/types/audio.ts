@@ -1,9 +1,11 @@
 import type { BeatView } from "./beat";
 
 export type PlaybackPhase = "idle" | "playing" | "armed" | "bridge";
+export type AdvanceMode = "auto" | "skip";
 
 export interface AudioPlayerState {
   current: BeatView | null;
+  activePathname?: string;
   isPlaying: boolean;
   phase?: PlaybackPhase;
   secondsRemaining: number;
@@ -14,5 +16,7 @@ export interface AudioPlayerState {
   togglePlay: () => void;
   play?: () => void;
   pause?: () => void;
-  advanceTrack: (mode?: "auto" | "skip" | unknown) => void;
+  skip?: () => void;
+  autoAdvance?: () => void;
+  advanceTrack: (mode?: AdvanceMode) => void;
 }

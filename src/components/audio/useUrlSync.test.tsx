@@ -3,7 +3,7 @@ import type { Dispatch, SetStateAction } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { beatsApi } from "@/lib/api";
 import { AudioEngine } from "@/lib/audio/engine";
-import type { PlaybackPhase } from "@/lib/types/audio";
+import type { PlayerAction } from "@/lib/player/decisions";
 import type { BeatView } from "@/lib/types/beat";
 import { useUrlSync, type UrlSyncOptions } from "./useUrlSync";
 
@@ -44,12 +44,26 @@ describe("useUrlSync", () => {
   };
 
   let mockEngine: AudioEngine;
+  const mockDispatch = vi.fn<Dispatch<PlayerAction>>();
   const mockSetCurrent = vi.fn<(beat: BeatView) => void>();
-  const mockSetPhase = vi.fn<(phase: PlaybackPhase) => void>();
-  const mockSetSecondsRemaining = vi.fn<(sec: number) => void>();
-  const mockSetPositionSec = vi.fn<(sec: number) => void>();
-  const mockSetError = vi.fn<(err: string | null) => void>();
   const mockSetPlayedHistory = vi.fn<Dispatch<SetStateAction<string[]>>>();
+
+  function makeStore(
+    current: BeatView | null = beatTwo,
+    pathname = "/beat/0002",
+  ) {
+    return {
+      setCurrent: mockSetCurrent,
+      setPlayedHistory: mockSetPlayedHistory,
+      stateRef: {
+        current: {
+          current,
+          pathname,
+          playedHistory: current ? [current.id] : [],
+        },
+      },
+    };
+  }
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -69,14 +83,8 @@ describe("useUrlSync", () => {
       <TestComponent
         engine={mockEngine}
         pathname="/beat/0002"
-        current={beatTwo}
-        setCurrent={mockSetCurrent}
-        setPhase={mockSetPhase}
-        setSecondsRemaining={mockSetSecondsRemaining}
-        setPositionSec={mockSetPositionSec}
-        setError={mockSetError}
-        playedHistory={["0002"]}
-        setPlayedHistory={mockSetPlayedHistory}
+        dispatch={mockDispatch}
+        store={makeStore()}
       />,
     );
 
@@ -86,6 +94,10 @@ describe("useUrlSync", () => {
       );
     });
 
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: "set_pathname",
+      pathname: "/beat/0001",
+    });
     expect(mockBeatsApi.getBeat).toHaveBeenCalledWith("0001");
     expect(mockSetCurrent).toHaveBeenCalledWith(beatOne);
     expect(loadSpy).toHaveBeenCalledWith(beatOne);
@@ -107,14 +119,8 @@ describe("useUrlSync", () => {
       <TestComponent
         engine={mockEngine}
         pathname="/beat/0002"
-        current={beatTwo}
-        setCurrent={mockSetCurrent}
-        setPhase={mockSetPhase}
-        setSecondsRemaining={mockSetSecondsRemaining}
-        setPositionSec={mockSetPositionSec}
-        setError={mockSetError}
-        playedHistory={["0002"]}
-        setPlayedHistory={mockSetPlayedHistory}
+        dispatch={mockDispatch}
+        store={makeStore()}
       />,
     );
 
@@ -132,13 +138,8 @@ describe("useUrlSync", () => {
       <TestComponent
         engine={mockEngine}
         pathname="/beat/0002"
-        current={beatTwo}
-        setCurrent={mockSetCurrent}
-        setPhase={mockSetPhase}
-        setSecondsRemaining={mockSetSecondsRemaining}
-        setError={mockSetError}
-        playedHistory={["0002"]}
-        setPlayedHistory={mockSetPlayedHistory}
+        dispatch={mockDispatch}
+        store={makeStore()}
       />,
     );
 
@@ -152,20 +153,15 @@ describe("useUrlSync", () => {
     expect(mockSetCurrent).not.toHaveBeenCalled();
   });
 
-  it("handles beat fetch failure by setting error", async () => {
+  it("handles beat fetch failure by dispatching set_error", async () => {
     mockBeatsApi.getBeat.mockRejectedValueOnce(new Error("Network error"));
 
     render(
       <TestComponent
         engine={mockEngine}
         pathname="/beat/0002"
-        current={beatTwo}
-        setCurrent={mockSetCurrent}
-        setPhase={mockSetPhase}
-        setSecondsRemaining={mockSetSecondsRemaining}
-        setError={mockSetError}
-        playedHistory={["0002"]}
-        setPlayedHistory={mockSetPlayedHistory}
+        dispatch={mockDispatch}
+        store={makeStore()}
       />,
     );
 
@@ -175,24 +171,20 @@ describe("useUrlSync", () => {
       );
     });
 
-    expect(mockSetError).toHaveBeenCalledWith("Network error");
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: "set_error",
+      error: "Network error",
+    });
   });
 
-  it("calls setIsPlaying(false) when transitioning from a beat route to '/'", async () => {
-    const mockSetIsPlaying = vi.fn();
-
+  it("dispatches set_playing(false) when transitioning from a beat route to '/'", () => {
+    const store = makeStore();
     const { rerender } = render(
       <TestComponent
         engine={mockEngine}
         pathname="/beat/0002"
-        current={beatTwo}
-        setCurrent={mockSetCurrent}
-        setPhase={mockSetPhase}
-        setSecondsRemaining={mockSetSecondsRemaining}
-        setError={mockSetError}
-        playedHistory={["0002"]}
-        setPlayedHistory={mockSetPlayedHistory}
-        setIsPlaying={mockSetIsPlaying}
+        dispatch={mockDispatch}
+        store={store}
       />,
     );
 
@@ -200,17 +192,18 @@ describe("useUrlSync", () => {
       <TestComponent
         engine={mockEngine}
         pathname="/"
-        current={beatTwo}
-        setCurrent={mockSetCurrent}
-        setPhase={mockSetPhase}
-        setSecondsRemaining={mockSetSecondsRemaining}
-        setError={mockSetError}
-        playedHistory={["0002"]}
-        setPlayedHistory={mockSetPlayedHistory}
-        setIsPlaying={mockSetIsPlaying}
+        dispatch={mockDispatch}
+        store={store}
       />,
     );
 
-    expect(mockSetIsPlaying).toHaveBeenCalledWith(false);
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: "set_pathname",
+      pathname: "/",
+    });
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: "set_playing",
+      isPlaying: false,
+    });
   });
 });

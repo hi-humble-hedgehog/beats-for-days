@@ -75,8 +75,14 @@ function DebugContent({
   pathname: string;
   onClose: () => void;
 }) {
-  const { current, phase, secondsRemaining, positionSec, playedHistory } =
-    useAudioPlayer();
+  const {
+    current,
+    activePathname,
+    phase,
+    secondsRemaining,
+    positionSec,
+    playedHistory,
+  } = useAudioPlayer();
 
   const historyState =
     typeof window !== "undefined"
@@ -113,7 +119,7 @@ function DebugContent({
 
       <DebugDetails
         currentBeatLabel={currentBeatLabel}
-        pathname={pathname}
+        pathname={activePathname ?? pathname}
         historyState={historyState}
         historyLength={historyLength}
         phase={phase}

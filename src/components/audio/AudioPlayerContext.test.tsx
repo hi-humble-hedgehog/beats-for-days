@@ -251,25 +251,7 @@ describe("AudioPlayerProvider", () => {
     expect(testHarness.engine.getSnapshot().positionSec).toBeCloseTo(15, 2);
   });
 
-  it("pauses active playing when pathname is the root landing page '/'", async () => {
-    mockPathname = "/";
-    render(
-      <AudioPlayerProvider engine={testHarness.engine}>
-        <Consumer />
-      </AudioPlayerProvider>,
-    );
-
-    expect(await screen.findByText(/Current: Soul Rhodes/)).toBeInTheDocument();
-
-    await act(async () => {
-      screen.getByRole("button", { name: "Toggle Play" }).click();
-    });
-
-    // Landing page always forces isPlaying to false to avoid audio auto-start
-    expect(screen.getByText("Playing: no")).toBeInTheDocument();
-  });
-
-  it("pauses active playing when returning to '/' from a beat route and resumes when returning to the beat route", async () => {
+  it("pauses playback when navigating to '/' and stays paused on leaving '/' until Play is pressed", async () => {
     mockPathname = "/beat/0001";
     const { rerender } = render(
       <AudioPlayerProvider engine={testHarness.engine}>
@@ -279,13 +261,12 @@ describe("AudioPlayerProvider", () => {
 
     expect(await screen.findByText(/Current: Soul Rhodes/)).toBeInTheDocument();
 
-    // Start playback on the beat route
     await act(async () => {
       screen.getByRole("button", { name: "Toggle Play" }).click();
     });
     expect(screen.getByText("Playing: yes")).toBeInTheDocument();
 
-    // User navigates back to home: music must pause
+    // Returning to '/' explicitly sets isPlaying to false
     mockPathname = "/";
     rerender(
       <AudioPlayerProvider engine={testHarness.engine}>
@@ -294,18 +275,41 @@ describe("AudioPlayerProvider", () => {
     );
     expect(screen.getByText("Playing: no")).toBeInTheDocument();
 
-    // User starts playback again from home (calls togglePlay) and navigates to beat page
-    await act(async () => {
-      screen.getByRole("button", { name: "Toggle Play" }).click();
-    });
-
+    // Leaving '/' without pressing Play does not auto-resume
     mockPathname = "/beat/0001";
     rerender(
       <AudioPlayerProvider engine={testHarness.engine}>
         <Consumer />
       </AudioPlayerProvider>,
     );
+    expect(screen.getByText("Playing: no")).toBeInTheDocument();
+
+    // Explicit Play resumes playback
+    await act(async () => {
+      screen.getByRole("button", { name: "Toggle Play" }).click();
+    });
     expect(screen.getByText("Playing: yes")).toBeInTheDocument();
+  });
+
+  it("pauses playback when popstate navigates back to '/'", async () => {
+    mockPathname = "/beat/0001";
+    render(
+      <AudioPlayerProvider engine={testHarness.engine}>
+        <Consumer />
+      </AudioPlayerProvider>,
+    );
+
+    expect(await screen.findByText(/Current: Soul Rhodes/)).toBeInTheDocument();
+    await act(async () => {
+      screen.getByRole("button", { name: "Toggle Play" }).click();
+    });
+    expect(screen.getByText("Playing: yes")).toBeInTheDocument();
+
+    window.history.pushState(null, "", "/");
+    await act(async () => {
+      window.dispatchEvent(new PopStateEvent("popstate", { state: null }));
+    });
+    expect(screen.getByText("Playing: no")).toBeInTheDocument();
   });
 
   it("cancels in-flight track playback if paused before audio buffer finishes loading", async () => {

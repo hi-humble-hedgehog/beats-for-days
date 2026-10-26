@@ -3,8 +3,12 @@
 import { useCallback } from "react";
 import { beatsApi } from "@/lib/api";
 import type { AudioEngine } from "@/lib/audio/engine";
+import {
+  planAdvance,
+  type AdvanceMode,
+  type PlayerAction,
+} from "@/lib/player/decisions";
 import { updatePlayedTrackIds } from "@/lib/player/graph";
-import type { PlaybackPhase } from "@/lib/types/audio";
 import type { BeatView } from "@/lib/types/beat";
 
 export interface TrackAdvanceOptions {
@@ -16,27 +20,18 @@ export interface TrackAdvanceOptions {
   }>;
   isResolvingRef: React.MutableRefObject<boolean>;
   commitNextBeat: (beat: BeatView) => void;
-  setPhase: (phase: PlaybackPhase) => void;
-  setSecondsRemaining: (sec: number) => void;
-  setError: (err: string | null) => void;
+  dispatch: React.Dispatch<PlayerAction>;
 }
 
 /**
- * Handles manually or automatically advancing to the next beat via transition graph resolution.
+ * Handles manually skipping or automatically advancing to the next beat.
+ * Delegates engine action planning to `planAdvance` in `src/lib/player/decisions.ts`.
  */
 export function useTrackAdvancer(opts: TrackAdvanceOptions) {
-  const {
-    engine,
-    stateRef,
-    isResolvingRef,
-    commitNextBeat,
-    setPhase,
-    setSecondsRemaining,
-    setError,
-  } = opts;
+  const { engine, stateRef, isResolvingRef, commitNextBeat, dispatch } = opts;
 
-  return useCallback(
-    (modeOrEvent?: unknown) => {
+  const advanceTrack = useCallback(
+    (mode: AdvanceMode = "skip") => {
       const snap = engine.getSnapshot();
       let cur = stateRef.current.current;
       let hist = stateRef.current.playedHistory;
@@ -49,47 +44,60 @@ export function useTrackAdvancer(opts: TrackAdvanceOptions) {
 
       if (!cur || isResolvingRef.current) return;
 
-      const mode = modeOrEvent === "auto" ? "auto" : "skip";
       isResolvingRef.current = true;
 
       beatsApi
         .getNextBeat({ currentTrackId: cur.id, playedTrackIds: hist, mode })
         .then(async (res) => {
-          const nextBeat = res.beat;
+          const plan = planAdvance(mode, res, engine.getSnapshot().isPlaying);
 
-          if (mode === "auto" && res.transition) {
-            await engine.armTransition(nextBeat, res.transition);
-            const snap = engine.getSnapshot();
-            setPhase(snap.phase);
-            setSecondsRemaining(snap.secondsRemaining);
+          if (plan.kind === "arm") {
+            await engine.armTransition(plan.beat, plan.transition);
+            const updated = engine.getSnapshot();
+            dispatch({
+              type: "sync_snapshot",
+              phase: updated.phase,
+              secondsRemaining: updated.secondsRemaining,
+              positionSec: updated.positionSec,
+            });
             return;
           }
 
-          if (engine.getSnapshot().isPlaying) {
-            await engine.skipToTrack(nextBeat);
-            const snap = engine.getSnapshot();
-            setPhase(snap.phase);
-            setSecondsRemaining(snap.secondsRemaining);
+          const skipPromise =
+            plan.kind === "skip"
+              ? engine.skipToTrack(plan.beat)
+              : Promise.resolve();
+
+          commitNextBeat(plan.beat);
+          isResolvingRef.current = false;
+
+          if (plan.kind === "skip") {
+            await skipPromise;
+            const updated = engine.getSnapshot();
+            dispatch({
+              type: "sync_snapshot",
+              phase: updated.phase,
+              secondsRemaining: updated.secondsRemaining,
+              positionSec: updated.positionSec,
+            });
           }
-          commitNextBeat(nextBeat);
         })
         .catch((err) => {
-          setError(
-            err instanceof Error ? err.message : "Failed to advance track",
-          );
+          dispatch({
+            type: "set_error",
+            error:
+              err instanceof Error ? err.message : "Failed to advance track",
+          });
         })
         .finally(() => {
           isResolvingRef.current = false;
         });
     },
-    [
-      commitNextBeat,
-      engine,
-      isResolvingRef,
-      setError,
-      setPhase,
-      setSecondsRemaining,
-      stateRef,
-    ],
+    [commitNextBeat, dispatch, engine, isResolvingRef, stateRef],
   );
+
+  const skip = useCallback(() => advanceTrack("skip"), [advanceTrack]);
+  const autoAdvance = useCallback(() => advanceTrack("auto"), [advanceTrack]);
+
+  return { advanceTrack, skip, autoAdvance };
 }

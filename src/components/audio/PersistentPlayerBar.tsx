@@ -169,6 +169,7 @@ export function PersistentPlayerBar() {
     isLoading,
     error,
     togglePlay,
+    skip,
     advanceTrack,
   } = useAudioPlayer();
 
@@ -197,7 +198,7 @@ export function PersistentPlayerBar() {
           positionSec={positionSec}
           durationSec={durationSec}
           onTogglePlay={togglePlay}
-          onAdvanceTrack={advanceTrack}
+          onAdvanceTrack={() => (skip ? skip() : advanceTrack("skip"))}
         />
       </div>
     </aside>
