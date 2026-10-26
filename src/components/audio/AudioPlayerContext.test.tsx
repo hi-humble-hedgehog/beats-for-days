@@ -676,8 +676,12 @@ describe("AudioPlayerProvider", () => {
     vi.useRealTimers();
   });
 
-  it("hydrates initial beat from BeatDeck without calling beatsApi.getBeat on cold /beat/:slug load", async () => {
+  it("hydrates initial beat from BeatDeck without calling beatsApi.getBeat or writing played history before Play", async () => {
     mockPathname = "/beat/0002";
+    window.localStorage.setItem(
+      STORAGE_KEYS.PLAYED_TRACKS,
+      JSON.stringify(["0099"]),
+    );
     const hydratedBeat: BeatView = {
       id: "0002",
       name: "Jazz Flute",
@@ -690,11 +694,16 @@ describe("AudioPlayerProvider", () => {
     };
 
     function Hydrator() {
-      const { commitBeat } = useAudioPlayer();
+      const { hydrateBeat, playedHistory } = useAudioPlayer();
       useEffect(() => {
-        commitBeat?.(hydratedBeat);
-      }, [commitBeat]);
-      return <Consumer />;
+        hydrateBeat?.(hydratedBeat);
+      }, [hydrateBeat]);
+      return (
+        <>
+          <Consumer />
+          <p>History: {(playedHistory ?? []).join(",")}</p>
+        </>
+      );
     }
 
     render(
@@ -705,6 +714,12 @@ describe("AudioPlayerProvider", () => {
 
     expect(await screen.findByText(/Current: Jazz Flute/)).toBeInTheDocument();
     expect(await screen.findByText("Loading: no")).toBeInTheDocument();
+    expect(screen.getByText("History: 0099")).toBeInTheDocument();
+    expect(
+      JSON.parse(
+        window.localStorage.getItem(STORAGE_KEYS.PLAYED_TRACKS) ?? "[]",
+      ),
+    ).toEqual(["0099"]);
     expect(mockBeatsApi.getBeat).not.toHaveBeenCalled();
     expect(mockBeatsApi.getNextBeat).not.toHaveBeenCalled();
   });

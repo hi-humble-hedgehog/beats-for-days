@@ -27,7 +27,7 @@ export function BeatDeck({ initialBeat }: { initialBeat?: BeatView }) {
     notFoundBeatId,
     isPlaying,
     togglePlay,
-    commitBeat,
+    hydrateBeat,
     skip,
     advanceTrack,
     secondsRemaining,
@@ -35,9 +35,9 @@ export function BeatDeck({ initialBeat }: { initialBeat?: BeatView }) {
 
   useEffect(() => {
     if (initialBeat) {
-      commitBeat?.(initialBeat);
+      hydrateBeat?.(initialBeat);
     }
-  }, [commitBeat, initialBeat]);
+  }, [hydrateBeat, initialBeat]);
 
   const slug = resolveActiveSlug(activePathname, pathname, params?.slug);
 

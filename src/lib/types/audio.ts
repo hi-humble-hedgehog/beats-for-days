@@ -19,6 +19,7 @@ export interface AudioPlayerState {
   play?: () => void;
   pause?: () => void;
   commitBeat?: (beat: BeatView) => void;
+  hydrateBeat?: (beat: BeatView) => void;
   skip?: () => void;
   autoAdvance?: () => void;
   advanceTrack: (mode?: AdvanceMode) => void;

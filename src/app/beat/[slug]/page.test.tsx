@@ -8,6 +8,7 @@ const mockUsePathname = vi.fn();
 const mockTogglePlay = vi.fn();
 const mockAdvanceTrack = vi.fn();
 const mockCommitBeat = vi.fn();
+const mockHydrateBeat = vi.fn();
 const mockNotFound = vi.fn();
 const mockFetchBeatViewById = vi.fn();
 
@@ -20,6 +21,7 @@ let mockPlayerState = {
   togglePlay: mockTogglePlay,
   advanceTrack: mockAdvanceTrack,
   commitBeat: mockCommitBeat,
+  hydrateBeat: mockHydrateBeat,
 };
 
 vi.mock("next/navigation", () => ({
@@ -76,7 +78,8 @@ describe("BeatPage (Server Component)", () => {
     render(ui);
 
     expect(mockFetchBeatViewById).toHaveBeenCalledWith("0001");
-    expect(mockCommitBeat).toHaveBeenCalledWith(serverBeat);
+    expect(mockHydrateBeat).toHaveBeenCalledWith(serverBeat);
+    expect(mockCommitBeat).not.toHaveBeenCalled();
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
       "#Brooklyn Sunset",
     );
@@ -95,6 +98,7 @@ describe("BeatDeck", () => {
       togglePlay: mockTogglePlay,
       advanceTrack: mockAdvanceTrack,
       commitBeat: mockCommitBeat,
+      hydrateBeat: mockHydrateBeat,
     };
   });
 

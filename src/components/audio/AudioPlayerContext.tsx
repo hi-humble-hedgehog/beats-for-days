@@ -244,7 +244,16 @@ export function AudioPlayerProvider({
     stateRef,
   });
 
-  const { dispatch, ui } = playerState;
+  const { setCurrent, dispatch, ui } = playerState;
+  const hydrateBeat = useCallback(
+    (beat: BeatView) => {
+      if (!stateRef.current.current) {
+        stateRef.current.current = beat;
+        setCurrent(beat);
+      }
+    },
+    [setCurrent],
+  );
   const togglePlay = useCallback(
     () => dispatch({ type: "toggle_playing" }),
     [dispatch],
@@ -261,21 +270,15 @@ export function AudioPlayerProvider({
   return (
     <AudioPlayerContext.Provider
       value={{
+        ...ui,
         current: playerState.current,
-        activePathname: ui.activePathname,
-        hasPausedBeat: ui.hasPausedBeat,
-        notFoundBeatId: ui.notFoundBeatId,
-        isPlaying: ui.isPlaying,
-        phase: ui.phase,
-        secondsRemaining: ui.secondsRemaining,
-        positionSec: ui.positionSec,
         isLoading: playerState.isLoading,
-        error: ui.error,
         playedHistory: playerState.playedHistory,
         togglePlay,
         play,
         pause,
         commitBeat: commitNextBeat,
+        hydrateBeat,
         skip,
         autoAdvance,
         advanceTrack,
