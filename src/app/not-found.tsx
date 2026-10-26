@@ -1,28 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
-import {
-  useAudioPlayer,
-  useStartPlayback,
-} from "@/components/audio/AudioPlayerContext";
+import { useStartPlayback } from "@/components/audio/AudioPlayerContext";
 
 /**
  * 404 Not Found page for unknown routes and missing beat IDs.
- * Pauses active playback like the landing page and lets visitors start the next beat.
+ * Pauses active playback like the landing page and lets visitors resume or start the next beat.
  */
 export default function NotFound() {
-  const { isPlaying, pause, togglePlay } = useAudioPlayer();
   const handleStartPlayback = useStartPlayback();
-
-  useEffect(() => {
-    if (isPlaying) {
-      if (pause) {
-        pause();
-      } else {
-        togglePlay();
-      }
-    }
-  }, [isPlaying, pause, togglePlay]);
 
   return (
     /* A11Y-PLAN:
@@ -43,7 +28,8 @@ export default function NotFound() {
         </h1>
 
         <p className="max-w-md text-xs font-bold tracking-widest text-muted-foreground uppercase">
-          That beat is not in the crate. Press play to jump to the next track.
+          That beat is not in the crate. Press play to resume your paused beat
+          or start the next track.
         </p>
       </div>
 

@@ -9,6 +9,8 @@ import { redirect } from "next/navigation";
  * next unheard beat via `resolveStartBeat`. In-app header navigation links directly
  * to the active beat URL when one is loaded.
  */
+export const instant = false;
+
 export default function BeatsPage() {
   redirect("/");
 }

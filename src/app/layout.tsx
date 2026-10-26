@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Suspense } from "react";
 import { Inter_Tight } from "next/font/google";
 import "./globals.css";
 
@@ -38,14 +37,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
       </head>
       <body className="flex min-h-full flex-col pb-24 font-sans">
-        <Suspense fallback={null}>
-          <AudioPlayerProvider>
-            <HeaderNav />
-            {children}
-            <PersistentPlayerBar />
-            <DebugPanel />
-          </AudioPlayerProvider>
-        </Suspense>
+        <AudioPlayerProvider>
+          <HeaderNav />
+          {children}
+          <PersistentPlayerBar />
+          <DebugPanel />
+        </AudioPlayerProvider>
       </body>
     </html>
   );

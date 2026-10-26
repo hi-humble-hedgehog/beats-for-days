@@ -40,7 +40,7 @@ We will make the route URL the single source of truth for track playback on beat
 - Browser Back and Forward navigation changes both the UI and audio playback immediately.
 - Users can bookmark or share direct links to specific beats (e.g., `/beat/0042`).
 - The player state remains synchronized with Next.js App Router navigation.
-- Cold starts on `/beat/:slug` fetch only the requested track metadata (~1 KB) instead of full catalogs.
+- Missing beat IDs on `/beat/:slug` return an HTTP 404 Not Found page and keep playback paused until the listener presses Play.
 
 ## Alternatives considered
 

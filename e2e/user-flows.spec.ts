@@ -49,7 +49,8 @@ test.describe("Navigation & static pages", () => {
   test("renders 404 for an unknown beat ID, keeps playback paused, and starts next beat on Play", async ({
     page,
   }) => {
-    await page.goto("/beat/does-not-exist");
+    const response = await page.goto("/beat/does-not-exist");
+    expect(response?.status()).toBe(404);
     await expect(
       page.getByRole("heading", { level: 1, name: /404 — Beat Not Found/i }),
     ).toBeVisible();
