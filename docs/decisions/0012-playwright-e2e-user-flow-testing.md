@@ -6,7 +6,7 @@
 ## Context
 
 Unit tests (`*.test.ts`) and happy-dom component tests (`*.test.tsx`) verify isolated logic and individual UI components ([ADR 0003](0003-testing-strategy.md)).
-However, happy-dom does not run a real browser engine, Next.js App Router server redirects (`/beats` → `/beat/0001`), live route handlers (`/api/beats/next`, `/api/waitlist`), or full multi-page navigation with the persistent audio player bar.
+However, happy-dom does not run a real browser engine, Next.js App Router server redirects (`/beats` → `/`), live route handlers (`/api/beats/next`, `/api/waitlist`), or full multi-page navigation with the persistent audio player bar.
 
 In addition, LLMs and developers often estimate color contrast ratios instead of computing relative luminance, causing subtle WCAG 2.2 AA contrast failures on accent and muted tokens.
 

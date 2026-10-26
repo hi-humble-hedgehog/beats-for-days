@@ -37,11 +37,39 @@ async function assertBornAccessible(page: Page) {
 }
 
 test.describe("Navigation & static pages", () => {
-  test("redirects /beats to the active beat deck", async ({ page }) => {
+  test("redirects /beats to the root landing page", async ({ page }) => {
     await page.goto("/beats");
-    await expect(page).toHaveURL(/\/beat\/.+/);
+    await expect(page).toHaveURL("/");
     await expect(page.getByRole("main")).toBeVisible();
-    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Beats for Days" }),
+    ).toBeVisible();
+  });
+
+  test("renders 404 for an unknown beat ID, keeps playback paused, and starts next beat on Play", async ({
+    page,
+  }) => {
+    const response = await page.goto("/beat/does-not-exist");
+    expect(response?.status()).toBe(404);
+    await expect(
+      page.getByRole("heading", { level: 1, name: /404 — Beat Not Found/i }),
+    ).toBeVisible();
+
+    const playerBar = page.getByRole("complementary", {
+      name: "Persistent Audio Player",
+    });
+    await expect(
+      playerBar.getByRole("button", { name: "Play audio" }),
+    ).toBeVisible();
+
+    await page.getByRole("button", { name: /Start Radio Stream/i }).click();
+    await expect(page).toHaveURL(/\/beat\/track-[a-c]/);
+    await expect(
+      page.getByRole("main").getByText("Playing", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      playerBar.getByRole("button", { name: "Pause audio" }),
+    ).toBeVisible();
   });
 
   test("navigates across About, Terms of Service, and Privacy Policy via header links", async ({
@@ -83,13 +111,13 @@ test.describe("Debug panel", () => {
   const toggleName = "Toggle history debug panel";
 
   test("stays hidden without ?debug=1", async ({ page }) => {
-    await page.goto("/beat/0001");
+    await page.goto("/beat/track-a");
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await expect(page.getByRole("button", { name: toggleName })).toHaveCount(0);
   });
 
   test("shows playback and history state with ?debug=1", async ({ page }) => {
-    await page.goto("/beat/0001?debug=1");
+    await page.goto("/beat/track-a?debug=1");
     const debugButton = page.getByRole("button", { name: toggleName });
     await expect(debugButton).toBeVisible();
     await debugButton.click();
@@ -311,6 +339,7 @@ test.describe("Born-Accessible UI & WCAG 2.2 AA verification", () => {
 
   for (const route of [
     "/",
+    "/beat/track-a",
     "/beat/0001",
     "/generate",
     "/about",

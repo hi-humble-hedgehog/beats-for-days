@@ -39,15 +39,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
       </head>
       <body className="flex min-h-full flex-col pb-24 font-sans">
-        <Suspense fallback={null}>
-          <AudioPlayerProvider>
-            <HeaderNav />
-            {children}
-            <PersistentPlayerBar />
-            {/* Off unless DEBUG_PANEL=true; then it still needs ?debug=1. */}
-            {getServerEnv().DEBUG_PANEL ? <DebugPanelGate /> : null}
-          </AudioPlayerProvider>
-        </Suspense>
+        <AudioPlayerProvider>
+          <HeaderNav />
+          {children}
+          <PersistentPlayerBar />
+          {/* Off unless DEBUG_PANEL=true; then it still needs ?debug=1. */}
+          {getServerEnv().DEBUG_PANEL ? (
+            <Suspense fallback={null}>
+              <DebugPanelGate />
+            </Suspense>
+          ) : null}
+        </AudioPlayerProvider>
       </body>
     </html>
   );

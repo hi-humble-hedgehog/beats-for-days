@@ -1,13 +1,16 @@
 import { redirect } from "next/navigation";
 
 /**
- * Server component redirecting cold-start /beats visitors to the canonical beat deck.
+ * Server component redirecting cold-start `/beats` visitors to the root landing page.
  *
  * Rationale:
- * Issuing an HTTP 307 server redirect eliminates client-side DOM mounting and avoids
- * any render flash when a user arrives directly at `/beats` via bookmark or external link.
- * In-app header navigation directly computes the active beat URL, bypassing this route entirely.
+ * Play history lives in browser `localStorage`, so the server cannot pick an unheard
+ * beat on a cold `/beats` request. Redirecting to `/` lets the visitor start the
+ * next unheard beat via `resolveStartBeat`. In-app header navigation links directly
+ * to the active beat URL when one is loaded.
  */
+export const instant = false;
+
 export default function BeatsPage() {
-  redirect("/beat/0001");
+  redirect("/");
 }

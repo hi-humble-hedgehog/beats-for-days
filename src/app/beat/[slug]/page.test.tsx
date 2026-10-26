@@ -1,15 +1,19 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import BeatPage from "./page";
+import { BeatDeck } from "./BeatDeck";
 
 const mockUseParams = vi.fn();
 const mockUsePathname = vi.fn();
 const mockTogglePlay = vi.fn();
 const mockAdvanceTrack = vi.fn();
+const mockNotFound = vi.fn();
+const mockFetchBeatViewById = vi.fn();
 
 let mockPlayerState = {
   current: null as { id: string; name: string } | null,
   activePathname: undefined as string | undefined,
+  notFoundBeatId: null as string | null,
   isPlaying: false,
   secondsRemaining: 30,
   togglePlay: mockTogglePlay,
@@ -19,18 +23,63 @@ let mockPlayerState = {
 vi.mock("next/navigation", () => ({
   useParams: () => mockUseParams(),
   usePathname: () => mockUsePathname(),
+  useRouter: () => ({ push: vi.fn() }),
+  notFound: () => {
+    mockNotFound();
+    throw new Error("NEXT_NOT_FOUND");
+  },
+}));
+
+vi.mock("@/lib/tracks", () => ({
+  fetchBeatViewById: (id: string) => mockFetchBeatViewById(id),
 }));
 
 vi.mock("@/components/audio/AudioPlayerContext", () => ({
   useAudioPlayer: () => mockPlayerState,
+  useStartPlayback: () => vi.fn(),
 }));
 
-describe("BeatPage", () => {
+describe("BeatPage (Server Component)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("calls notFound() when fetchBeatViewById returns null", async () => {
+    mockFetchBeatViewById.mockResolvedValue(null);
+
+    await expect(
+      BeatPage({ params: Promise.resolve({ slug: "missing-beat" }) }),
+    ).rejects.toThrow("NEXT_NOT_FOUND");
+
+    expect(mockFetchBeatViewById).toHaveBeenCalledWith("missing-beat");
+    expect(mockNotFound).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders BeatDeck when fetchBeatViewById resolves a beat", async () => {
+    mockFetchBeatViewById.mockResolvedValue({
+      id: "0001",
+      name: "Brooklyn Sunset",
+    });
+    mockUseParams.mockReturnValue({ slug: "0001" });
+    mockPlayerState.current = { id: "0001", name: "Brooklyn Sunset" };
+
+    const ui = await BeatPage({ params: Promise.resolve({ slug: "0001" }) });
+    render(ui);
+
+    expect(mockFetchBeatViewById).toHaveBeenCalledWith("0001");
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+      "#Brooklyn Sunset",
+    );
+  });
+});
+
+describe("BeatDeck", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPlayerState = {
       current: null,
       activePathname: undefined,
+      notFoundBeatId: null,
       isPlaying: false,
       secondsRemaining: 30,
       togglePlay: mockTogglePlay,
@@ -41,7 +90,7 @@ describe("BeatPage", () => {
   it("renders loading state with the slug when beat is not yet loaded", () => {
     mockUseParams.mockReturnValue({ slug: "0002" });
 
-    render(<BeatPage />);
+    render(<BeatDeck />);
 
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
       "Loading Beat 0002...",
@@ -59,7 +108,7 @@ describe("BeatPage", () => {
     mockUseParams.mockReturnValue({ slug: "0002" });
     mockPlayerState.current = { id: "0001", name: "Brooklyn Sunset" };
 
-    render(<BeatPage />);
+    render(<BeatDeck />);
 
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
       "Loading Beat 0002...",
@@ -70,7 +119,7 @@ describe("BeatPage", () => {
   it("renders fallback dash when slug is missing from params", () => {
     mockUseParams.mockReturnValue(null);
 
-    render(<BeatPage />);
+    render(<BeatDeck />);
 
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
       "Loading Beat —...",
@@ -84,7 +133,7 @@ describe("BeatPage", () => {
     mockPlayerState.isPlaying = true;
     mockPlayerState.secondsRemaining = 15;
 
-    render(<BeatPage />);
+    render(<BeatDeck />);
 
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
       "Brooklyn Sunset",
@@ -109,7 +158,7 @@ describe("BeatPage", () => {
     mockUseParams.mockReturnValue({ slug: "0001" });
     mockPlayerState.current = { id: "0001", name: "Brooklyn Sunset" };
 
-    render(<BeatPage />);
+    render(<BeatDeck />);
 
     const buttons = screen.getAllByRole("button");
     for (const button of buttons) {
@@ -124,11 +173,23 @@ describe("BeatPage", () => {
     mockPlayerState.activePathname = "/beat/0002";
     mockPlayerState.current = { id: "0002", name: "Jazz Flute" };
 
-    render(<BeatPage />);
+    render(<BeatDeck />);
 
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
       "#Jazz Flute",
     );
     expect(screen.getByText("Track ID: 0002")).toBeInTheDocument();
+  });
+
+  it("renders 404 NotFound state when notFoundBeatId matches the route slug", () => {
+    mockUseParams.mockReturnValue({ slug: "9999" });
+    mockUsePathname.mockReturnValue("/beat/9999");
+    mockPlayerState.notFoundBeatId = "9999";
+
+    render(<BeatDeck />);
+
+    expect(
+      screen.getByRole("heading", { level: 1, name: /404 — Beat Not Found/i }),
+    ).toBeInTheDocument();
   });
 });

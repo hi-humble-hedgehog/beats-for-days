@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { BeatView, TransitionView } from "@/lib/types/beat";
 import {
   planAdvance,
@@ -178,6 +178,8 @@ describe("playerReducer", () => {
     expect(createInitialPlayerUiState("/beat/0001")).toEqual({
       activePathname: "/beat/0001",
       isPlaying: false,
+      hasPausedBeat: false,
+      notFoundBeatId: null,
       phase: "idle",
       secondsRemaining: 0,
       positionSec: 0,
@@ -234,5 +236,198 @@ describe("playerReducer", () => {
       error: "Network error",
     });
     expect(errored.error).toBe("Network error");
+  });
+});
+
+import { resolveStartBeat, shouldResolveStartOnPlay } from "./decisions";
+
+describe("playerReducer notFound and hasPausedBeat", () => {
+  it("tracks hasPausedBeat once playback starts and keeps it true after pausing", () => {
+    const initial = createInitialPlayerUiState("/beat/0001");
+    expect(initial.hasPausedBeat).toBe(false);
+    expect(initial.notFoundBeatId).toBeNull();
+
+    const stillStopped = playerReducer(initial, {
+      type: "set_playing",
+      isPlaying: false,
+    });
+    expect(stillStopped.hasPausedBeat).toBe(false);
+
+    const playing = playerReducer(initial, {
+      type: "set_playing",
+      isPlaying: true,
+    });
+    expect(playing.hasPausedBeat).toBe(true);
+
+    const paused = playerReducer(playing, {
+      type: "set_playing",
+      isPlaying: false,
+    });
+    expect(paused.isPlaying).toBe(false);
+    expect(paused.hasPausedBeat).toBe(true);
+
+    const toggledFromFresh = playerReducer(initial, { type: "toggle_playing" });
+    expect(toggledFromFresh.isPlaying).toBe(true);
+    expect(toggledFromFresh.hasPausedBeat).toBe(true);
+
+    const toggledToPaused = playerReducer(toggledFromFresh, {
+      type: "toggle_playing",
+    });
+    expect(toggledToPaused.isPlaying).toBe(false);
+    expect(toggledToPaused.hasPausedBeat).toBe(true);
+  });
+
+  it("handles set_not_found by recording beatId and pausing when non-null", () => {
+    const playing = playerReducer(createInitialPlayerUiState("/beat/0001"), {
+      type: "set_playing",
+      isPlaying: true,
+    });
+
+    const missing = playerReducer(playing, {
+      type: "set_not_found",
+      beatId: "9999",
+    });
+    expect(missing.notFoundBeatId).toBe("9999");
+    expect(missing.isPlaying).toBe(false);
+
+    const cleared = playerReducer(missing, {
+      type: "set_not_found",
+      beatId: null,
+    });
+    expect(cleared.notFoundBeatId).toBeNull();
+  });
+
+  it("preserves isPlaying when set_not_found clears beatId to null", () => {
+    const playing = playerReducer(createInitialPlayerUiState("/beat/0001"), {
+      type: "set_playing",
+      isPlaying: true,
+    });
+    const cleared = playerReducer(playing, {
+      type: "set_not_found",
+      beatId: null,
+    });
+    expect(cleared.isPlaying).toBe(true);
+  });
+});
+
+describe("resolveStartBeat", () => {
+  it("resumes the paused beat without fetching when current is loaded and hasPausedBeat is true", async () => {
+    const fetchNextBeat = vi.fn();
+    const commitBeat = vi.fn();
+    const startPlay = vi.fn();
+    const navigate = vi.fn();
+
+    const result = await resolveStartBeat({
+      current: sampleBeat,
+      hasPausedBeat: true,
+      playedHistory: ["0001", "0002"],
+      fetchNextBeat,
+      commitBeat,
+      startPlay,
+      navigate,
+    });
+
+    expect(result).toEqual(sampleBeat);
+    expect(fetchNextBeat).not.toHaveBeenCalled();
+    expect(commitBeat).not.toHaveBeenCalled();
+    expect(startPlay).toHaveBeenCalledTimes(1);
+    expect(navigate).toHaveBeenCalledWith("/beat/0002");
+  });
+
+  it("fetches next beat passing current.id when hasPausedBeat is false on a fresh session", async () => {
+    const nextBeat: BeatView = {
+      ...sampleBeat,
+      id: "0003",
+      name: "Soul Trumpet",
+    };
+    const fetchNextBeat = vi.fn().mockResolvedValue({ beat: nextBeat });
+    const commitBeat = vi.fn();
+    const startPlay = vi.fn();
+    const navigate = vi.fn();
+
+    const result = await resolveStartBeat({
+      current: sampleBeat,
+      hasPausedBeat: false,
+      playedHistory: ["0001"],
+      fetchNextBeat,
+      commitBeat,
+      startPlay,
+      navigate,
+    });
+
+    expect(fetchNextBeat).toHaveBeenCalledWith({
+      currentTrackId: "0002",
+      playedTrackIds: ["0001"],
+      mode: "skip",
+    });
+    expect(commitBeat).toHaveBeenCalledWith(nextBeat);
+    expect(startPlay).toHaveBeenCalledTimes(1);
+    expect(navigate).toHaveBeenCalledWith("/beat/0003");
+    expect(result).toEqual(nextBeat);
+  });
+
+  it("fetches next beat passing last playedHistory id when current is null", async () => {
+    const fetchNextBeat = vi.fn().mockResolvedValue({ beat: sampleBeat });
+    const startPlay = vi.fn();
+
+    await resolveStartBeat({
+      current: null,
+      hasPausedBeat: false,
+      playedHistory: ["0001", "0004"],
+      fetchNextBeat,
+      startPlay,
+    });
+
+    expect(fetchNextBeat).toHaveBeenCalledWith({
+      currentTrackId: "0004",
+      playedTrackIds: ["0001", "0004"],
+      mode: "skip",
+    });
+  });
+
+  it("fetches next beat with undefined currentTrackId when current is null and history is empty", async () => {
+    const fetchNextBeat = vi.fn().mockResolvedValue({ beat: sampleBeat });
+    const startPlay = vi.fn();
+
+    await resolveStartBeat({
+      current: null,
+      playedHistory: [],
+      fetchNextBeat,
+      startPlay,
+    });
+
+    expect(fetchNextBeat).toHaveBeenCalledWith({
+      currentTrackId: undefined,
+      playedTrackIds: [],
+      mode: "skip",
+    });
+  });
+});
+
+describe("shouldResolveStartOnPlay", () => {
+  it("returns false when already playing", () => {
+    expect(shouldResolveStartOnPlay(true, "/", null, null)).toBe(false);
+    expect(
+      shouldResolveStartOnPlay(true, "/beat/0002", sampleBeat, "0002"),
+    ).toBe(false);
+  });
+
+  it("returns true when paused on home, on a 404 beat, or when current is null", () => {
+    expect(shouldResolveStartOnPlay(false, "/", sampleBeat, null)).toBe(true);
+    expect(
+      shouldResolveStartOnPlay(false, "/beat/missing", sampleBeat, "missing"),
+    ).toBe(true);
+    expect(shouldResolveStartOnPlay(false, "/beat/0002", null, null)).toBe(
+      true,
+    );
+  });
+
+  it("returns false when paused on a valid beat route or background route with current loaded", () => {
+    expect(
+      shouldResolveStartOnPlay(false, "/beat/0002", sampleBeat, null),
+    ).toBe(false);
+    expect(shouldResolveStartOnPlay(false, "/about", sampleBeat, null)).toBe(
+      false,
+    );
   });
 });

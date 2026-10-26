@@ -7,8 +7,8 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("BeatsPage", () => {
-  it("immediately triggers a server-side redirect to /beat/0001", () => {
+  it("immediately triggers a server-side redirect to /", () => {
     BeatsPage();
-    expect(mockRedirect).toHaveBeenCalledWith("/beat/0001");
+    expect(mockRedirect).toHaveBeenCalledWith("/");
   });
 });

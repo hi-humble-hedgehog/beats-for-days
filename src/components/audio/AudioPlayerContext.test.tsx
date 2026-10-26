@@ -10,6 +10,7 @@ import { AudioPlayerProvider, useAudioPlayer } from "./AudioPlayerContext";
 let mockPathname = "/beats";
 vi.mock("next/navigation", () => ({
   usePathname: () => mockPathname,
+  useRouter: () => ({ push: vi.fn() }),
 }));
 
 vi.mock("@/lib/api", () => ({
@@ -728,5 +729,24 @@ describe("AudioPlayerProvider", () => {
     );
 
     expect(await screen.findByText(/Current: Jazz Flute/)).toBeInTheDocument();
+  });
+
+  it("marks route as not found without falling back to getNextBeat when direct /beat/:slug does not exist", async () => {
+    mockPathname = "/beat/9999";
+
+    render(
+      <AudioPlayerProvider engine={testHarness.engine}>
+        <Consumer />
+      </AudioPlayerProvider>,
+    );
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(mockBeatsApi.getBeat).toHaveBeenCalledWith("9999");
+    expect(mockBeatsApi.getNextBeat).not.toHaveBeenCalled();
+    expect(screen.getByText("Current: none")).toBeInTheDocument();
+    expect(screen.getByText("Playing: no")).toBeInTheDocument();
   });
 });

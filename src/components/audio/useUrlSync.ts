@@ -45,8 +45,12 @@ function useTrackSwitcher(
       inFlightRef.current = targetBeatId;
       try {
         const beat = await beatsApi.getBeat(targetBeatId);
-        if (!beat) return;
+        if (!beat) {
+          dispatch({ type: "set_not_found", beatId: targetBeatId });
+          return;
+        }
 
+        dispatch({ type: "set_not_found", beatId: null });
         const nextHistory = updatePlayedTrackIds(
           stateRef.current.playedHistory,
           beat.id,
@@ -102,9 +106,12 @@ export function useUrlSync(opts: UrlSyncOptions) {
         stateRef.current.current?.id,
       );
       if (intent.kind === "pause") {
+        dispatch({ type: "set_not_found", beatId: null });
         dispatch({ type: "set_playing", isPlaying: false });
       } else if (intent.kind === "load") {
         void switchToBeat(intent.beatId);
+      } else {
+        dispatch({ type: "set_not_found", beatId: null });
       }
     },
     [dispatch, stateRef, switchToBeat],

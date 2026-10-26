@@ -43,7 +43,7 @@ We will roll out in **two phases** and connect tracks through an **on-the-fly tr
 
 ### 3. On-the-Fly Transition Graph & 1-Minute Loops
 
-- **4-digit `/beat/####` URLs:** Each beat gets the next 4-digit ID in order (`/beat/0001`, `/beat/0002`, …, `/beat/1500`). Visiting `/beats` redirects to the currently playing beat (`/beat/####`).
+- **4-digit `/beat/####` URLs:** Each beat gets the next 4-digit ID in order (`/beat/0001`, `/beat/0002`, …, `/beat/1500`). Visiting `/beats` on a cold request redirects to `/`; in-app header navigation links directly to the active beat (`/beat/####`).
 - **1-minute loopable beats:** Every beat is 1 minute long and loops seamlessly from end to start.
 - **Browser play history (`playedTrackIds`):** The browser saves a list of heard beat IDs in `localStorage`, ordered from oldest to newest. Playing a beat moves its ID to the newest end of the list.
 - **How the radio picks the next beat (after Loop 1 finishes):**
