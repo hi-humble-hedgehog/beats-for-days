@@ -17,16 +17,18 @@ Background: `docs/guides/testing.md`, `docs/decisions/0003-testing-strategy.md`.
 pnpm verify
 ```
 
-Runs typecheck → lint → format:check → deps:check → knip → tests + CRAP.
+Runs typecheck → lint → lint:a11y → format:check → deps:check → knip → tests + CRAP → test:e2e (Playwright + axe-core + 320px reflow).
 Fix failures in that order (type errors often cause lint noise).
 
 - **Lint/format**: `pnpm lint:fix && pnpm format`, then fix what remains by hand.
   Complexity/size errors mean split the function, not disable the rule.
+- **lint:a11y**: `pnpm lint:a11y` verifies `/* Contrast: X.X:1 vs --bg (level) */` assertions on `oklch(...)` and hex tokens and checks for clickable non-semantic elements or removed focus outlines.
 - **deps:check**: read the violated rule's `comment` in
   `.dependency-cruiser.cjs`. Move code to the right layer; don't loosen the rule
   unless the architecture really changed (then write an ADR).
 - **knip**: delete unused exports/files/deps. If something is used in a way
   knip can't see (alias, config string), add it to `knip.json` with care.
+- **test:e2e**: runs Playwright user flows, `@axe-core/playwright` WCAG 2.2 AA checks, and 320px viewport reflow checks across all routes.
 
 ## 2. CRAP offenders
 

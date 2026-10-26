@@ -3,20 +3,55 @@
 ## Setup
 
 ```bash
-nvm use                 # Node from .nvmrc
-pnpm install            # also installs git hooks (lefthook)
+nvm use                           # Node from .nvmrc
+pnpm install                      # also installs git hooks (lefthook)
 cp .env.example .env.local
-brew install gitleaks   # optional: local secret scanning (CI always scans)
+supabase start                    # local Supabase (requires Docker running)
+pnpm db:seed                      # upload starter tracks & transitions
+brew install gitleaks             # optional: local secret scanning (CI always scans)
 pnpm dev
 ```
+
+### Local Supabase Troubleshooting
+
+- **Docker daemon not running:** Start Docker Desktop (`open -a Docker`) or OrbStack before running `supabase start`.
+- **Stale container state (`no container found for project`):** Run `supabase stop --no-backup` followed by `supabase start` to recreate clean local containers.
 
 ## Inner loop
 
 ```bash
 pnpm test:watch         # fast feedback while coding
+pnpm lint:a11y          # static OKLCH/hex contrast & semantic control lint
+pnpm test:e2e           # end-to-end browser + axe-core + 320px reflow tests
 pnpm verify             # full local gate before pushing / declaring done
 pnpm test:mutation      # after logic-heavy changes
 ```
+
+### Playback debug panel
+
+The debug panel shows the active beat, route, history state and played ids. It needs two switches:
+
+1. Set `DEBUG_PANEL=true` in the environment (`.env.local` locally, or the Vercel project settings).
+2. Add `?debug=1` to the page URL.
+
+- The env var is read at build time. On Vercel, changing it needs a redeploy.
+- With the env var off, the panel's code never loads.
+- With it on, visiting `?debug=1` enables the panel and sets a local cookie (`beats_debug_panel=1`), keeping the panel present across in-app and browser history navigation.
+- The panel open/closed toggle state persists in `sessionStorage` (`beats_debug_panel_open`).
+- The panel shows only the visitor's own local data. It sends nothing anywhere.
+
+## Branching & PR workflow
+
+1. **Branch naming:** Create feature/fix branches. Direct commits to `main` are blocked.
+   - `feat/<feature-name>`
+   - `fix/<bug-name>`
+   - `refactor/<scope>`
+   - `chore/<task>`
+2. **Pull Requests:**
+   - PR title must follow Conventional Commits (e.g., `feat(audio): implement gapless bar looping`). Enforced in CI.
+   - PR size target: ≤ 400 changed production lines (excluding tests, `docs/`, and lockfile). CI warns if exceeded.
+   - Merge strategy: **Squash and merge** with conventional title to maintain linear history on `main`.
+   - Head branch auto-deleted after merge.
 
 ## What runs when
 
@@ -24,8 +59,8 @@ pnpm test:mutation      # after logic-heavy changes
 flowchart LR
     commit["git commit"] --> pc["pre-commit (~5s): gitleaks · eslint --fix · prettier · typecheck"]
     commit --> cm["commit-msg: commitlint"]
-    push["git push"] --> pp["pre-push: full verify (tests, CRAP, boundaries, knip) · mutation testing (incremental)"]
-    pr["Pull request"] --> ci["CI: verify + build · mutation (incremental) · gitleaks"]
+    push["git push"] --> pp["pre-push: full verify (tests, CRAP, a11y, E2E, boundaries, knip)"]
+    pr["Pull request"] --> ci["CI: full quality gate (verify + build) · mutation · gitleaks"]
 ```
 
 Hooks only touch staged files where possible. Emergency bypass:
@@ -52,9 +87,11 @@ Recommended: protect `main` and require all three checks to pass.
 
 ## Reports (git-ignored)
 
-| Path                           | Produced by          |
-| ------------------------------ | -------------------- |
-| `coverage/index.html`          | `pnpm test:coverage` |
-| `reports/crap.json`            | `pnpm crap`          |
-| `reports/mutation/index.html`  | `pnpm test:mutation` |
-| `reports/dependency-graph.mmd` | `pnpm deps:graph`    |
+| Path                            | Produced by          |
+| ------------------------------- | -------------------- |
+| `coverage/index.html`           | `pnpm test:coverage` |
+| `reports/crap.json`             | `pnpm crap`          |
+| `reports/mutation/index.html`   | `pnpm test:mutation` |
+| `reports/playwright/index.html` | `pnpm test:e2e`      |
+| `reports/a11y/report.html`      | `pnpm audit:a11y`    |
+| `reports/dependency-graph.mmd`  | `pnpm deps:graph`    |

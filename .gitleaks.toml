@@ -1,0 +1,20 @@
+# Gitleaks configuration
+# See: https://github.com/gitleaks/gitleaks
+title = "Beats for Days Gitleaks Config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allowlist local development Supabase dummy keys and seed configurations"
+regexes = [
+  '''sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz''',
+  '''sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH''',
+]
+paths = [
+  '''^\.env\.example$''',
+  '''^\.github/workflows/ci\.yml$''',
+  '''^scripts/seed/cli\.ts$''',
+  '''^src/lib/env\.test\.ts$''',
+  '''^src/lib/env\.ts$''',
+]

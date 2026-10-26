@@ -2,26 +2,131 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { parseServerEnv } from "./env";
 
 describe("parseServerEnv", () => {
-  it("returns only the validated variables, trimmed", () => {
-    expect(
-      parseServerEnv({ ELEVENLABS_API_KEY: " sk_123 ", OTHER: "x" }),
-    ).toEqual({ ELEVENLABS_API_KEY: "sk_123" });
+  it("defaults ALLOW_LIVE_AI_CALLS to false and allows omitting ELEVENLABS_API_KEY in offline mode", () => {
+    expect(parseServerEnv({ OTHER: "ignored" })).toEqual({
+      ALLOW_LIVE_AI_CALLS: false,
+      ELEVENLABS_API_KEY: undefined,
+      NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54521",
+      NEXT_PUBLIC_SUPABASE_ANON_KEY:
+        "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH",
+      SUPABASE_SERVICE_ROLE_KEY: "sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz",
+      USE_LOCAL_AUDIO: true,
+      NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS: 30,
+      DEBUG_PANEL: false,
+    });
   });
 
-  it("rejects a missing ELEVENLABS_API_KEY", () => {
-    expect(() => parseServerEnv({})).toThrow(
-      /^Invalid server environment:\n.*\n.*ELEVENLABS_API_KEY/,
+  it("turns DEBUG_PANEL on only for the exact string true", () => {
+    expect(parseServerEnv({ DEBUG_PANEL: "true" }).DEBUG_PANEL).toBe(true);
+    expect(parseServerEnv({ DEBUG_PANEL: "false" }).DEBUG_PANEL).toBe(false);
+    expect(() => parseServerEnv({ DEBUG_PANEL: "yes" })).toThrow("DEBUG_PANEL");
+  });
+
+  it("parses custom USE_LOCAL_AUDIO and NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS", () => {
+    expect(
+      parseServerEnv({
+        USE_LOCAL_AUDIO: "false",
+        NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS: "45",
+      }),
+    ).toMatchObject({
+      USE_LOCAL_AUDIO: false,
+      NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS: 45,
+    });
+  });
+
+  it("defaults USE_LOCAL_AUDIO to false in production and honors explicit true override", () => {
+    expect(
+      parseServerEnv({
+        NODE_ENV: "production",
+      }),
+    ).toMatchObject({
+      USE_LOCAL_AUDIO: false,
+    });
+
+    expect(
+      parseServerEnv({
+        NODE_ENV: "production",
+        USE_LOCAL_AUDIO: "true",
+      }),
+    ).toMatchObject({
+      USE_LOCAL_AUDIO: true,
+    });
+  });
+
+  it("rejects non-positive NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS", () => {
+    expect(() =>
+      parseServerEnv({ NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS: "-5" }),
+    ).toThrow(/NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS/);
+    expect(() =>
+      parseServerEnv({ NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS: "0" }),
+    ).toThrow(/NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS/);
+    expect(() =>
+      parseServerEnv({ NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS: "abc" }),
+    ).toThrow(/NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS/);
+  });
+
+  it("normalizes blank ELEVENLABS_API_KEY to undefined when ALLOW_LIVE_AI_CALLS is false", () => {
+    expect(
+      parseServerEnv({
+        ALLOW_LIVE_AI_CALLS: "false",
+        ELEVENLABS_API_KEY: "   ",
+      }),
+    ).toEqual({
+      ALLOW_LIVE_AI_CALLS: false,
+      ELEVENLABS_API_KEY: undefined,
+      NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54521",
+      NEXT_PUBLIC_SUPABASE_ANON_KEY:
+        "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH",
+      SUPABASE_SERVICE_ROLE_KEY: "sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz",
+      USE_LOCAL_AUDIO: true,
+      NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS: 30,
+      DEBUG_PANEL: false,
+    });
+  });
+
+  it("returns trimmed ELEVENLABS_API_KEY and parses ALLOW_LIVE_AI_CALLS=true", () => {
+    expect(
+      parseServerEnv({
+        ALLOW_LIVE_AI_CALLS: "true",
+        ELEVENLABS_API_KEY: " sk_123 ",
+        OTHER: "x",
+      }),
+    ).toEqual({
+      ALLOW_LIVE_AI_CALLS: true,
+      ELEVENLABS_API_KEY: "sk_123",
+      NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54521",
+      NEXT_PUBLIC_SUPABASE_ANON_KEY:
+        "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH",
+      SUPABASE_SERVICE_ROLE_KEY: "sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz",
+      USE_LOCAL_AUDIO: true,
+      NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS: 30,
+      DEBUG_PANEL: false,
+    });
+  });
+
+  it("rejects invalid ALLOW_LIVE_AI_CALLS values", () => {
+    expect(() => parseServerEnv({ ALLOW_LIVE_AI_CALLS: "yes" })).toThrow(
+      /ALLOW_LIVE_AI_CALLS/,
     );
   });
 
   it.each([
+    ["missing", undefined],
     ["empty", ""],
     ["blank", "   "],
-  ])("rejects an %s ELEVENLABS_API_KEY as required", (_label, value) => {
-    expect(() => parseServerEnv({ ELEVENLABS_API_KEY: value })).toThrow(
-      "Invalid server environment:\n✖ is required\n  → at ELEVENLABS_API_KEY",
-    );
-  });
+  ])(
+    "rejects a %s ELEVENLABS_API_KEY when ALLOW_LIVE_AI_CALLS=true",
+    (_label, value) => {
+      expect(() =>
+        parseServerEnv({
+          ALLOW_LIVE_AI_CALLS: "true",
+          ELEVENLABS_API_KEY: value,
+        }),
+      ).toThrow(
+        "Invalid server environment:\n✖ is required when ALLOW_LIVE_AI_CALLS=true\n  → at ELEVENLABS_API_KEY",
+      );
+    },
+  );
 });
 
 describe("getServerEnv", () => {
@@ -44,7 +149,8 @@ describe("getServerEnv", () => {
     expect(getServerEnv().ELEVENLABS_API_KEY).toBe("first");
   });
 
-  it("throws when the environment is invalid", async () => {
+  it("throws when live AI calls are enabled without an API key", async () => {
+    vi.stubEnv("ALLOW_LIVE_AI_CALLS", "true");
     vi.stubEnv("ELEVENLABS_API_KEY", "");
     const { getServerEnv } = await loadFresh();
     expect(() => getServerEnv()).toThrow(/ELEVENLABS_API_KEY/);

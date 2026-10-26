@@ -1,10 +1,10 @@
 ---
 name: write-adr
 description: >-
-  Records an Architecture Decision Record in docs/decisions/. Use when a
-  significant technical decision is made or changed (choosing a library,
-  pattern, data flow, boundary, or trade-off between real alternatives), or
-  when the user asks to document a decision.
+  Records an Architecture Decision Record in docs/decisions/. Use when an
+  architectural boundary changes, a paid external service is added, or a core
+  subsystem choice is made (routine utility libraries and local helpers do not
+  need an ADR), or when the user asks to document a decision.
 ---
 
 # Write an ADR
@@ -14,8 +14,10 @@ description: >-
    `docs/decisions/NNNN-kebab-case-title.md`. Title in imperative mood
    ("Use X for Y").
 3. Fill in Context → Decision → Consequences → Alternatives. Keep it under a
-   page. State the decision plainly ("We will …"). Include concrete
-   consequences (follow-ups, constraints, things that get harder).
+   page and follow **ISO 24495-1 plain language**: short sentences (≤ 20 words),
+   active voice ("We will …"), everyday words instead of jargon, and bullet
+   lists or tables for scannability. Include concrete consequences (follow-ups,
+   constraints, things that get harder).
 4. Set `Status: Accepted` (or `Proposed` if the user hasn't agreed yet) and
    today's date.
 5. If it replaces an earlier ADR, change only the old ADR's status line to

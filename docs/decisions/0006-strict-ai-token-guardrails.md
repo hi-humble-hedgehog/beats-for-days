@@ -5,24 +5,24 @@
 
 ## Context
 
-Generative audio and multimodal API calls (ElevenLabs, Gemini) carry recurring financial costs and consume limited quota tokens. Autonomous AI coding agents working on local tests, benchmarks, or dev servers could inadvertently trigger live API calls, burning tokens during loops or automated test suites.
+ElevenLabs and Gemini API calls cost money and use limited quota. Without safeguards, local dev servers, test suites, or AI coding agents could accidentally call live APIs in a loop and burn budget.
 
 ## Decision
 
-We enforce a **multi-layered defensive policy** across development, testing, and agent workflows:
+We block live AI API calls by default across tests, local dev, and agent runs:
 
-1. **Offline & Stubbed by Default:** All test suites and standard local dev workflows run against static fixtures, mock stems, or local stubs. No network requests to generative providers are permitted during `pnpm test`, `pnpm verify`, or regular dev builds.
-2. **Explicit Opt-In Flag:** Live generative API requests require an explicit runtime opt-in environment flag (`ALLOW_LIVE_AI_CALLS=true`). Without this flag explicitly set in the active execution context, API clients in `src/lib/` must throw an error before initiating outbound network traffic.
-3. **Agent Action Guardrail:** AI coding agents are strictly forbidden from executing live generation scripts, cURL commands, or triggering non-mocked API generation without explicit user confirmation in the conversation prompt.
-4. **PreToolUse / Hook Enforcement:** Lifecycle hooks warn and block unauthorized shell commands targeting generative endpoints if live flags are detected without user permission.
+1. **Mocked by default:** All tests (`pnpm test`, `pnpm verify`) and local dev runs use static audio files or mocks. Never call live AI APIs in automated tests.
+2. **Opt-in runtime flag:** Live AI calls require `ALLOW_LIVE_AI_CALLS=true` in the environment. If that flag is `false` or missing, API clients in `src/lib/` throw an error before making a network request.
+3. **Human approval required:** AI agents must never run live generation scripts or enable `ALLOW_LIVE_AI_CALLS=true` unless the user explicitly asks for it in the prompt.
+4. **Hook checks:** Local hooks block shell commands that try to call live AI endpoints without permission.
 
 ## Consequences
 
-- Zero accidental token expenditure from running local tests or agent verify loops.
-- Live integration verification requires manual human confirmation or running isolated smoke scripts with explicit flags.
-- API client implementations must support mock/stub adapter modes out of the box.
+- Tests and agent loops cannot spend API tokens by accident.
+- Testing live APIs requires a human to opt in with `ALLOW_LIVE_AI_CALLS=true`.
+- Every AI client in `src/lib/` must support a mock or stub mode.
 
 ## Alternatives considered
 
-- **Relying solely on missing env keys**: Risk of developers populating `.env.local` with real keys, which tests could then unintentionally pick up.
-- **Purely manual human supervision**: Error-prone during autonomous agent multi-step loops.
+- **Leaving API keys blank in `.env.local`:** Unsafe once a developer adds a real key for manual testing.
+- **Manual review only:** Too slow and easy to miss during multi-step agent runs.

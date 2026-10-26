@@ -2,6 +2,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import prettier from "eslint-config-prettier/flat";
+import jsdoc from "eslint-plugin-jsdoc";
 
 // Rationale for these rules: docs/decisions/0004-code-quality-guardrails.md
 const eslintConfig = defineConfig([
@@ -52,8 +53,36 @@ const eslintConfig = defineConfig([
     },
   },
   {
+    name: "bfd/jsdoc-lib",
+    files: ["src/lib/**/*.{ts,tsx}"],
+    ignores: ["**/*.test.{ts,tsx}"],
+    plugins: {
+      jsdoc,
+    },
+    rules: {
+      "jsdoc/require-jsdoc": [
+        "error",
+        {
+          publicOnly: true,
+          enableFixer: false,
+          require: {
+            FunctionDeclaration: true,
+            MethodDefinition: true,
+            ClassDeclaration: true,
+            ArrowFunctionExpression: true,
+            FunctionExpression: true,
+          },
+        },
+      ],
+      "jsdoc/require-description": "error",
+      "jsdoc/no-types": "error",
+      "jsdoc/check-param-names": "error",
+      "jsdoc/check-tag-names": "error",
+    },
+  },
+  {
     name: "bfd/tests",
-    files: ["**/*.test.{ts,tsx}"],
+    files: ["**/*.test.{ts,tsx}", "e2e/**/*.spec.ts"],
     rules: {
       "max-lines-per-function": "off",
       "max-lines": "off",
@@ -76,6 +105,7 @@ const eslintConfig = defineConfig([
     "coverage/**",
     "reports/**",
     ".stryker-tmp/**",
+    ".agents/skills/born-accessible-ui/scripts/**",
   ]),
 ]);
 

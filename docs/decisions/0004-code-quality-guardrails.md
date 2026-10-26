@@ -17,10 +17,12 @@ automatic, fast where they run often, and thorough where they run rarely.
 | Types                   | `tsc` strict+                                                     | pre-commit, CI                |
 | Secrets                 | gitleaks                                                          | pre-commit (if installed), CI |
 | Commit messages         | commitlint (Conventional)                                         | commit-msg                    |
+| Accessibility lint      | Born-Accessible UI (`pnpm lint:a11y`)                             | pre-push, CI                  |
 | Tests                   | Vitest                                                            | pre-push, CI                  |
 | Architecture boundaries | dependency-cruiser                                                | pre-push, CI                  |
-| Dead code / unused deps | knip                                                              | CI                            |
-| CRAP gate               | `scripts/crap`                                                    | CI (`pnpm verify` locally)    |
+| Dead code / unused deps | knip                                                              | pre-push, CI                  |
+| CRAP gate               | `scripts/crap`                                                    | pre-push, CI                  |
+| E2E & browser a11y      | Playwright + axe-core (`pnpm test:e2e`)                           | pre-push, CI                  |
 | Mutation testing        | Stryker (incremental)                                             | CI, on demand                 |
 | Build                   | `next build`                                                      | CI                            |
 | Dependency updates      | Dependabot (grouped, weekly)                                      | GitHub                        |
@@ -30,8 +32,18 @@ Hooks are managed by **lefthook** (fast, parallel, single binary), installed by
 
 ESLint complexity budget: cyclomatic ≤ 10, max-depth 4, max-params 4,
 ≤ 80 lines/function, ≤ 300 lines/file (tests exempt from size limits).
+Split complex functions into local helpers in the same file instead of creating
+single-use, 10-line files. Move code to a new file only when it is shared or
+exceeds 300 lines.
+
 Type-aware rules: no floating or misused promises, exhaustive switches,
 consistent type imports, no `any`.
+
+Scoped JSDoc rules (`eslint-plugin-jsdoc` on `src/lib/**/*.{ts,tsx}`, excluding tests):
+
+- Require a JSDoc description on exported functions, methods, and classes (`publicOnly: true`, `enableFixer: false`).
+- Check that `@param` names match the function signature (`jsdoc/check-param-names`).
+- Forbid TypeScript type annotations in tags (`jsdoc/no-types`) so comments explain _why_ in plain language (ISO 24495-1) rather than repeating types.
 
 ## Consequences
 

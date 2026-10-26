@@ -1,10 +1,18 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": ["scripts/**/cli.ts", "test/stubs/*.ts", ".agents/hooks/*.mjs"],
+  "entry": [
+    "scripts/**/cli.ts",
+    "test/stubs/*.ts",
+    ".agents/hooks/*.mjs",
+    ".agents/skills/born-accessible-ui/scripts/*.mjs"
+  ],
   "project": [
     "src/**/*.{ts,tsx,css}",
     "scripts/**/*.ts",
     "test/**/*.ts",
+    "e2e/**/*.ts",
     ".agents/**/*.mjs"
-  ]
+  ],
+  "ignoreExportsUsedInFile": true,
+  "ignoreBinaries": ["ffmpeg"]
 }

@@ -5,15 +5,15 @@
 
 ## Context
 
-What problem are we solving? What forces and constraints are at play?
+What problem are we solving, and what constraints matter? Use short, plain sentences (ISO 24495-1).
 
 ## Decision
 
-What we decided, stated plainly ("We will …").
+State what we decided in active voice ("We will …"). Use bullet lists or tables so it is easy to scan.
 
 ## Consequences
 
-What becomes easier, what becomes harder, and what follow-ups this creates.
+What gets easier, what gets harder, and what follow-up work this creates.
 
 ## Alternatives considered
 

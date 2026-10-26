@@ -1,0 +1,184 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beatsApi, waitlistApi } from "./api";
+import { API_ROUTES } from "./constants";
+
+describe("beatsApi", () => {
+  const originalFetch = globalThis.fetch;
+
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+  });
+
+  it("getNextBeat sends POST request to /api/beats/next with payload", async () => {
+    const mockResponse = {
+      beat: {
+        id: "0001",
+        name: "Beat",
+        audioUrl: "http://a.wav",
+        transitions: [],
+      },
+      transition: null,
+    };
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockResponse),
+    });
+
+    const payload = {
+      currentTrackId: "0001",
+      playedTrackIds: ["0001"],
+      mode: "auto" as const,
+    };
+    const result = await beatsApi.getNextBeat(payload);
+
+    expect(globalThis.fetch).toHaveBeenCalledWith(API_ROUTES.BEATS_NEXT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    expect(result).toEqual(mockResponse);
+  });
+
+  it("getNextBeat works with default empty payload", async () => {
+    const mockResponse = {
+      beat: {
+        id: "0001",
+        name: "Beat",
+        audioUrl: "http://a.wav",
+        transitions: [],
+      },
+      transition: null,
+    };
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockResponse),
+    });
+
+    const result = await beatsApi.getNextBeat();
+
+    expect(globalThis.fetch).toHaveBeenCalledWith(API_ROUTES.BEATS_NEXT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    expect(result).toEqual(mockResponse);
+  });
+
+  it("getNextBeat throws error when response is not ok", async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      statusText: "Not Found",
+    });
+
+    await expect(beatsApi.getNextBeat()).rejects.toThrow(
+      "Failed to resolve next beat: Not Found",
+    );
+  });
+
+  it("getBeat fetches single beat by ID from /api/beats?id=...", async () => {
+    const mockBeat = {
+      id: "0001",
+      name: "Beat One",
+      audioUrl: "http://storage/1.m4a",
+      durationMs: 60000,
+      loopStartMs: 0,
+      loopEndMs: 60000,
+      bpm: 86,
+      transitions: [],
+    };
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({ beat: mockBeat }),
+    });
+
+    const result = await beatsApi.getBeat("0001");
+
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      `${API_ROUTES.BEATS}?id=0001`,
+    );
+    expect(result).toEqual(mockBeat);
+  });
+
+  it("getBeat returns null when beat is not found (404)", async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 404,
+      statusText: "Not Found",
+    });
+
+    const result = await beatsApi.getBeat("non-existent");
+
+    expect(result).toBeNull();
+  });
+
+  it("getBeat throws error on server failure other than 404", async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      statusText: "Internal Server Error",
+    });
+
+    await expect(beatsApi.getBeat("0001")).rejects.toThrow(
+      "Failed to load beat: Internal Server Error",
+    );
+  });
+});
+
+describe("waitlistApi", () => {
+  const originalFetch = globalThis.fetch;
+
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+  });
+
+  it("getStats fetches from /api/waitlist", async () => {
+    const mockStats = { total: 100, claimed: 40, remaining: 60 };
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockStats),
+    });
+
+    const result = await waitlistApi.getStats();
+
+    expect(globalThis.fetch).toHaveBeenCalledWith(API_ROUTES.WAITLIST);
+    expect(result).toEqual(mockStats);
+  });
+
+  it("getStats throws error when response is not ok", async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      statusText: "Bad Gateway",
+    });
+
+    await expect(waitlistApi.getStats()).rejects.toThrow(
+      "Failed to load waitlist metrics: Bad Gateway",
+    );
+  });
+
+  it("joinWaitlist sends POST request to /api/waitlist", async () => {
+    const mockResponse = { success: true, remaining: 59 };
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockResponse),
+    });
+
+    const payload = { email: "test@example.com", timezone: "Europe/Amsterdam" };
+    const result = await waitlistApi.joinWaitlist(payload);
+
+    expect(globalThis.fetch).toHaveBeenCalledWith(API_ROUTES.WAITLIST, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    expect(result).toEqual(mockResponse);
+  });
+});

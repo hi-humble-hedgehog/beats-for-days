@@ -47,6 +47,7 @@ src/
     └── env.ts           # Validated server env (server-only)
 scripts/                 # Repo tooling (e.g. CRAP gate). Not shipped.
 test/                    # Shared test setup & stubs
+e2e/                     # Playwright end-to-end browser tests (ADR 0012)
 stream-worker/           # Headless streaming worker (separate deploy, isolated)
 docs/                    # You are here
 ```
@@ -72,7 +73,7 @@ flowchart LR
 | `lib-is-ui-agnostic`         | Keeps core logic testable in Node and reusable by the stream worker |
 | `components-not-to-app`      | Routes compose components, never the reverse                        |
 | `server-code-not-in-client`  | Secrets & server clients must never reach the browser bundle        |
-| `app-code-not-to-tooling`    | `scripts/` and `test/` are not part of the shipped app              |
+| `app-code-not-to-tooling`    | `scripts/`, `test/`, and `e2e/` are not part of the shipped app     |
 | `stream-worker-is-isolated`  | Separate deployable; share code via an explicit package             |
 | `no-circular`, `no-orphans`… | From `dependency-cruiser/configs/recommended-strict`                |
 
@@ -85,3 +86,20 @@ Logic (state machines, timing math, parsing, API mapping) goes in `.ts` modules
 under `src/lib` or hooks. `.tsx` components wire that logic to the DOM. This
 keeps the important code fast to test and lets mutation testing focus on
 `.ts` files. See [ADR 0003](../decisions/0003-testing-strategy.md).
+
+## Beat generation & on-the-fly transition graph playback
+
+Phased beat generation on `/generate` (Phase 1 waitlist signup; Phase 2 free
+waitlist, paid instant pass, and BYOK) and the on-the-fly directed transition
+graph playback model are detailed in
+[`generation-policy.md`](generation-policy.md) and
+[ADR 0009](../decisions/0009-beat-generation-access-and-queue-policy.md).
+
+## Audio asset delivery & stream protection
+
+Audio stems and transitions are delivered via:
+
+- **Local development:** Direct static asset serving from `public/audio/` (`/audio/...`) for zero-dependency offline playback ([ADR 0011](../decisions/0011-local-static-audio-asset-delivery.md)).
+- **Production stream protection:** Audio assets reside in a private Supabase Storage bucket. The server resolves requests using short-lived signed URLs (e.g. 60-second TTL), or proxied streaming. The browser fetches raw bytes directly into memory (`fetch() -> ArrayBuffer`) and decodes them into an `AudioBuffer` for the Web Audio API, preventing direct file scraping, hotlinking, and raw downloads without requiring heavy DRM or Vercel serverless proxy overhead.
+- **Database contract:** The `tracks` and `transitions` tables store relative paths (e.g., `tracks/track-a-soul-rhodes.m4a`). The resolver handles environment-specific URL generation. Seeded via `pnpm db:seed`.
+- **Format:** AAC (`.m4a`) at 192 kbps with `+faststart` (generated via `pnpm audio:convert`), avoiding MP3 encoder delay and preserving sample-accurate loop points (`loopStartMs`, `loopEndMs`).

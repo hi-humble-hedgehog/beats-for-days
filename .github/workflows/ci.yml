@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+    types: [opened, synchronize, reopened, edited]
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -11,12 +12,60 @@ concurrency:
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
+  pr-metadata:
+    name: PR Title & Size Check
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Validate PR Title (Conventional Commits)
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check PR Size
+        run: |
+          DIFF_FILTER=(-- . ':(exclude)**/*.test.ts' ':(exclude)**/*.test.tsx' ':(exclude)e2e/**' ':(exclude)docs/**' ':(exclude)pnpm-lock.yaml')
+          CHANGES=$(git diff --stat origin/${{ github.base_ref }}...HEAD "${DIFF_FILTER[@]}" | tail -n 1)
+          echo "PR Diff Stats (excluding tests, docs & lockfile): $CHANGES"
+          INSERTIONS=$(git diff --numstat origin/${{ github.base_ref }}...HEAD "${DIFF_FILTER[@]}" | awk '{s+=$1} END {print s+0}')
+          DELETIONS=$(git diff --numstat origin/${{ github.base_ref }}...HEAD "${DIFF_FILTER[@]}" | awk '{s+=$2} END {print s+0}')
+          TOTAL_CHANGES=$((INSERTIONS + DELETIONS))
+          echo "Total changed production lines: $TOTAL_CHANGES"
+          if [ "$TOTAL_CHANGES" -gt 400 ]; then
+            echo "::warning title=Large PR Alert::This PR modifies $TOTAL_CHANGES production lines (threshold: 400, excluding tests & docs). Consider breaking it down into smaller, focused review units."
+          fi
+
   quality:
     name: Quality gate
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54521
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH
+      SUPABASE_SERVICE_ROLE_KEY: sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz
+      USE_LOCAL_AUDIO: "true"
+      ALLOW_LIVE_AI_CALLS: "false"
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -26,10 +75,15 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
 
+      - name: Copy environment defaults
+        run: cp .env.example .env.local
+
       - name: Typecheck
         run: pnpm typecheck
       - name: Lint
         run: pnpm lint
+      - name: Static accessibility & contrast lint
+        run: pnpm lint:a11y
       - name: Format
         run: pnpm format:check
       - name: Architecture boundaries
@@ -41,6 +95,23 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v3
+        with:
+          version: latest
+
+      - name: Start local Supabase
+        run: supabase start
+
+      - name: Seed starter catalog
+        run: pnpm exec tsx scripts/seed/cli.ts
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Playwright E2E & Born-Accessible audit
+        run: pnpm test:e2e
+
       - name: Upload coverage & CRAP report
         if: always()
         uses: actions/upload-artifact@v4
@@ -49,6 +120,16 @@ jobs:
           path: |
             coverage/
             reports/crap.json
+          if-no-files-found: ignore
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            reports/playwright/
+            reports/playwright-results/
           if-no-files-found: ignore
 
   mutation:
@@ -63,6 +144,13 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+
+      - name: Copy environment defaults
+        run: cp .env.example .env.local
+
+      # Generate Next.js global route types (LayoutProps, etc.) for TypeScript checker
+      - name: Generate route types
+        run: pnpm exec next typegen
 
       # Incremental mode: reuse results for unchanged code/tests.
       # PRs fall back to main's baseline on their first run.
@@ -95,4 +183,4 @@ jobs:
         with:
           fetch-depth: 0
       - name: gitleaks
-        run: docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:latest git /repo --redact --no-banner --verbose
+        run: docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:latest git /repo --config /repo/.gitleaks.toml --redact --no-banner --verbose
