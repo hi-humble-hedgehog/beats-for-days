@@ -28,5 +28,7 @@ export default defineConfig({
     url: `http://localhost:${PORT}`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    // Lets e2e check the debug panel gate. It still needs ?debug=1 to show.
+    env: { DEBUG_PANEL: "true" },
   },
 });

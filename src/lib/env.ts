@@ -28,6 +28,11 @@ const serverEnvSchema = z
       .string()
       .default("sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz"),
     USE_LOCAL_AUDIO: z.enum(["true", "false"]).optional(),
+    // Shows the playback debug panel to visitors who add `?debug=1`. Off by default.
+    DEBUG_PANEL: z
+      .enum(["true", "false"])
+      .default("false")
+      .transform((val) => val === "true"),
     NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS: z
       .string()
       .default("30")
@@ -59,6 +64,7 @@ const serverEnvSchema = z
       USE_LOCAL_AUDIO: useLocalAudio,
       NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS:
         env.NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS,
+      DEBUG_PANEL: env.DEBUG_PANEL,
     };
   })
   .refine(

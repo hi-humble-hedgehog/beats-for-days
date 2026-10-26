@@ -78,6 +78,36 @@ test.describe("Navigation & static pages", () => {
   });
 });
 
+test.describe("Debug panel", () => {
+  // The e2e web server runs with DEBUG_PANEL=true (playwright.config.ts).
+  const toggleName = "Toggle history debug panel";
+
+  test("stays hidden without ?debug=1", async ({ page }) => {
+    await page.goto("/beat/0001");
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(page.getByRole("button", { name: toggleName })).toHaveCount(0);
+  });
+
+  test("shows playback and history state with ?debug=1", async ({ page }) => {
+    await page.goto("/beat/0001?debug=1");
+    const debugButton = page.getByRole("button", { name: toggleName });
+    await expect(debugButton).toBeVisible();
+    await debugButton.click();
+
+    const debugRegion = page.getByRole("region", {
+      name: "Playback and history state",
+    });
+    await expect(debugRegion).toBeVisible();
+    await expect(debugRegion).toContainText("Played History");
+    await expect(debugRegion).toContainText("History Stack Length:");
+
+    await debugRegion
+      .getByRole("button", { name: "Close debug panel" })
+      .click();
+    await expect(debugRegion).not.toBeVisible();
+  });
+});
+
 test.describe("Radio landing & playback flow", () => {
   test("starts radio stream from home, controls playback in persistent bar, and pauses when returning home", async ({
     page,
@@ -151,25 +181,6 @@ test.describe("Radio landing & playback flow", () => {
       );
       await expect(playerBar).toContainText(`Now Playing: ${skippedBeatName}`);
     }
-
-    // Verify History Debug panel displays history state
-    const debugButton = page.getByRole("button", {
-      name: "Toggle history debug panel",
-    });
-    await expect(debugButton).toBeVisible();
-    await debugButton.click();
-
-    const debugRegion = page.getByRole("region", {
-      name: "Playback and history state",
-    });
-    await expect(debugRegion).toBeVisible();
-    await expect(debugRegion).toContainText("Played History");
-    await expect(debugRegion).toContainText("History Stack Length:");
-
-    await debugRegion
-      .getByRole("button", { name: "Close debug panel" })
-      .click();
-    await expect(debugRegion).not.toBeVisible();
 
     await page
       .getByRole("banner")
