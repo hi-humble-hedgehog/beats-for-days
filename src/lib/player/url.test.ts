@@ -7,8 +7,8 @@ import {
 } from "./url";
 
 describe("isBeatPage", () => {
-  it("identifies the root page as a beat page", () => {
-    expect(isBeatPage("/")).toBe(true);
+  it("returns false for the root landing page", () => {
+    expect(isBeatPage("/")).toBe(false);
   });
 
   it("identifies /beat, /beats and /beat/:id paths as beat pages", () => {
@@ -51,7 +51,7 @@ describe("formatBeatUrl", () => {
 describe("syncBeatUrl", () => {
   it("calls pushState when on a beat page", () => {
     const mockHistory = { pushState: vi.fn() };
-    const synced = syncBeatUrl("/", "0002", mockHistory);
+    const synced = syncBeatUrl("/beat/0001", "0002", mockHistory);
 
     expect(synced).toBe(true);
     expect(mockHistory.pushState).toHaveBeenCalledWith(
@@ -146,5 +146,6 @@ describe("extractBeatIdFromPathname", () => {
     expect(extractBeatIdFromPathname("/beat")).toBeNull();
     expect(extractBeatIdFromPathname("/beat/")).toBeNull();
     expect(extractBeatIdFromPathname("/about")).toBeNull();
+    expect(extractBeatIdFromPathname("/other/beat/0001")).toBeNull();
   });
 });

@@ -117,40 +117,76 @@ test.describe("Radio landing & playback flow", () => {
       page.getByRole("main").getByText("Playing", { exact: true }),
     ).toBeVisible();
 
-    const initialHeading = await page
-      .getByRole("heading", { level: 1 })
-      .textContent();
+    const initialUrl = page.url();
+    const initialHeading =
+      (await page.getByRole("heading", { level: 1 }).textContent()) ?? "";
+
+    // First skip via persistent player bar
     await playerBar.getByRole("button", { name: "Skip to next track" }).click();
     await expect(page.getByRole("heading", { level: 1 })).not.toHaveText(
-      initialHeading ?? "",
+      initialHeading,
     );
     await expect(page.getByRole("heading", { level: 1 })).not.toContainText(
       "Loading Beat",
     );
-
-    const skippedBeatName = (
-      await page.getByRole("heading", { level: 1 }).textContent()
-    )?.replace(/^#/, "");
-    if (skippedBeatName) {
-      await expect(playerBar).toContainText(`Now Playing: ${skippedBeatName}`);
-    }
-
-    // Browser Back navigation restores previous beat in both UI and player
-    await page.goBack();
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-      initialHeading ?? "",
+    const firstSkipUrl = page.url();
+    expect(firstSkipUrl).not.toBe(initialUrl);
+    const firstSkipHeading =
+      (await page.getByRole("heading", { level: 1 }).textContent()) ?? "";
+    await expect(playerBar).toContainText(
+      `Now Playing: ${firstSkipHeading.replace(/^#/, "")}`,
     );
-    const restoredBeatName = (initialHeading ?? "").replace(/^#/, "");
-    await expect(playerBar).toContainText(`Now Playing: ${restoredBeatName}`);
 
-    // Browser Forward navigation returns to the advanced beat
+    // Second skip via deck Next Beat button
+    await page.getByRole("button", { name: /Next Beat/i }).click();
+    await expect(page.getByRole("heading", { level: 1 })).not.toHaveText(
+      firstSkipHeading,
+    );
+    await expect(page.getByRole("heading", { level: 1 })).not.toContainText(
+      "Loading Beat",
+    );
+    const secondSkipUrl = page.url();
+    expect(secondSkipUrl).not.toBe(firstSkipUrl);
+    const secondSkipHeading =
+      (await page.getByRole("heading", { level: 1 }).textContent()) ?? "";
+    await expect(playerBar).toContainText(
+      `Now Playing: ${secondSkipHeading.replace(/^#/, "")}`,
+    );
+
+    // Browser Back twice restores first skip then initial beat in URL, heading, and player
+    await page.goBack();
+    await expect(page).toHaveURL(firstSkipUrl);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      firstSkipHeading,
+    );
+    await expect(playerBar).toContainText(
+      `Now Playing: ${firstSkipHeading.replace(/^#/, "")}`,
+    );
+
+    await page.goBack();
+    await expect(page).toHaveURL(initialUrl);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      initialHeading,
+    );
+    await expect(playerBar).toContainText(
+      `Now Playing: ${initialHeading.replace(/^#/, "")}`,
+    );
+
+    // Browser Forward twice returns to first skip then second skip
     await page.goForward();
-    if (skippedBeatName) {
-      await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-        `#${skippedBeatName}`,
-      );
-      await expect(playerBar).toContainText(`Now Playing: ${skippedBeatName}`);
-    }
+    await expect(page).toHaveURL(firstSkipUrl);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      firstSkipHeading,
+    );
+
+    await page.goForward();
+    await expect(page).toHaveURL(secondSkipUrl);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      secondSkipHeading,
+    );
+    await expect(playerBar).toContainText(
+      `Now Playing: ${secondSkipHeading.replace(/^#/, "")}`,
+    );
 
     // Verify History Debug panel displays history state
     const debugButton = page.getByRole("button", {

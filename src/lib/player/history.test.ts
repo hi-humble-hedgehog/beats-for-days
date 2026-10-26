@@ -54,4 +54,24 @@ describe("history storage helpers with window.localStorage", () => {
     mockStore[STORAGE_KEYS.PLAYED_TRACKS] = "{invalid-json";
     expect(loadPlayedHistory()).toEqual([]);
   });
+
+  it("loadPlayedHistory returns empty array when stored JSON is not an array", () => {
+    mockStore[STORAGE_KEYS.PLAYED_TRACKS] = JSON.stringify({ id: "0001" });
+    expect(loadPlayedHistory()).toEqual([]);
+    mockStore[STORAGE_KEYS.PLAYED_TRACKS] = JSON.stringify("0001");
+    expect(loadPlayedHistory()).toEqual([]);
+    mockStore[STORAGE_KEYS.PLAYED_TRACKS] = JSON.stringify(null);
+    expect(loadPlayedHistory()).toEqual([]);
+  });
+
+  it("loadPlayedHistory filters out non-string items from stored array", () => {
+    mockStore[STORAGE_KEYS.PLAYED_TRACKS] = JSON.stringify([
+      "0001",
+      42,
+      null,
+      "0002",
+      {},
+    ]);
+    expect(loadPlayedHistory()).toEqual(["0001", "0002"]);
+  });
 });

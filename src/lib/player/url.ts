@@ -1,9 +1,9 @@
 /**
- * Returns `true` on player routes (`/` and `/beat/*`) where changing beats should update the URL.
+ * Returns `true` on beat deck routes (`/beat`, `/beats`, and `/beat/*`) where changing beats should update the URL.
  * Returns `false` on info pages (`/about`, `/generate`) so background audio does not hijack navigation.
  */
 export function isBeatPage(pathname: string): boolean {
-  if (pathname === "/" || pathname === "/beat" || pathname === "/beats") {
+  if (pathname === "/beat" || pathname === "/beats") {
     return true;
   }
   return pathname.startsWith("/beat/");

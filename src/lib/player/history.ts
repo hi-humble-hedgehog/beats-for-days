@@ -2,18 +2,19 @@ import { STORAGE_KEYS } from "@/lib/constants";
 
 /**
  * Loads recent played track IDs from browser local storage.
- * Safely returns an empty array on the server or if storage is unreadable.
+ * Validates that stored data is an array of strings and safely returns an empty array on the server or on invalid data.
  */
 export function loadPlayedHistory(): string[] {
-  if (typeof window === "undefined") {
-    return [];
-  }
   try {
-    return (
-      (JSON.parse(
-        window.localStorage.getItem(STORAGE_KEYS.PLAYED_TRACKS) || "[]",
-      ) as string[]) || []
-    );
+    const raw = window.localStorage.getItem(STORAGE_KEYS.PLAYED_TRACKS);
+    if (!raw) {
+      return [];
+    }
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    return parsed.filter((item): item is string => typeof item === "string");
   } catch {
     return [];
   }
@@ -24,15 +25,12 @@ export function loadPlayedHistory(): string[] {
  * Safely ignores storage quota errors and SSR environments.
  */
 export function savePlayedHistory(history: string[]): void {
-  if (typeof window === "undefined") {
-    return;
-  }
   try {
     window.localStorage.setItem(
       STORAGE_KEYS.PLAYED_TRACKS,
       JSON.stringify(history),
     );
   } catch {
-    // Ignore storage quota errors
+    // Ignore storage quota errors and SSR environments without window
   }
 }
