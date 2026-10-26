@@ -28,3 +28,4 @@ and its consequences. Format: lightweight [MADR](https://adr.github.io/madr/).
 | [0010](0010-history-based-next-track-api.md)            | Deliver next beat via history-based graph API      | Accepted |
 | [0011](0011-local-static-audio-asset-delivery.md)       | Local static audio asset delivery                  | Accepted |
 | [0012](0012-playwright-e2e-user-flow-testing.md)        | Playwright, Born-Accessible UI & OKLCH tokens      | Accepted |
+| [0013](0013-url-as-source-of-truth-for-beat-routes.md)  | URL as single source of truth for beat routes      | Accepted |

@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import BeatPage from "./page";
 
 const mockUseParams = vi.fn();
+const mockUsePathname = vi.fn();
 const mockTogglePlay = vi.fn();
 const mockAdvanceTrack = vi.fn();
 
@@ -16,6 +17,7 @@ let mockPlayerState = {
 
 vi.mock("next/navigation", () => ({
   useParams: () => mockUseParams(),
+  usePathname: () => mockUsePathname(),
 }));
 
 vi.mock("@/components/audio/AudioPlayerContext", () => ({
@@ -49,6 +51,18 @@ describe("BeatPage", () => {
     expect(
       screen.getByText(/Automatic seamless AI transition queued in 30s/),
     ).toBeInTheDocument();
+  });
+
+  it("renders loading state for route slug when player current beat does not match slug", () => {
+    mockUseParams.mockReturnValue({ slug: "0002" });
+    mockPlayerState.current = { id: "0001", name: "Brooklyn Sunset" };
+
+    render(<BeatPage />);
+
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+      "Loading Beat 0002...",
+    );
+    expect(screen.getByText("Track ID: 0002")).toBeInTheDocument();
   });
 
   it("renders fallback dash when slug is missing from params", () => {

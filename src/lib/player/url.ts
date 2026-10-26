@@ -38,11 +38,32 @@ export function syncBeatUrl(
     return false;
   }
 
+  const targetUrl = formatBeatUrl(beatId);
+  const currentPath =
+    typeof window !== "undefined"
+      ? (window.location?.pathname ?? pathname)
+      : pathname;
+  if (currentPath === targetUrl) {
+    return false;
+  }
+
   const target =
     historyTarget ??
     (typeof window !== "undefined" ? window.history : undefined);
   if (target) {
-    target.pushState({ beatId }, "", formatBeatUrl(beatId));
+    target.pushState({ beatId }, "", targetUrl);
   }
   return true;
+}
+
+/**
+ * Extracts the beat ID from a beat route pathname like `/beat/0001`.
+ * Returns `null` if the pathname does not point to a specific beat.
+ */
+export function extractBeatIdFromPathname(pathname: string): string | null {
+  const match = /^\/beat\/([^/?#]+)/.exec(pathname);
+  if (!match || !match[1]) {
+    return null;
+  }
+  return decodeURIComponent(match[1]);
 }

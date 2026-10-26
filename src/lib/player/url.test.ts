@@ -1,5 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
-import { formatBeatUrl, isBeatPage, syncBeatUrl } from "./url";
+import {
+  extractBeatIdFromPathname,
+  formatBeatUrl,
+  isBeatPage,
+  syncBeatUrl,
+} from "./url";
 
 describe("isBeatPage", () => {
   it("identifies the root page as a beat page", () => {
@@ -92,5 +97,54 @@ describe("syncBeatUrl", () => {
 
     expect(synced).toBe(false);
     expect(mockHistory.pushState).not.toHaveBeenCalled();
+  });
+
+  it("does not call pushState when already on the target beat URL", () => {
+    const mockHistory = { pushState: vi.fn() };
+    const synced = syncBeatUrl("/beat/0002", "0002", mockHistory);
+
+    expect(synced).toBe(false);
+    expect(mockHistory.pushState).not.toHaveBeenCalled();
+  });
+
+  it("does not call pushState when window.location.pathname already matches target URL", () => {
+    const mockPush = vi.fn();
+    const originalWindow = globalThis.window;
+    try {
+      globalThis.window = {
+        history: { pushState: mockPush },
+        location: { pathname: "/beat/0002" },
+      } as unknown as Window & typeof globalThis;
+      const synced = syncBeatUrl("/beat/0001", "0002");
+      expect(synced).toBe(false);
+      expect(mockPush).not.toHaveBeenCalled();
+    } finally {
+      globalThis.window = originalWindow;
+    }
+  });
+});
+
+describe("extractBeatIdFromPathname", () => {
+  it("extracts the beat ID from /beat/:id paths", () => {
+    expect(extractBeatIdFromPathname("/beat/0001")).toBe("0001");
+    expect(extractBeatIdFromPathname("/beat/42")).toBe("42");
+    expect(extractBeatIdFromPathname("/beat/track-a")).toBe("track-a");
+  });
+
+  it("handles URL-encoded characters in beat IDs", () => {
+    expect(extractBeatIdFromPathname("/beat/track%201")).toBe("track 1");
+  });
+
+  it("ignores query parameters and hash fragments", () => {
+    expect(extractBeatIdFromPathname("/beat/0001?autoplay=true")).toBe("0001");
+    expect(extractBeatIdFromPathname("/beat/0001#lyrics")).toBe("0001");
+  });
+
+  it("returns null for non-beat or non-specific paths", () => {
+    expect(extractBeatIdFromPathname("/")).toBeNull();
+    expect(extractBeatIdFromPathname("/beats")).toBeNull();
+    expect(extractBeatIdFromPathname("/beat")).toBeNull();
+    expect(extractBeatIdFromPathname("/beat/")).toBeNull();
+    expect(extractBeatIdFromPathname("/about")).toBeNull();
   });
 });

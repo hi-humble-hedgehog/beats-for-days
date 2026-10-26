@@ -100,3 +100,16 @@ export async function fetchBeatViews(
 
   return buildBeatViews(tracks, transitions, resolveAudioUrl);
 }
+
+/**
+ * Loads a single beat view by its unique track ID.
+ * Returns `null` when the requested track ID is not found.
+ */
+export async function fetchBeatViewById(
+  id: string,
+  client: SupabaseClient = getSupabaseServerClient(),
+  useLocalAudio: boolean = getServerEnv().USE_LOCAL_AUDIO,
+): Promise<BeatView | null> {
+  const allBeats = await fetchBeatViews(client, useLocalAudio);
+  return allBeats.find((beat) => beat.id === id) ?? null;
+}

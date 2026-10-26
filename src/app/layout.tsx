@@ -21,6 +21,7 @@ export const viewport: Viewport = {
 
 import { AudioPlayerProvider } from "@/components/audio/AudioPlayerContext";
 import { PersistentPlayerBar } from "@/components/audio/PersistentPlayerBar";
+import { DebugPanel } from "@/components/debug/DebugPanel";
 import { HeaderNav } from "@/components/navigation/HeaderNav";
 import { API_ROUTES } from "@/lib/constants";
 import { PALETTE } from "@/lib/design-tokens";
@@ -42,6 +43,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <HeaderNav />
             {children}
             <PersistentPlayerBar />
+            <DebugPanel />
           </AudioPlayerProvider>
         </Suspense>
       </body>

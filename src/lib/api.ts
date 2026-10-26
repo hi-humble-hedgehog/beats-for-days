@@ -59,6 +59,22 @@ export const beatsApi = {
     }
     return res.json();
   },
+
+  /**
+   * Fetches a specific beat by ID from `/api/beats?id=...`.
+   * Returns `null` when the requested track ID is not found.
+   */
+  async getBeat(id: string): Promise<BeatView | null> {
+    const res = await fetch(`${API_ROUTES.BEATS}?id=${encodeURIComponent(id)}`);
+    if (res.status === 404) {
+      return null;
+    }
+    if (!res.ok) {
+      throw new Error(`Failed to load beat: ${res.statusText}`);
+    }
+    const data = (await res.json()) as { beat: BeatView };
+    return data.beat;
+  },
 };
 
 export const waitlistApi = {

@@ -12,41 +12,21 @@ import {
 import { usePathname } from "next/navigation";
 import { beatsApi } from "@/lib/api";
 import { AudioEngine } from "@/lib/audio/engine";
-import { STORAGE_KEYS } from "@/lib/constants";
 import { updatePlayedTrackIds } from "@/lib/player/graph";
-import { syncBeatUrl } from "@/lib/player/url";
+import { loadPlayedHistory, savePlayedHistory } from "@/lib/player/history";
+import { extractBeatIdFromPathname, syncBeatUrl } from "@/lib/player/url";
 import type { AudioPlayerState, PlaybackPhase } from "@/lib/types/audio";
 import type { BeatView } from "@/lib/types/beat";
 import { useEngineHandoff, useEngineSync } from "./useEngineSync";
+import { useTrackAdvancer } from "./useTrackAdvancer";
+import { useUrlSync } from "./useUrlSync";
 
 export const AudioPlayerContext = createContext<AudioPlayerState | null>(null);
 
-function loadPlayedHistory(): string[] {
-  if (typeof window === "undefined") return [];
-  try {
-    return (
-      (JSON.parse(
-        window.localStorage.getItem(STORAGE_KEYS.PLAYED_TRACKS) || "[]",
-      ) as string[]) || []
-    );
-  } catch {
-    return [];
-  }
-}
-
-function savePlayedHistory(history: string[]) {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.setItem(
-      STORAGE_KEYS.PLAYED_TRACKS,
-      JSON.stringify(history),
-    );
-  } catch {
-    // Ignore storage quota errors
-  }
-}
-
-function useInitialBeat(initialHistory: string[]) {
+function useInitialBeat(
+  initialHistory: string[],
+  initialBeatId?: string | null,
+) {
   const [current, setCurrent] = useState<BeatView | null>(null);
   const [resolveAfterSec, setResolveAfterSec] = useState<number>(30);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -55,109 +35,41 @@ function useInitialBeat(initialHistory: string[]) {
 
   useEffect(() => {
     let active = true;
-    beatsApi
-      .getNextBeat({ playedTrackIds: historyRef.current, mode: "skip" })
-      .then((res) => {
+
+    async function loadInitialBeat() {
+      try {
+        if (initialBeatId) {
+          const beat = await beatsApi.getBeat(initialBeatId);
+          if (beat && active) {
+            setCurrent(beat);
+            setIsLoading(false);
+            return;
+          }
+        }
+
+        const res = await beatsApi.getNextBeat({
+          playedTrackIds: historyRef.current,
+          mode: "skip",
+        });
         if (!active) return;
         setCurrent(res.beat);
         if (res.resolveAfterSec) setResolveAfterSec(res.resolveAfterSec);
-        setIsLoading(false);
-      })
-      .catch((err) => {
+      } catch (err) {
         if (!active) return;
         setError(err instanceof Error ? err.message : "Failed to load beats");
-        setIsLoading(false);
-      });
+      } finally {
+        if (active) setIsLoading(false);
+      }
+    }
+
+    void loadInitialBeat();
+
     return () => {
       active = false;
     };
-  }, []);
+  }, [initialBeatId]);
 
   return { current, setCurrent, resolveAfterSec, isLoading, error, setError };
-}
-
-interface TrackAdvanceOptions {
-  engine: AudioEngine;
-  stateRef: React.MutableRefObject<{
-    current: BeatView | null;
-    pathname: string;
-    playedHistory: string[];
-  }>;
-  isResolvingRef: React.MutableRefObject<boolean>;
-  commitNextBeat: (beat: BeatView) => void;
-  setPhase: (phase: PlaybackPhase) => void;
-  setSecondsRemaining: (sec: number) => void;
-  setError: (err: string | null) => void;
-}
-
-function useTrackAdvancer(opts: TrackAdvanceOptions) {
-  const {
-    engine,
-    stateRef,
-    isResolvingRef,
-    commitNextBeat,
-    setPhase,
-    setSecondsRemaining,
-    setError,
-  } = opts;
-
-  return useCallback(
-    (modeOrEvent?: unknown) => {
-      const snap = engine.getSnapshot();
-      let cur = stateRef.current.current;
-      let hist = stateRef.current.playedHistory;
-
-      if (snap.currentBeat && snap.currentBeat.id !== cur?.id) {
-        cur = snap.currentBeat;
-        hist = updatePlayedTrackIds(hist, cur.id);
-        commitNextBeat(cur);
-      }
-
-      if (!cur || isResolvingRef.current) return;
-
-      const mode = modeOrEvent === "auto" ? "auto" : "skip";
-      isResolvingRef.current = true;
-
-      beatsApi
-        .getNextBeat({ currentTrackId: cur.id, playedTrackIds: hist, mode })
-        .then(async (res) => {
-          const nextBeat = res.beat;
-
-          if (mode === "auto" && res.transition) {
-            await engine.armTransition(nextBeat, res.transition);
-            const snap = engine.getSnapshot();
-            setPhase(snap.phase);
-            setSecondsRemaining(snap.secondsRemaining);
-            return;
-          }
-
-          if (engine.getSnapshot().isPlaying) {
-            await engine.skipToTrack(nextBeat);
-            const snap = engine.getSnapshot();
-            setPhase(snap.phase);
-            setSecondsRemaining(snap.secondsRemaining);
-          }
-          commitNextBeat(nextBeat);
-        })
-        .catch((err) => {
-          setError(
-            err instanceof Error ? err.message : "Failed to advance track",
-          );
-        })
-        .finally(() => {
-          isResolvingRef.current = false;
-        });
-    },
-    [
-      commitNextBeat,
-      engine,
-      isResolvingRef,
-      setError,
-      setPhase,
-      setSecondsRemaining,
-      stateRef,
-    ],
-  );
 }
 
 export interface AudioPlayerProviderProps {
@@ -168,6 +80,7 @@ export interface AudioPlayerProviderProps {
 function useBeatCommit(
   setCurrent: (beat: BeatView) => void,
   stateRef: React.MutableRefObject<{
+    current: BeatView | null;
     pathname: string;
     playedHistory: string[];
   }>,
@@ -175,7 +88,14 @@ function useBeatCommit(
 ) {
   return useCallback(
     (nextBeat: BeatView) => {
-      const { pathname: path, playedHistory: hist } = stateRef.current;
+      const {
+        pathname: path,
+        playedHistory: hist,
+        current: cur,
+      } = stateRef.current;
+      if (cur?.id === nextBeat.id) {
+        return;
+      }
       const nextHistory = updatePlayedTrackIds(hist, nextBeat.id);
       setPlayedHistory(nextHistory);
       savePlayedHistory(nextHistory);
@@ -191,39 +111,66 @@ function useBeatCommit(
   );
 }
 
-export function AudioPlayerProvider({
-  children,
-  engine: injectedEngine,
-}: AudioPlayerProviderProps) {
-  const pathname = usePathname();
+function usePlayerState(initialBeatId: string | null) {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [phase, setPhase] = useState<PlaybackPhase>("idle");
   const [secondsRemaining, setSecondsRemaining] = useState<number>(0);
   const [positionSec, setPositionSec] = useState<number>(0);
   const [playedHistory, setPlayedHistory] =
     useState<string[]>(loadPlayedHistory);
-  const { current, setCurrent, resolveAfterSec, isLoading, error, setError } =
-    useInitialBeat(playedHistory);
+  const initialBeat = useInitialBeat(playedHistory, initialBeatId);
 
-  const [defaultEngine] = useState(
-    () => injectedEngine ?? new AudioEngine({ vinylEffects: true }),
-  );
-  const engine = injectedEngine ?? defaultEngine;
+  return {
+    isPlaying,
+    setIsPlaying,
+    phase,
+    setPhase,
+    secondsRemaining,
+    setSecondsRemaining,
+    positionSec,
+    setPositionSec,
+    playedHistory,
+    setPlayedHistory,
+    ...initialBeat,
+  };
+}
+
+interface CoordinatorOptions {
+  engine: AudioEngine;
+  pathname: string;
+  state: ReturnType<typeof usePlayerState>;
+  commitNextBeat: (beat: BeatView) => void;
+  stateRef: React.MutableRefObject<{
+    current: BeatView | null;
+    pathname: string;
+    playedHistory: string[];
+  }>;
+}
+
+function useAudioCoordinator(opts: CoordinatorOptions) {
+  const { engine, pathname, state, commitNextBeat, stateRef } = opts;
   const isResolvingRef = useRef<boolean>(false);
-  const stateRef = useRef({ current, pathname, playedHistory });
-
-  useEffect(() => {
-    stateRef.current = { current, pathname, playedHistory };
-  });
-
-  const commitNextBeat = useBeatCommit(setCurrent, stateRef, setPlayedHistory);
 
   useEngineHandoff({
     engine,
     commitNextBeat,
-    setPhase,
-    setSecondsRemaining,
-    setPositionSec,
+    setPhase: state.setPhase,
+    setSecondsRemaining: state.setSecondsRemaining,
+    setPositionSec: state.setPositionSec,
+  });
+
+  useUrlSync({
+    engine,
+    pathname,
+    current: state.current,
+    setCurrent: state.setCurrent,
+    setPhase: state.setPhase,
+    setSecondsRemaining: state.setSecondsRemaining,
+    setPositionSec: state.setPositionSec,
+    setError: state.setError,
+    playedHistory: state.playedHistory,
+    setPlayedHistory: state.setPlayedHistory,
+    setIsPlaying: state.setIsPlaying,
   });
 
   const advanceTrack = useTrackAdvancer({
@@ -231,39 +178,90 @@ export function AudioPlayerProvider({
     stateRef,
     isResolvingRef,
     commitNextBeat,
-    setPhase,
-    setSecondsRemaining,
-    setError,
+    setPhase: state.setPhase,
+    setSecondsRemaining: state.setSecondsRemaining,
+    setError: state.setError,
   });
 
-  const activePlaying = isPlaying && pathname !== "/";
+  const activePlaying = state.isPlaying && pathname !== "/";
   useEngineSync({
     engine,
     activePlaying,
-    isLoading,
-    current,
-    resolveAfterSec,
+    isLoading: state.isLoading,
+    current: state.current,
+    resolveAfterSec: state.resolveAfterSec,
     isResolvingRef,
     commitNextBeat,
     advanceTrack,
-    setPhase,
-    setSecondsRemaining,
-    setPositionSec,
+    setPhase: state.setPhase,
+    setSecondsRemaining: state.setSecondsRemaining,
+    setPositionSec: state.setPositionSec,
   });
 
-  const togglePlay = useCallback(() => setIsPlaying((prev) => !prev), []);
+  return { activePlaying, advanceTrack };
+}
+
+export function AudioPlayerProvider({
+  children,
+  engine: injectedEngine,
+}: AudioPlayerProviderProps) {
+  const pathname = usePathname();
+  const [initialBeatId] = useState(() => extractBeatIdFromPathname(pathname));
+  const playerState = usePlayerState(initialBeatId);
+  const [defaultEngine] = useState(
+    () => injectedEngine ?? new AudioEngine({ vinylEffects: true }),
+  );
+  const engine = injectedEngine ?? defaultEngine;
+  const stateRef = useRef({
+    current: playerState.current,
+    pathname,
+    playedHistory: playerState.playedHistory,
+  });
+
+  useEffect(() => {
+    stateRef.current = {
+      current: playerState.current,
+      pathname,
+      playedHistory: playerState.playedHistory,
+    };
+  });
+
+  const commitNextBeat = useBeatCommit(
+    playerState.setCurrent,
+    stateRef,
+    playerState.setPlayedHistory,
+  );
+
+  const { activePlaying, advanceTrack } = useAudioCoordinator({
+    engine,
+    pathname,
+    state: playerState,
+    commitNextBeat,
+    stateRef,
+  });
+
+  const { setIsPlaying } = playerState;
+  const togglePlay = useCallback(
+    () => setIsPlaying((prev) => !prev),
+    [setIsPlaying],
+  );
+  const play = useCallback(() => setIsPlaying(true), [setIsPlaying]);
+  const pause = useCallback(() => setIsPlaying(false), [setIsPlaying]);
 
   return (
     <AudioPlayerContext.Provider
       value={{
-        current,
+        current: playerState.current,
         isPlaying: activePlaying,
-        phase,
-        secondsRemaining,
-        positionSec,
-        isLoading,
-        error,
+        phase: playerState.phase,
+        secondsRemaining: playerState.secondsRemaining,
+        positionSec: playerState.positionSec,
+        isLoading: playerState.isLoading,
+        error: playerState.error,
+        playedHistory: playerState.playedHistory,
         togglePlay,
+        play,
+        pause,
         advanceTrack,
       }}
     >

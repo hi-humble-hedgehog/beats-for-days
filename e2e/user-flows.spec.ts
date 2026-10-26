@@ -97,19 +97,25 @@ test.describe("Radio landing & playback flow", () => {
     await startButton.click();
 
     await expect(page).toHaveURL(/\/beat\/.+/);
-    await expect(page.getByText("Playing", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("main").getByText("Playing", { exact: true }),
+    ).toBeVisible();
     await expect(
       playerBar.getByRole("button", { name: "Pause audio" }),
     ).toBeVisible();
 
     await playerBar.getByRole("button", { name: "Pause audio" }).click();
-    await expect(page.getByText("Paused", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("main").getByText("Paused", { exact: true }),
+    ).toBeVisible();
     await expect(
       playerBar.getByRole("button", { name: "Play audio" }),
     ).toBeVisible();
 
     await page.getByRole("button", { name: /Play Beat/i }).click();
-    await expect(page.getByText("Playing", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("main").getByText("Playing", { exact: true }),
+    ).toBeVisible();
 
     const initialHeading = await page
       .getByRole("heading", { level: 1 })
@@ -117,6 +123,9 @@ test.describe("Radio landing & playback flow", () => {
     await playerBar.getByRole("button", { name: "Skip to next track" }).click();
     await expect(page.getByRole("heading", { level: 1 })).not.toHaveText(
       initialHeading ?? "",
+    );
+    await expect(page.getByRole("heading", { level: 1 })).not.toContainText(
+      "Loading Beat",
     );
 
     const skippedBeatName = (
@@ -126,6 +135,42 @@ test.describe("Radio landing & playback flow", () => {
       await expect(playerBar).toContainText(`Now Playing: ${skippedBeatName}`);
     }
 
+    // Browser Back navigation restores previous beat in both UI and player
+    await page.goBack();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      initialHeading ?? "",
+    );
+    const restoredBeatName = (initialHeading ?? "").replace(/^#/, "");
+    await expect(playerBar).toContainText(`Now Playing: ${restoredBeatName}`);
+
+    // Browser Forward navigation returns to the advanced beat
+    await page.goForward();
+    if (skippedBeatName) {
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+        `#${skippedBeatName}`,
+      );
+      await expect(playerBar).toContainText(`Now Playing: ${skippedBeatName}`);
+    }
+
+    // Verify History Debug panel displays history state
+    const debugButton = page.getByRole("button", {
+      name: "Toggle history debug panel",
+    });
+    await expect(debugButton).toBeVisible();
+    await debugButton.click();
+
+    const debugRegion = page.getByRole("region", {
+      name: "Playback and history state",
+    });
+    await expect(debugRegion).toBeVisible();
+    await expect(debugRegion).toContainText("Played History");
+    await expect(debugRegion).toContainText("History Stack Length:");
+
+    await debugRegion
+      .getByRole("button", { name: "Close debug panel" })
+      .click();
+    await expect(debugRegion).not.toBeVisible();
+
     await page
       .getByRole("banner")
       .getByRole("link", { name: /Beats for Days/i })
@@ -133,6 +178,21 @@ test.describe("Radio landing & playback flow", () => {
     await expect(page).toHaveURL("/");
     await expect(
       playerBar.getByRole("button", { name: "Play audio" }),
+    ).toBeVisible();
+
+    // Returning to home and clicking Start Radio Stream again resumes playback on beat deck
+    const restartButton = page.getByRole("button", {
+      name: /Start Radio Stream/i,
+    });
+    await expect(restartButton).toBeVisible();
+    await restartButton.click();
+
+    await expect(page).toHaveURL(/\/beat\/.+/);
+    await expect(
+      page.getByRole("main").getByText("Playing", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      playerBar.getByRole("button", { name: "Pause audio" }),
     ).toBeVisible();
   });
 });

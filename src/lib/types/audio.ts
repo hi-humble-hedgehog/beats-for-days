@@ -10,6 +10,9 @@ export interface AudioPlayerState {
   positionSec?: number;
   isLoading: boolean;
   error: string | null;
+  playedHistory?: string[];
   togglePlay: () => void;
+  play?: () => void;
+  pause?: () => void;
   advanceTrack: (mode?: "auto" | "skip" | unknown) => void;
 }

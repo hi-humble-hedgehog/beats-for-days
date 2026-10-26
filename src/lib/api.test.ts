@@ -102,6 +102,55 @@ describe("beatsApi", () => {
       "Failed to resolve next beat: Not Found",
     );
   });
+
+  it("getBeat fetches single beat by ID from /api/beats?id=...", async () => {
+    const mockBeat = {
+      id: "0001",
+      name: "Beat One",
+      audioUrl: "http://storage/1.m4a",
+      durationMs: 60000,
+      loopStartMs: 0,
+      loopEndMs: 60000,
+      bpm: 86,
+      transitions: [],
+    };
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({ beat: mockBeat }),
+    });
+
+    const result = await beatsApi.getBeat("0001");
+
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      `${API_ROUTES.BEATS}?id=0001`,
+    );
+    expect(result).toEqual(mockBeat);
+  });
+
+  it("getBeat returns null when beat is not found (404)", async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 404,
+      statusText: "Not Found",
+    });
+
+    const result = await beatsApi.getBeat("non-existent");
+
+    expect(result).toBeNull();
+  });
+
+  it("getBeat throws error on server failure other than 404", async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      statusText: "Internal Server Error",
+    });
+
+    await expect(beatsApi.getBeat("0001")).rejects.toThrow(
+      "Failed to load beat: Internal Server Error",
+    );
+  });
 });
 
 describe("waitlistApi", () => {

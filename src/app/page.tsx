@@ -5,10 +5,12 @@ import { useAudioPlayer } from "@/components/audio/AudioPlayerContext";
 
 export default function Home() {
   const router = useRouter();
-  const { current, isPlaying, togglePlay } = useAudioPlayer();
+  const { current, isPlaying, togglePlay, play } = useAudioPlayer();
 
   const handleStartPlayback = () => {
-    if (!isPlaying) {
+    if (play) {
+      play();
+    } else if (!isPlaying) {
       togglePlay();
     }
     const targetBeat = current?.id ?? "0001";

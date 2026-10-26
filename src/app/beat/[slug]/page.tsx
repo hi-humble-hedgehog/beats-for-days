@@ -1,13 +1,33 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { useAudioPlayer } from "@/components/audio/AudioPlayerContext";
+import { extractBeatIdFromPathname } from "@/lib/player/url";
+
+function getBeatDisplayInfo(
+  slug: string,
+  currentName?: string,
+  currentId?: string,
+) {
+  const isMatched = slug === "—" || currentId === slug;
+  return {
+    beatName: isMatched ? currentName : undefined,
+    trackId: isMatched ? (currentId ?? slug) : slug,
+  };
+}
 
 export default function BeatPage() {
   const params = useParams<{ slug: string }>();
-  const slug = params?.slug ?? "—";
+  const pathname = usePathname();
+  const slug = extractBeatIdFromPathname(pathname) ?? params?.slug ?? "—";
   const { current, isPlaying, togglePlay, advanceTrack, secondsRemaining } =
     useAudioPlayer();
+
+  const { beatName, trackId } = getBeatDisplayInfo(
+    slug,
+    current?.name,
+    current?.id,
+  );
 
   return (
     <main className="mx-auto flex max-w-4xl flex-1 flex-col items-center justify-center gap-8 p-8 text-center">
@@ -18,11 +38,11 @@ export default function BeatPage() {
 
         <h1 className="text-4xl leading-[0.85] font-bold tracking-tighter text-foreground sm:text-6xl">
           <span className="font-black text-primary">#</span>
-          {current?.name ?? `Loading Beat ${slug}...`}
+          {beatName ?? `Loading Beat ${slug}...`}
         </h1>
 
         <p className="max-w-md text-xs font-bold tracking-widest text-muted-foreground uppercase tabular-nums">
-          Track ID: {current?.id ?? slug}
+          Track ID: {trackId}
         </p>
       </div>
 

@@ -1,7 +1,9 @@
+import { type SupabaseClient } from "@supabase/supabase-js";
 import { describe, expect, it } from "vitest";
 import {
   buildBeatViews,
   fetchBeatViews,
+  fetchBeatViewById,
   type TrackRow,
   type TransitionRow,
 } from "./tracks";
@@ -371,5 +373,55 @@ describe("fetchBeatViews", () => {
     await expect(fetchBeatViews(mockClient as any)).rejects.toThrow(
       "Failed to fetch transitions: Transitions DB failure",
     );
+  });
+});
+
+describe("fetchBeatViewById", () => {
+  const mockClient = {
+    from: (table: string) => {
+      if (table === "tracks") {
+        return {
+          select: () => ({
+            order: () =>
+              Promise.resolve({
+                data: [
+                  {
+                    id: "0001",
+                    name: "Track One",
+                    bpm: 85,
+                    duration_ms: 60000,
+                    loop_start_ms: 0,
+                    loop_end_ms: 60000,
+                    audio_path: "1.m4a",
+                  },
+                ],
+                error: null,
+              }),
+          }),
+        };
+      }
+      return {
+        select: () => Promise.resolve({ data: [], error: null }),
+      };
+    },
+  };
+
+  it("returns the matching beat when found", async () => {
+    const beat = await fetchBeatViewById(
+      "0001",
+      mockClient as unknown as SupabaseClient,
+      true,
+    );
+    expect(beat?.id).toBe("0001");
+    expect(beat?.name).toBe("Track One");
+  });
+
+  it("returns null when the beat is not found", async () => {
+    const beat = await fetchBeatViewById(
+      "non-existent",
+      mockClient as unknown as SupabaseClient,
+      true,
+    );
+    expect(beat).toBeNull();
   });
 });

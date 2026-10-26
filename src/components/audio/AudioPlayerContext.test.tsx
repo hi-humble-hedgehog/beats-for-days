@@ -7,7 +7,7 @@ import { STORAGE_KEYS } from "@/lib/constants";
 import type { BeatView } from "@/lib/types/beat";
 import { AudioPlayerProvider, useAudioPlayer } from "./AudioPlayerContext";
 
-let mockPathname = "/beat/0001";
+let mockPathname = "/beats";
 vi.mock("next/navigation", () => ({
   usePathname: () => mockPathname,
 }));
@@ -15,6 +15,7 @@ vi.mock("next/navigation", () => ({
 vi.mock("@/lib/api", () => ({
   beatsApi: {
     getNextBeat: vi.fn(),
+    getBeat: vi.fn(),
   },
 }));
 
@@ -121,7 +122,7 @@ describe("AudioPlayerProvider", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useRealTimers();
-    mockPathname = "/beat/0001";
+    mockPathname = "/beats";
     window.localStorage.clear();
     testHarness = createTestAudioEngine();
 
@@ -156,6 +157,34 @@ describe("AudioPlayerProvider", () => {
         transition: null,
         resolveAfterSec: 30,
       });
+    });
+
+    mockBeatsApi.getBeat.mockImplementation((id: string) => {
+      if (id === "0002") {
+        return Promise.resolve({
+          id: "0002",
+          name: "Jazz Flute",
+          audioUrl: "http://storage/2.m4a",
+          durationMs: 60000,
+          loopStartMs: 10000,
+          loopEndMs: 50000,
+          bpm: 86,
+          transitions: [],
+        });
+      }
+      if (id === "0001") {
+        return Promise.resolve({
+          id: "0001",
+          name: "Soul Rhodes",
+          audioUrl: "http://storage/1.m4a",
+          durationMs: 60000,
+          loopStartMs: 10000,
+          loopEndMs: 50000,
+          bpm: 86,
+          transitions: [transition1To2],
+        });
+      }
+      return Promise.resolve(null);
     });
   });
 
@@ -238,6 +267,45 @@ describe("AudioPlayerProvider", () => {
 
     // Landing page always forces isPlaying to false to avoid audio auto-start
     expect(screen.getByText("Playing: no")).toBeInTheDocument();
+  });
+
+  it("pauses active playing when returning to '/' from a beat route and resumes when returning to the beat route", async () => {
+    mockPathname = "/beat/0001";
+    const { rerender } = render(
+      <AudioPlayerProvider engine={testHarness.engine}>
+        <Consumer />
+      </AudioPlayerProvider>,
+    );
+
+    expect(await screen.findByText(/Current: Soul Rhodes/)).toBeInTheDocument();
+
+    // Start playback on the beat route
+    await act(async () => {
+      screen.getByRole("button", { name: "Toggle Play" }).click();
+    });
+    expect(screen.getByText("Playing: yes")).toBeInTheDocument();
+
+    // User navigates back to home: music must pause
+    mockPathname = "/";
+    rerender(
+      <AudioPlayerProvider engine={testHarness.engine}>
+        <Consumer />
+      </AudioPlayerProvider>,
+    );
+    expect(screen.getByText("Playing: no")).toBeInTheDocument();
+
+    // User starts playback again from home (calls togglePlay) and navigates to beat page
+    await act(async () => {
+      screen.getByRole("button", { name: "Toggle Play" }).click();
+    });
+
+    mockPathname = "/beat/0001";
+    rerender(
+      <AudioPlayerProvider engine={testHarness.engine}>
+        <Consumer />
+      </AudioPlayerProvider>,
+    );
+    expect(screen.getByText("Playing: yes")).toBeInTheDocument();
   });
 
   it("cancels in-flight track playback if paused before audio buffer finishes loading", async () => {
@@ -600,5 +668,61 @@ describe("AudioPlayerProvider", () => {
       }),
     );
     vi.useRealTimers();
+  });
+
+  it("loads initial beat specified by route slug on direct navigation to /beat/:slug", async () => {
+    mockPathname = "/beat/0002";
+
+    render(
+      <AudioPlayerProvider engine={testHarness.engine}>
+        <Consumer />
+      </AudioPlayerProvider>,
+    );
+
+    expect(await screen.findByText(/Current: Jazz Flute/)).toBeInTheDocument();
+    expect(mockBeatsApi.getBeat).toHaveBeenCalledWith("0002");
+  });
+
+  it("switches beat when window popstate fires with a different beat", async () => {
+    render(
+      <AudioPlayerProvider engine={testHarness.engine}>
+        <Consumer />
+      </AudioPlayerProvider>,
+    );
+
+    expect(await screen.findByText(/Current: Soul Rhodes/)).toBeInTheDocument();
+
+    await act(async () => {
+      screen.getByRole("button", { name: "Advance" }).click();
+    });
+    expect(await screen.findByText(/Current: Jazz Flute/)).toBeInTheDocument();
+
+    // User navigates back in browser
+    await act(async () => {
+      window.dispatchEvent(
+        new PopStateEvent("popstate", { state: { beatId: "0001" } }),
+      );
+    });
+
+    expect(await screen.findByText(/Current: Soul Rhodes/)).toBeInTheDocument();
+  });
+
+  it("switches beat when pathname route changes to another beat", async () => {
+    const { rerender } = render(
+      <AudioPlayerProvider engine={testHarness.engine}>
+        <Consumer />
+      </AudioPlayerProvider>,
+    );
+
+    expect(await screen.findByText(/Current: Soul Rhodes/)).toBeInTheDocument();
+
+    mockPathname = "/beat/0002";
+    rerender(
+      <AudioPlayerProvider engine={testHarness.engine}>
+        <Consumer />
+      </AudioPlayerProvider>,
+    );
+
+    expect(await screen.findByText(/Current: Jazz Flute/)).toBeInTheDocument();
   });
 });
