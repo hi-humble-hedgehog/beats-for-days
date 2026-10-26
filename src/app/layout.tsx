@@ -21,9 +21,10 @@ export const viewport: Viewport = {
 
 import { AudioPlayerProvider } from "@/components/audio/AudioPlayerContext";
 import { PersistentPlayerBar } from "@/components/audio/PersistentPlayerBar";
-import { DebugPanel } from "@/components/debug/DebugPanel";
+import { DebugPanelGate } from "@/components/debug/DebugPanelGate";
 import { HeaderNav } from "@/components/navigation/HeaderNav";
 import { API_ROUTES } from "@/lib/constants";
+import { getServerEnv } from "@/lib/env";
 import { PALETTE } from "@/lib/design-tokens";
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -43,7 +44,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <HeaderNav />
             {children}
             <PersistentPlayerBar />
-            <DebugPanel />
+            {/* Off unless DEBUG_PANEL=true; then it still needs ?debug=1. */}
+            {getServerEnv().DEBUG_PANEL ? <DebugPanelGate /> : null}
           </AudioPlayerProvider>
         </Suspense>
       </body>

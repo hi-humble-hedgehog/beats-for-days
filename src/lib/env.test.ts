@@ -12,7 +12,14 @@ describe("parseServerEnv", () => {
       SUPABASE_SERVICE_ROLE_KEY: "sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz",
       USE_LOCAL_AUDIO: true,
       NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS: 30,
+      DEBUG_PANEL: false,
     });
+  });
+
+  it("turns DEBUG_PANEL on only for the exact string true", () => {
+    expect(parseServerEnv({ DEBUG_PANEL: "true" }).DEBUG_PANEL).toBe(true);
+    expect(parseServerEnv({ DEBUG_PANEL: "false" }).DEBUG_PANEL).toBe(false);
+    expect(() => parseServerEnv({ DEBUG_PANEL: "yes" })).toThrow("DEBUG_PANEL");
   });
 
   it("parses custom USE_LOCAL_AUDIO and NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS", () => {
@@ -73,6 +80,7 @@ describe("parseServerEnv", () => {
       SUPABASE_SERVICE_ROLE_KEY: "sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz",
       USE_LOCAL_AUDIO: true,
       NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS: 30,
+      DEBUG_PANEL: false,
     });
   });
 
@@ -92,6 +100,7 @@ describe("parseServerEnv", () => {
       SUPABASE_SERVICE_ROLE_KEY: "sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz",
       USE_LOCAL_AUDIO: true,
       NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS: 30,
+      DEBUG_PANEL: false,
     });
   });
 

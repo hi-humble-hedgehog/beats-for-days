@@ -27,6 +27,17 @@ pnpm verify             # full local gate before pushing / declaring done
 pnpm test:mutation      # after logic-heavy changes
 ```
 
+### Playback debug panel
+
+The debug panel shows the active beat, route, history state and played ids. It needs two switches:
+
+1. Set `DEBUG_PANEL=true` in the environment (`.env.local` locally, or the Vercel project settings).
+2. Add `?debug=1` to the page URL.
+
+- The env var is read at build time. On Vercel, changing it needs a redeploy.
+- With the env var off, the panel's code never loads. With it on, the code loads only for visitors who add `?debug=1`.
+- The panel shows only the visitor's own local data. It sends nothing anywhere.
+
 ## Branching & PR workflow
 
 1. **Branch naming:** Create feature/fix branches. Direct commits to `main` are blocked.
