@@ -1,21 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useAudioPlayer } from "@/components/audio/AudioPlayerContext";
+import { useStartPlayback } from "@/components/audio/AudioPlayerContext";
 
 export default function Home() {
-  const router = useRouter();
-  const { current, isPlaying, togglePlay, play } = useAudioPlayer();
-
-  const handleStartPlayback = () => {
-    if (play) {
-      play();
-    } else if (!isPlaying) {
-      togglePlay();
-    }
-    const targetBeat = current?.id ?? "0001";
-    router.push(`/beat/${targetBeat}`);
-  };
+  const handleStartPlayback = useStartPlayback();
 
   return (
     <main className="mx-auto flex max-w-4xl flex-1 flex-col items-center justify-center gap-8 p-8 text-center">

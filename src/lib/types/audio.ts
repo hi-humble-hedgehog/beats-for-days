@@ -6,6 +6,8 @@ export type AdvanceMode = "auto" | "skip";
 export interface AudioPlayerState {
   current: BeatView | null;
   activePathname?: string;
+  hasPausedBeat?: boolean;
+  notFoundBeatId?: string | null;
   isPlaying: boolean;
   phase?: PlaybackPhase;
   secondsRemaining: number;
@@ -16,6 +18,7 @@ export interface AudioPlayerState {
   togglePlay: () => void;
   play?: () => void;
   pause?: () => void;
+  commitBeat?: (beat: BeatView) => void;
   skip?: () => void;
   autoAdvance?: () => void;
   advanceTrack: (mode?: AdvanceMode) => void;

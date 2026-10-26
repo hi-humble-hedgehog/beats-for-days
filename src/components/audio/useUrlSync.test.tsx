@@ -206,4 +206,28 @@ describe("useUrlSync", () => {
       isPlaying: false,
     });
   });
+
+  it("dispatches set_not_found when getBeat returns null for an unknown beat id", async () => {
+    render(
+      <TestComponent
+        engine={mockEngine}
+        pathname="/beat/0002"
+        dispatch={mockDispatch}
+        store={makeStore()}
+      />,
+    );
+
+    await act(async () => {
+      window.dispatchEvent(
+        new PopStateEvent("popstate", { state: { beatId: "9999" } }),
+      );
+    });
+
+    expect(mockBeatsApi.getBeat).toHaveBeenCalledWith("9999");
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: "set_not_found",
+      beatId: "9999",
+    });
+    expect(mockSetCurrent).not.toHaveBeenCalled();
+  });
 });

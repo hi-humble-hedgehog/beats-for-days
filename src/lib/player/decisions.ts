@@ -1,6 +1,6 @@
 import type { AdvanceMode, PlaybackPhase } from "@/lib/types/audio";
 import type { BeatView, TransitionView } from "@/lib/types/beat";
-import { extractBeatIdFromPathname } from "./url";
+import { extractBeatIdFromPathname, formatBeatUrl } from "./url";
 
 export type { AdvanceMode, PlaybackPhase };
 
@@ -88,9 +88,77 @@ export function selectBeatDisplayInfo(opts: {
   };
 }
 
+export interface ResolveStartBeatOptions {
+  current: BeatView | null;
+  hasPausedBeat?: boolean;
+  playedHistory: string[];
+  fetchNextBeat: (req: {
+    currentTrackId?: string;
+    playedTrackIds: string[];
+    mode: "skip";
+  }) => Promise<{ beat: BeatView }>;
+  commitBeat?: (beat: BeatView) => void;
+  startPlay: () => void;
+  navigate?: (url: string) => void;
+}
+
+/**
+ * Starts playback from Home, 404, or the persistent player bar.
+ * Resumes the paused beat when playback was already started in this session, or
+ * queries `/api/beats/next` with the current ID and history on a cold start.
+ */
+export async function resolveStartBeat(
+  opts: ResolveStartBeatOptions,
+): Promise<BeatView> {
+  const {
+    current,
+    hasPausedBeat = Boolean(current),
+    playedHistory,
+    fetchNextBeat,
+    commitBeat,
+    startPlay,
+    navigate,
+  } = opts;
+
+  if (current && hasPausedBeat) {
+    startPlay();
+    navigate?.(formatBeatUrl(current.id));
+    return current;
+  }
+
+  const currentTrackId = current?.id ?? playedHistory[playedHistory.length - 1];
+  const res = await fetchNextBeat({
+    currentTrackId,
+    playedTrackIds: playedHistory,
+    mode: "skip",
+  });
+  commitBeat?.(res.beat);
+  startPlay();
+  navigate?.(formatBeatUrl(res.beat.id));
+  return res.beat;
+}
+
+/**
+ * Determines whether clicking Play in the persistent bar should resolve and navigate
+ * to a beat deck (when stopped on Home, on a 404 route, or with no beat loaded).
+ */
+export function shouldResolveStartOnPlay(
+  isPlaying: boolean,
+  pathname: string,
+  current: BeatView | null,
+  notFoundBeatId?: string | null,
+): boolean {
+  if (isPlaying) {
+    return false;
+  }
+  return pathname === "/" || Boolean(notFoundBeatId) || !current;
+}
+
 export interface PlayerUiState {
   activePathname: string;
   isPlaying: boolean;
+  hasPausedBeat: boolean;
+  notFoundBeatId: string | null;
   phase: PlaybackPhase;
   secondsRemaining: number;
   positionSec: number;
@@ -107,7 +175,8 @@ export type PlayerAction =
       positionSec: number;
     }
   | { type: "set_pathname"; pathname: string }
-  | { type: "set_error"; error: string | null };
+  | { type: "set_error"; error: string | null }
+  | { type: "set_not_found"; beatId: string | null };
 
 /**
  * Creates the initial UI reducer state for the audio player provider.
@@ -116,6 +185,8 @@ export function createInitialPlayerUiState(pathname: string): PlayerUiState {
   return {
     activePathname: pathname,
     isPlaying: false,
+    hasPausedBeat: false,
+    notFoundBeatId: null,
     phase: "idle",
     secondsRemaining: 0,
     positionSec: 0,
@@ -124,7 +195,7 @@ export function createInitialPlayerUiState(pathname: string): PlayerUiState {
 }
 
 /**
- * Pure state reducer for player playback UI, route pathname, and engine snapshot fields.
+ * Pure state reducer for player playback UI, route pathname, 404 state, and engine snapshot fields.
  * Keeps state transitions predictable and out of multi-setter hook options.
  */
 export function playerReducer(
@@ -133,9 +204,17 @@ export function playerReducer(
 ): PlayerUiState {
   switch (action.type) {
     case "set_playing":
-      return { ...state, isPlaying: action.isPlaying };
+      return {
+        ...state,
+        isPlaying: action.isPlaying,
+        hasPausedBeat: state.hasPausedBeat || action.isPlaying,
+      };
     case "toggle_playing":
-      return { ...state, isPlaying: !state.isPlaying };
+      return {
+        ...state,
+        isPlaying: !state.isPlaying,
+        hasPausedBeat: true,
+      };
     case "sync_snapshot":
       return {
         ...state,
@@ -147,5 +226,11 @@ export function playerReducer(
       return { ...state, activePathname: action.pathname };
     case "set_error":
       return { ...state, error: action.error };
+    case "set_not_found":
+      return {
+        ...state,
+        notFoundBeatId: action.beatId,
+        isPlaying: action.beatId ? false : state.isPlaying,
+      };
   }
 }

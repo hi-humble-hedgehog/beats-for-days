@@ -10,12 +10,13 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { beatsApi } from "@/lib/api";
 import { AudioEngine } from "@/lib/audio/engine";
 import {
   createInitialPlayerUiState,
   playerReducer,
+  resolveStartBeat,
   type PlayerAction,
 } from "@/lib/player/decisions";
 import { updatePlayedTrackIds } from "@/lib/player/graph";
@@ -32,6 +33,12 @@ import { useTrackAdvancer } from "./useTrackAdvancer";
 import { useUrlSync } from "./useUrlSync";
 
 export const AudioPlayerContext = createContext<AudioPlayerState | null>(null);
+
+interface PlayerStateRef {
+  current: BeatView | null;
+  pathname: string;
+  playedHistory: string[];
+}
 
 function useInitialBeat(
   initialHistory: string[],
@@ -50,11 +57,13 @@ function useInitialBeat(
       try {
         if (initialBeatId) {
           const beat = await beatsApi.getBeat(initialBeatId);
-          if (beat && active) {
-            setCurrent(beat);
-            setIsLoading(false);
+          if (!active) return;
+          if (!beat) {
+            dispatch({ type: "set_not_found", beatId: initialBeatId });
             return;
           }
+          setCurrent(beat);
+          return;
         }
 
         const res = await beatsApi.getNextBeat({
@@ -76,7 +85,6 @@ function useInitialBeat(
     }
 
     void loadInitialBeat();
-
     return () => {
       active = false;
     };
@@ -92,11 +100,7 @@ export interface AudioPlayerProviderProps {
 
 function useBeatCommit(
   setCurrent: (beat: BeatView) => void,
-  stateRef: React.MutableRefObject<{
-    current: BeatView | null;
-    pathname: string;
-    playedHistory: string[];
-  }>,
+  stateRef: React.MutableRefObject<PlayerStateRef>,
   setPlayedHistory: React.Dispatch<React.SetStateAction<string[]>>,
   dispatch: React.Dispatch<PlayerAction>,
 ) {
@@ -107,9 +111,8 @@ function useBeatCommit(
         playedHistory: hist,
         current: cur,
       } = stateRef.current;
-      if (cur?.id === nextBeat.id) {
-        return;
-      }
+      dispatch({ type: "set_not_found", beatId: null });
+      if (cur?.id === nextBeat.id) return;
       const nextHistory = updatePlayedTrackIds(hist, nextBeat.id);
       stateRef.current.current = nextBeat;
       stateRef.current.playedHistory = nextHistory;
@@ -135,38 +138,20 @@ function usePlayerState(pathname: string, initialBeatId: string | null) {
   const [playedHistory, setPlayedHistory] =
     useState<string[]>(loadPlayedHistory);
   const initialBeat = useInitialBeat(playedHistory, initialBeatId, dispatch);
-
-  return {
-    ui,
-    dispatch,
-    playedHistory,
-    setPlayedHistory,
-    ...initialBeat,
-  };
+  return { ui, dispatch, playedHistory, setPlayedHistory, ...initialBeat };
 }
 
-interface CoordinatorOptions {
+function useAudioCoordinator(opts: {
   engine: AudioEngine;
   pathname: string;
   state: ReturnType<typeof usePlayerState>;
   commitNextBeat: (beat: BeatView) => void;
-  stateRef: React.MutableRefObject<{
-    current: BeatView | null;
-    pathname: string;
-    playedHistory: string[];
-  }>;
-}
-
-function useAudioCoordinator(opts: CoordinatorOptions) {
+  stateRef: React.MutableRefObject<PlayerStateRef>;
+}) {
   const { engine, pathname, state, commitNextBeat, stateRef } = opts;
   const isResolvingRef = useRef<boolean>(false);
 
-  useEngineHandoff({
-    engine,
-    commitNextBeat,
-    dispatch: state.dispatch,
-  });
-
+  useEngineHandoff({ engine, commitNextBeat, dispatch: state.dispatch });
   useUrlSync({
     engine,
     pathname,
@@ -178,7 +163,7 @@ function useAudioCoordinator(opts: CoordinatorOptions) {
     },
   });
 
-  const { advanceTrack, skip, autoAdvance } = useTrackAdvancer({
+  const advancer = useTrackAdvancer({
     engine,
     stateRef,
     isResolvingRef,
@@ -194,11 +179,11 @@ function useAudioCoordinator(opts: CoordinatorOptions) {
     resolveAfterSec: state.resolveAfterSec,
     isResolvingRef,
     commitNextBeat,
-    autoAdvance,
+    autoAdvance: advancer.autoAdvance,
     dispatch: state.dispatch,
   });
 
-  return { advanceTrack, skip, autoAdvance };
+  return advancer;
 }
 
 export function AudioPlayerProvider({
@@ -212,7 +197,7 @@ export function AudioPlayerProvider({
     () => injectedEngine ?? new AudioEngine({ vinylEffects: true }),
   );
   const engine = injectedEngine ?? defaultEngine;
-  const stateRef = useRef({
+  const stateRef = useRef<PlayerStateRef>({
     current: playerState.current,
     pathname: playerState.ui.activePathname,
     playedHistory: playerState.playedHistory,
@@ -241,7 +226,7 @@ export function AudioPlayerProvider({
     stateRef,
   });
 
-  const { dispatch } = playerState;
+  const { dispatch, ui } = playerState;
   const togglePlay = useCallback(
     () => dispatch({ type: "toggle_playing" }),
     [dispatch],
@@ -259,17 +244,20 @@ export function AudioPlayerProvider({
     <AudioPlayerContext.Provider
       value={{
         current: playerState.current,
-        activePathname: playerState.ui.activePathname,
-        isPlaying: playerState.ui.isPlaying,
-        phase: playerState.ui.phase,
-        secondsRemaining: playerState.ui.secondsRemaining,
-        positionSec: playerState.ui.positionSec,
+        activePathname: ui.activePathname,
+        hasPausedBeat: ui.hasPausedBeat,
+        notFoundBeatId: ui.notFoundBeatId,
+        isPlaying: ui.isPlaying,
+        phase: ui.phase,
+        secondsRemaining: ui.secondsRemaining,
+        positionSec: ui.positionSec,
         isLoading: playerState.isLoading,
-        error: playerState.ui.error,
+        error: ui.error,
         playedHistory: playerState.playedHistory,
         togglePlay,
         play,
         pause,
+        commitBeat: commitNextBeat,
         skip,
         autoAdvance,
         advanceTrack,
@@ -288,4 +276,31 @@ export function useAudioPlayer(): AudioPlayerState {
     );
   }
   return context;
+}
+
+/**
+ * Shared callback used by Home, 404, and the persistent player bar to start playback
+ * via `resolveStartBeat` and navigate to the target beat deck.
+ */
+export function useStartPlayback(): () => void {
+  const router = useRouter();
+  const state = useAudioPlayer();
+
+  return useCallback(() => {
+    void resolveStartBeat({
+      current: state.current,
+      hasPausedBeat: state.hasPausedBeat,
+      playedHistory: state.playedHistory ?? [],
+      fetchNextBeat: (req) => beatsApi.getNextBeat(req),
+      commitBeat: state.commitBeat,
+      startPlay: () => {
+        if (state.play) {
+          state.play();
+        } else if (!state.isPlaying) {
+          state.togglePlay();
+        }
+      },
+      navigate: (url) => router.push(url),
+    });
+  }, [router, state]);
 }

@@ -1,9 +1,16 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { beatsApi } from "@/lib/api";
 import { describe, expect, it, vi } from "vitest";
 import Home from "./page";
 import { AudioPlayerContext } from "@/components/audio/AudioPlayerContext";
 
 const mockPush = vi.fn();
+vi.mock("@/lib/api", () => ({
+  beatsApi: {
+    getNextBeat: vi.fn(),
+  },
+}));
+
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush }),
   usePathname: () => "/",
@@ -110,5 +117,59 @@ describe("Home page", () => {
     });
     expect(button.className).not.toMatch(/focus-visible:outline/);
     expect(button.className).not.toMatch(/focus:ring/);
+  });
+
+  it("resolves the next beat via beatsApi.getNextBeat when no beat is paused", async () => {
+    const nextBeat = {
+      id: "0003",
+      name: "Soul Trumpet",
+      audioUrl: "http://storage/3.m4a",
+      durationMs: 60000,
+      loopStartMs: 10000,
+      loopEndMs: 50000,
+      bpm: 88,
+      transitions: [],
+    };
+    vi.mocked(beatsApi.getNextBeat).mockResolvedValueOnce({
+      beat: nextBeat,
+      transition: null,
+    });
+    const mockPlay = vi.fn();
+    const mockCommitBeat = vi.fn();
+
+    render(
+      <AudioPlayerContext.Provider
+        value={{
+          current: null,
+          hasPausedBeat: false,
+          playedHistory: ["0001", "0002"],
+          isPlaying: false,
+          secondsRemaining: 0,
+          isLoading: false,
+          error: null,
+          togglePlay: vi.fn(),
+          play: mockPlay,
+          commitBeat: mockCommitBeat,
+          advanceTrack: vi.fn(),
+        }}
+      >
+        <Home />
+      </AudioPlayerContext.Provider>,
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /Start Radio Stream/i }),
+    );
+
+    await waitFor(() => {
+      expect(beatsApi.getNextBeat).toHaveBeenCalledWith({
+        currentTrackId: "0002",
+        playedTrackIds: ["0001", "0002"],
+        mode: "skip",
+      });
+      expect(mockCommitBeat).toHaveBeenCalledWith(nextBeat);
+      expect(mockPlay).toHaveBeenCalledTimes(1);
+      expect(mockPush).toHaveBeenCalledWith("/beat/0003");
+    });
   });
 });

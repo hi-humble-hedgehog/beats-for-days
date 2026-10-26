@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams, usePathname } from "next/navigation";
+import NotFound from "@/app/not-found";
 import { useAudioPlayer } from "@/components/audio/AudioPlayerContext";
 import { selectBeatDisplayInfo } from "@/lib/player/decisions";
 import { extractBeatIdFromPathname } from "@/lib/player/url";
@@ -11,6 +12,7 @@ export default function BeatPage() {
   const {
     current,
     activePathname,
+    notFoundBeatId,
     isPlaying,
     togglePlay,
     skip,
@@ -22,6 +24,11 @@ export default function BeatPage() {
     extractBeatIdFromPathname(activePathname ?? pathname) ??
     params?.slug ??
     "—";
+
+  if (notFoundBeatId && notFoundBeatId === slug) {
+    return <NotFound />;
+  }
+
   const { beatName, trackId } = selectBeatDisplayInfo({
     slug,
     current,

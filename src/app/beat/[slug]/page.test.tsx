@@ -10,6 +10,7 @@ const mockAdvanceTrack = vi.fn();
 let mockPlayerState = {
   current: null as { id: string; name: string } | null,
   activePathname: undefined as string | undefined,
+  notFoundBeatId: null as string | null,
   isPlaying: false,
   secondsRemaining: 30,
   togglePlay: mockTogglePlay,
@@ -19,10 +20,12 @@ let mockPlayerState = {
 vi.mock("next/navigation", () => ({
   useParams: () => mockUseParams(),
   usePathname: () => mockUsePathname(),
+  useRouter: () => ({ push: vi.fn() }),
 }));
 
 vi.mock("@/components/audio/AudioPlayerContext", () => ({
   useAudioPlayer: () => mockPlayerState,
+  useStartPlayback: () => vi.fn(),
 }));
 
 describe("BeatPage", () => {
@@ -31,6 +34,7 @@ describe("BeatPage", () => {
     mockPlayerState = {
       current: null,
       activePathname: undefined,
+      notFoundBeatId: null,
       isPlaying: false,
       secondsRemaining: 30,
       togglePlay: mockTogglePlay,
@@ -130,5 +134,17 @@ describe("BeatPage", () => {
       "#Jazz Flute",
     );
     expect(screen.getByText("Track ID: 0002")).toBeInTheDocument();
+  });
+
+  it("renders 404 NotFound state when notFoundBeatId matches the route slug", () => {
+    mockUseParams.mockReturnValue({ slug: "9999" });
+    mockUsePathname.mockReturnValue("/beat/9999");
+    mockPlayerState.notFoundBeatId = "9999";
+
+    render(<BeatPage />);
+
+    expect(
+      screen.getByRole("heading", { level: 1, name: /404 — Beat Not Found/i }),
+    ).toBeInTheDocument();
   });
 });

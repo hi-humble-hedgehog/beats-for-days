@@ -1,6 +1,8 @@
 "use client";
 
-import { useAudioPlayer } from "./AudioPlayerContext";
+import { usePathname } from "next/navigation";
+import { shouldResolveStartOnPlay } from "@/lib/player/decisions";
+import { useAudioPlayer, useStartPlayback } from "./AudioPlayerContext";
 
 function PlayerStatusBanner({
   message,
@@ -160,8 +162,11 @@ function PlayControls(props: PlayControlsProps) {
 }
 
 export function PersistentPlayerBar() {
+  const pathname = usePathname();
   const {
     current,
+    activePathname,
+    notFoundBeatId,
     isPlaying,
     phase,
     secondsRemaining,
@@ -172,6 +177,7 @@ export function PersistentPlayerBar() {
     skip,
     advanceTrack,
   } = useAudioPlayer();
+  const startPlayback = useStartPlayback();
 
   if (isLoading) {
     return <PlayerStatusBanner message="Loading beat catalog..." />;
@@ -182,6 +188,16 @@ export function PersistentPlayerBar() {
   }
 
   const durationSec = (current?.durationMs ?? 0) / 1000;
+  const activeRoute = activePathname ?? pathname;
+  const handleTogglePlay = () => {
+    if (
+      shouldResolveStartOnPlay(isPlaying, activeRoute, current, notFoundBeatId)
+    ) {
+      startPlayback();
+      return;
+    }
+    togglePlay();
+  };
 
   return (
     <aside
@@ -197,7 +213,7 @@ export function PersistentPlayerBar() {
           secondsRemaining={secondsRemaining}
           positionSec={positionSec}
           durationSec={durationSec}
-          onTogglePlay={togglePlay}
+          onTogglePlay={handleTogglePlay}
           onAdvanceTrack={() => (skip ? skip() : advanceTrack("skip"))}
         />
       </div>
