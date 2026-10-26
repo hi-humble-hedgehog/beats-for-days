@@ -7,3 +7,13 @@ export function isDebugQueryEnabled(
 ): boolean {
   return params?.get("debug") === "1";
 }
+
+/**
+ * Decides whether the debug panel should mount based on query param or persisted cookie.
+ */
+export function shouldRenderDebugGate(opts: {
+  hasQueryFlag: boolean;
+  hasCookie: boolean;
+}): boolean {
+  return opts.hasQueryFlag || opts.hasCookie;
+}

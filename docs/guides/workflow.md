@@ -35,7 +35,9 @@ The debug panel shows the active beat, route, history state and played ids. It n
 2. Add `?debug=1` to the page URL.
 
 - The env var is read at build time. On Vercel, changing it needs a redeploy.
-- With the env var off, the panel's code never loads. With it on, the code loads only for visitors who add `?debug=1`.
+- With the env var off, the panel's code never loads.
+- With it on, visiting `?debug=1` enables the panel and sets a local cookie (`beats_debug_panel=1`), keeping the panel present across in-app and browser history navigation.
+- The panel open/closed toggle state persists in `sessionStorage` (`beats_debug_panel_open`).
 - The panel shows only the visitor's own local data. It sends nothing anywhere.
 
 ## Branching & PR workflow

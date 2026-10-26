@@ -2,6 +2,7 @@ export const STORAGE_KEYS = {
   PLAYED_TRACKS: "beats_played_ids",
   ORDER_HASH: "beats_order_hash",
   BYOK_KEY: "elevenlabs_api_key",
+  DEBUG_PANEL: "beats_debug_panel",
 } as const;
 
 export const LIMITS = {

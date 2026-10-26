@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useAudioPlayer } from "@/components/audio/AudioPlayerContext";
+import { STORAGE_KEYS } from "@/lib/constants";
 
 function DebugDetails({
   currentBeatLabel,
@@ -131,13 +132,39 @@ function DebugContent({
   );
 }
 
+function readInitialOpenState(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return (
+      window.sessionStorage.getItem(`${STORAGE_KEYS.DEBUG_PANEL}_open`) ===
+      "true"
+    );
+  } catch {
+    return false;
+  }
+}
+
+function saveOpenState(isOpen: boolean) {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(
+      `${STORAGE_KEYS.DEBUG_PANEL}_open`,
+      String(isOpen),
+    );
+  } catch {}
+}
+
 /**
  * Floating debug panel displaying real-time browser history and played tracks state.
  * Allows verifying history stack transitions and track synchronization during navigation.
  */
 export function DebugPanel() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(readInitialOpenState);
   const pathname = usePathname();
+
+  useEffect(() => {
+    saveOpenState(isOpen);
+  }, [isOpen]);
 
   return (
     <>

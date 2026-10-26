@@ -110,13 +110,15 @@ test.describe("Debug panel", () => {
   // The e2e web server runs with DEBUG_PANEL=true (playwright.config.ts).
   const toggleName = "Toggle history debug panel";
 
-  test("stays hidden without ?debug=1", async ({ page }) => {
+  test("stays hidden without ?debug=1 or cookie", async ({ page }) => {
     await page.goto("/beat/track-a");
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await expect(page.getByRole("button", { name: toggleName })).toHaveCount(0);
   });
 
-  test("shows playback and history state with ?debug=1", async ({ page }) => {
+  test("shows playback and history state with ?debug=1 and persists across back/forward navigation", async ({
+    page,
+  }) => {
     await page.goto("/beat/track-a?debug=1");
     const debugButton = page.getByRole("button", { name: toggleName });
     await expect(debugButton).toBeVisible();
@@ -129,10 +131,31 @@ test.describe("Debug panel", () => {
     await expect(debugRegion).toContainText("Played History");
     await expect(debugRegion).toContainText("History Stack Length:");
 
-    await debugRegion
+    // Navigate to another beat without ?debug=1 in URL
+    await page.getByRole("button", { name: /Next Beat/i }).click();
+    await expect(page).toHaveURL(/\/beat\/track-[b-c]/);
+    expect(page.url()).not.toContain("debug=1");
+
+    // Debug panel toggle button and open state persist via cookie and sessionStorage
+    await expect(page.getByRole("button", { name: toggleName })).toBeVisible();
+    await expect(
+      page.getByRole("region", { name: "Playback and history state" }),
+    ).toBeVisible();
+
+    // Navigate back in browser history
+    await page.goBack();
+    await expect(page).toHaveURL("/beat/track-a?debug=1");
+    await expect(
+      page.getByRole("region", { name: "Playback and history state" }),
+    ).toBeVisible();
+
+    await page
+      .getByRole("region", { name: "Playback and history state" })
       .getByRole("button", { name: "Close debug panel" })
       .click();
-    await expect(debugRegion).not.toBeVisible();
+    await expect(
+      page.getByRole("region", { name: "Playback and history state" }),
+    ).not.toBeVisible();
   });
 });
 
