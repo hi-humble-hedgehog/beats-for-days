@@ -27,7 +27,7 @@
     "db:seed": "tsx scripts/seed/cli.ts",
     "crap": "tsx scripts/crap/cli.ts",
     "test:crap": "pnpm test:coverage && pnpm crap",
-    "test:mutation": "stryker run",
+    "test:mutation": "next typegen && stryker run",
     "deps:check": "depcruise src scripts",
     "deps:graph": "depcruise src --output-type mermaid --output-to reports/dependency-graph.mmd",
     "knip": "knip",

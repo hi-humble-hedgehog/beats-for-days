@@ -145,6 +145,13 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
 
+      - name: Copy environment defaults
+        run: cp .env.example .env.local
+
+      # Generate Next.js global route types (LayoutProps, etc.) for TypeScript checker
+      - name: Generate route types
+        run: pnpm exec next typegen
+
       # Incremental mode: reuse results for unchanged code/tests.
       # PRs fall back to main's baseline on their first run.
       - name: Restore Stryker incremental baseline
@@ -176,4 +183,4 @@ jobs:
         with:
           fetch-depth: 0
       - name: gitleaks
-        run: docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:latest git /repo --redact --no-banner --verbose
+        run: docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:latest git /repo --config /repo/.gitleaks.toml --redact --no-banner --verbose
