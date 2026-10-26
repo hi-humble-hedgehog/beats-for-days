@@ -40,10 +40,27 @@ interface PlayerStateRef {
   playedHistory: string[];
 }
 
+function fetchInitialBeatData(
+  initialBeatId: string | null | undefined,
+  currentId: string | undefined,
+  playedTrackIds: string[],
+): Promise<{
+  hydrated?: boolean;
+  beat?: BeatView | null;
+  resolveAfterSec?: number;
+}> {
+  if (initialBeatId) {
+    if (currentId === initialBeatId) return Promise.resolve({ hydrated: true });
+    return beatsApi.getBeat(initialBeatId).then((beat) => ({ beat }));
+  }
+  return beatsApi.getNextBeat({ playedTrackIds, mode: "skip" });
+}
+
 function useInitialBeat(
   initialHistory: string[],
   initialBeatId: string | null | undefined,
   dispatch: React.Dispatch<PlayerAction>,
+  stateRef: React.MutableRefObject<PlayerStateRef>,
 ) {
   const [current, setCurrent] = useState<BeatView | null>(null);
   const [resolveAfterSec, setResolveAfterSec] = useState<number>(30);
@@ -52,43 +69,35 @@ function useInitialBeat(
 
   useEffect(() => {
     let active = true;
-
-    async function loadInitialBeat() {
-      try {
-        if (initialBeatId) {
-          const beat = await beatsApi.getBeat(initialBeatId);
-          if (!active) return;
-          if (!beat) {
-            dispatch({ type: "set_not_found", beatId: initialBeatId });
-            return;
-          }
-          setCurrent(beat);
+    fetchInitialBeatData(
+      initialBeatId,
+      stateRef.current.current?.id,
+      historyRef.current,
+    )
+      .then((res) => {
+        if (!active || res.hydrated) return;
+        if (!res.beat) {
+          dispatch({ type: "set_not_found", beatId: initialBeatId ?? null });
           return;
         }
-
-        const res = await beatsApi.getNextBeat({
-          playedTrackIds: historyRef.current,
-          mode: "skip",
-        });
-        if (!active) return;
         setCurrent(res.beat);
         if (res.resolveAfterSec) setResolveAfterSec(res.resolveAfterSec);
-      } catch (err) {
+      })
+      .catch((err: unknown) => {
         if (!active) return;
         dispatch({
           type: "set_error",
           error: err instanceof Error ? err.message : "Failed to load beats",
         });
-      } finally {
+      })
+      .finally(() => {
         if (active) setIsLoading(false);
-      }
-    }
+      });
 
-    void loadInitialBeat();
     return () => {
       active = false;
     };
-  }, [dispatch, initialBeatId]);
+  }, [dispatch, initialBeatId, stateRef]);
 
   return { current, setCurrent, resolveAfterSec, isLoading };
 }
@@ -129,7 +138,11 @@ function useBeatCommit(
   );
 }
 
-function usePlayerState(pathname: string, initialBeatId: string | null) {
+function usePlayerState(
+  pathname: string,
+  initialBeatId: string | null,
+  stateRef: React.MutableRefObject<PlayerStateRef>,
+) {
   const [ui, dispatch] = useReducer(
     playerReducer,
     pathname,
@@ -137,7 +150,12 @@ function usePlayerState(pathname: string, initialBeatId: string | null) {
   );
   const [playedHistory, setPlayedHistory] =
     useState<string[]>(loadPlayedHistory);
-  const initialBeat = useInitialBeat(playedHistory, initialBeatId, dispatch);
+  const initialBeat = useInitialBeat(
+    playedHistory,
+    initialBeatId,
+    dispatch,
+    stateRef,
+  );
   return { ui, dispatch, playedHistory, setPlayedHistory, ...initialBeat };
 }
 
@@ -192,16 +210,16 @@ export function AudioPlayerProvider({
 }: AudioPlayerProviderProps) {
   const pathname = usePathname();
   const [initialBeatId] = useState(() => extractBeatIdFromPathname(pathname));
-  const playerState = usePlayerState(pathname, initialBeatId);
+  const stateRef = useRef<PlayerStateRef>({
+    current: null,
+    pathname,
+    playedHistory: [],
+  });
+  const playerState = usePlayerState(pathname, initialBeatId, stateRef);
   const [defaultEngine] = useState(
     () => injectedEngine ?? new AudioEngine({ vinylEffects: true }),
   );
   const engine = injectedEngine ?? defaultEngine;
-  const stateRef = useRef<PlayerStateRef>({
-    current: playerState.current,
-    pathname: playerState.ui.activePathname,
-    playedHistory: playerState.playedHistory,
-  });
 
   useEffect(() => {
     stateRef.current = {
@@ -284,23 +302,16 @@ export function useAudioPlayer(): AudioPlayerState {
  */
 export function useStartPlayback(): () => void {
   const router = useRouter();
-  const state = useAudioPlayer();
-
+  const s = useAudioPlayer();
   return useCallback(() => {
     void resolveStartBeat({
-      current: state.current,
-      hasPausedBeat: state.hasPausedBeat,
-      playedHistory: state.playedHistory ?? [],
+      current: s.current,
+      hasPausedBeat: s.hasPausedBeat,
+      playedHistory: s.playedHistory ?? [],
       fetchNextBeat: (req) => beatsApi.getNextBeat(req),
-      commitBeat: state.commitBeat,
-      startPlay: () => {
-        if (state.play) {
-          state.play();
-        } else if (!state.isPlaying) {
-          state.togglePlay();
-        }
-      },
+      commitBeat: s.commitBeat,
+      startPlay: () => (s.play ? s.play() : !s.isPlaying && s.togglePlay()),
       navigate: (url) => router.push(url),
     });
-  }, [router, state]);
+  }, [router, s]);
 }

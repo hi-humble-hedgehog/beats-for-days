@@ -7,6 +7,7 @@ const mockUseParams = vi.fn();
 const mockUsePathname = vi.fn();
 const mockTogglePlay = vi.fn();
 const mockAdvanceTrack = vi.fn();
+const mockCommitBeat = vi.fn();
 const mockNotFound = vi.fn();
 const mockFetchBeatViewById = vi.fn();
 
@@ -18,6 +19,7 @@ let mockPlayerState = {
   secondsRemaining: 30,
   togglePlay: mockTogglePlay,
   advanceTrack: mockAdvanceTrack,
+  commitBeat: mockCommitBeat,
 };
 
 vi.mock("next/navigation", () => ({
@@ -55,18 +57,26 @@ describe("BeatPage (Server Component)", () => {
     expect(mockNotFound).toHaveBeenCalledTimes(1);
   });
 
-  it("renders BeatDeck when fetchBeatViewById resolves a beat", async () => {
-    mockFetchBeatViewById.mockResolvedValue({
+  it("renders BeatDeck with the server-fetched initialBeat when fetchBeatViewById resolves a beat", async () => {
+    const serverBeat = {
       id: "0001",
       name: "Brooklyn Sunset",
-    });
+      audioUrl: "http://storage/1.m4a",
+      durationMs: 60000,
+      loopStartMs: 10000,
+      loopEndMs: 50000,
+      bpm: 86,
+      transitions: [],
+    };
+    mockFetchBeatViewById.mockResolvedValue(serverBeat);
     mockUseParams.mockReturnValue({ slug: "0001" });
-    mockPlayerState.current = { id: "0001", name: "Brooklyn Sunset" };
+    mockPlayerState.current = null;
 
     const ui = await BeatPage({ params: Promise.resolve({ slug: "0001" }) });
     render(ui);
 
     expect(mockFetchBeatViewById).toHaveBeenCalledWith("0001");
+    expect(mockCommitBeat).toHaveBeenCalledWith(serverBeat);
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
       "#Brooklyn Sunset",
     );
@@ -84,6 +94,7 @@ describe("BeatDeck", () => {
       secondsRemaining: 30,
       togglePlay: mockTogglePlay,
       advanceTrack: mockAdvanceTrack,
+      commitBeat: mockCommitBeat,
     };
   });
 

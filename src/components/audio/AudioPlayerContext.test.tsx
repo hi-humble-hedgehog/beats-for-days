@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { render, screen, act } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { beatsApi } from "@/lib/api";
@@ -675,7 +676,40 @@ describe("AudioPlayerProvider", () => {
     vi.useRealTimers();
   });
 
-  it("loads initial beat specified by route slug on direct navigation to /beat/:slug", async () => {
+  it("hydrates initial beat from BeatDeck without calling beatsApi.getBeat on cold /beat/:slug load", async () => {
+    mockPathname = "/beat/0002";
+    const hydratedBeat: BeatView = {
+      id: "0002",
+      name: "Jazz Flute",
+      audioUrl: "http://storage/2.m4a",
+      durationMs: 60000,
+      loopStartMs: 10000,
+      loopEndMs: 50000,
+      bpm: 86,
+      transitions: [],
+    };
+
+    function Hydrator() {
+      const { commitBeat } = useAudioPlayer();
+      useEffect(() => {
+        commitBeat?.(hydratedBeat);
+      }, [commitBeat]);
+      return <Consumer />;
+    }
+
+    render(
+      <AudioPlayerProvider engine={testHarness.engine}>
+        <Hydrator />
+      </AudioPlayerProvider>,
+    );
+
+    expect(await screen.findByText(/Current: Jazz Flute/)).toBeInTheDocument();
+    expect(await screen.findByText("Loading: no")).toBeInTheDocument();
+    expect(mockBeatsApi.getBeat).not.toHaveBeenCalled();
+    expect(mockBeatsApi.getNextBeat).not.toHaveBeenCalled();
+  });
+
+  it("loads initial beat specified by route slug on direct navigation to /beat/:slug when not hydrated", async () => {
     mockPathname = "/beat/0002";
 
     render(

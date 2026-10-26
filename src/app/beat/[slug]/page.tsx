@@ -15,5 +15,5 @@ export default async function BeatPage({
     notFound();
   }
 
-  return <BeatDeck />;
+  return <BeatDeck initialBeat={beat} />;
 }

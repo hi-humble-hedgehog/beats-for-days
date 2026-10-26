@@ -1,12 +1,24 @@
 "use client";
 
+import { useEffect } from "react";
 import { useParams, usePathname } from "next/navigation";
 import NotFound from "@/app/not-found";
 import { useAudioPlayer } from "@/components/audio/AudioPlayerContext";
 import { selectBeatDisplayInfo } from "@/lib/player/decisions";
 import { extractBeatIdFromPathname } from "@/lib/player/url";
+import type { BeatView } from "@/lib/types/beat";
 
-export function BeatDeck() {
+function resolveActiveSlug(
+  activePathname: string | undefined,
+  pathname: string,
+  paramSlug: string | undefined,
+): string {
+  return (
+    extractBeatIdFromPathname(activePathname ?? pathname) ?? paramSlug ?? "—"
+  );
+}
+
+export function BeatDeck({ initialBeat }: { initialBeat?: BeatView }) {
   const params = useParams<{ slug: string }>();
   const pathname = usePathname();
   const {
@@ -15,15 +27,19 @@ export function BeatDeck() {
     notFoundBeatId,
     isPlaying,
     togglePlay,
+    commitBeat,
     skip,
     advanceTrack,
     secondsRemaining,
   } = useAudioPlayer();
 
-  const slug =
-    extractBeatIdFromPathname(activePathname ?? pathname) ??
-    params?.slug ??
-    "—";
+  useEffect(() => {
+    if (initialBeat) {
+      commitBeat?.(initialBeat);
+    }
+  }, [commitBeat, initialBeat]);
+
+  const slug = resolveActiveSlug(activePathname, pathname, params?.slug);
 
   if (notFoundBeatId && notFoundBeatId === slug) {
     return <NotFound />;
@@ -31,7 +47,7 @@ export function BeatDeck() {
 
   const { beatName, trackId } = selectBeatDisplayInfo({
     slug,
-    current,
+    current: current ?? initialBeat ?? null,
   });
 
   return (
