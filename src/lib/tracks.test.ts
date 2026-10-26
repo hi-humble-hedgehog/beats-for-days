@@ -377,51 +377,128 @@ describe("fetchBeatViews", () => {
 });
 
 describe("fetchBeatViewById", () => {
-  const mockClient = {
-    from: (table: string) => {
-      if (table === "tracks") {
-        return {
-          select: () => ({
-            order: () =>
-              Promise.resolve({
-                data: [
-                  {
-                    id: "0001",
-                    name: "Track One",
-                    bpm: 85,
-                    duration_ms: 60000,
-                    loop_start_ms: 0,
-                    loop_end_ms: 60000,
-                    audio_path: "1.m4a",
-                  },
-                ],
-                error: null,
-              }),
-          }),
-        };
-      }
-      return {
-        select: () => Promise.resolve({ data: [], error: null }),
-      };
-    },
+  const trackRow: TrackRow = {
+    id: "0001",
+    name: "Track One",
+    bpm: 85,
+    duration_ms: 60000,
+    loop_start_ms: 0,
+    loop_end_ms: 60000,
+    audio_path: "1.m4a",
+  };
+  const transitionRow: TransitionRow = {
+    id: "t-1-2",
+    from_track_id: "0001",
+    to_track_id: "0002",
+    audio_path: "t.m4a",
+    timing: { handleMs: 1, crossfadeMs: 2, glueMs: 3, landMs: 4 },
   };
 
-  it("returns the matching beat when found", async () => {
-    const beat = await fetchBeatViewById(
-      "0001",
-      mockClient as unknown as SupabaseClient,
-      true,
+  interface Result {
+    data: unknown;
+    error: { message: string } | null;
+  }
+
+  /** Records every query call so tests can assert the exact filters. */
+  function makeClient(trackResult: Result, transitionResult: Result) {
+    const calls: unknown[][] = [];
+    const client = {
+      from: (table: string) => ({
+        select: (columns: string) => ({
+          eq: (column: string, value: string) => {
+            calls.push([table, columns, column, value]);
+            if (table === "tracks") {
+              return { maybeSingle: () => Promise.resolve(trackResult) };
+            }
+            return Promise.resolve(transitionResult);
+          },
+        }),
+      }),
+    };
+    return { client: client as unknown as SupabaseClient, calls };
+  }
+
+  it("filters both tables by the requested id", async () => {
+    const { client, calls } = makeClient(
+      { data: trackRow, error: null },
+      { data: [transitionRow], error: null },
     );
-    expect(beat?.id).toBe("0001");
-    expect(beat?.name).toBe("Track One");
+    await fetchBeatViewById("0001", client, true);
+    expect(calls).toEqual([
+      [
+        "tracks",
+        "id, name, bpm, duration_ms, loop_start_ms, loop_end_ms, audio_path",
+        "id",
+        "0001",
+      ],
+      [
+        "transitions",
+        "id, from_track_id, to_track_id, audio_path, timing",
+        "from_track_id",
+        "0001",
+      ],
+    ]);
   });
 
-  it("returns null when the beat is not found", async () => {
-    const beat = await fetchBeatViewById(
-      "non-existent",
-      mockClient as unknown as SupabaseClient,
-      true,
+  it("returns the beat with its outgoing transitions", async () => {
+    const { client } = makeClient(
+      { data: trackRow, error: null },
+      { data: [transitionRow], error: null },
     );
-    expect(beat).toBeNull();
+    const beat = await fetchBeatViewById("0001", client, true);
+    expect(beat).toEqual({
+      id: "0001",
+      name: "Track One",
+      audioUrl: "/audio/1.m4a",
+      durationMs: 60000,
+      loopStartMs: 0,
+      loopEndMs: 60000,
+      bpm: 85,
+      transitions: [
+        {
+          id: "t-1-2",
+          targetTrackId: "0002",
+          audioUrl: "/audio/t.m4a",
+          timing: { handleMs: 1, crossfadeMs: 2, glueMs: 3, landMs: 4 },
+        },
+      ],
+    });
+  });
+
+  it("returns null when the track does not exist", async () => {
+    const { client } = makeClient(
+      { data: null, error: null },
+      { data: [], error: null },
+    );
+    expect(await fetchBeatViewById("missing", client, true)).toBeNull();
+  });
+
+  it("treats missing transition data as no transitions", async () => {
+    const { client } = makeClient(
+      { data: trackRow, error: null },
+      { data: null, error: null },
+    );
+    const beat = await fetchBeatViewById("0001", client, true);
+    expect(beat?.transitions).toEqual([]);
+  });
+
+  it("throws when the track query fails", async () => {
+    const { client } = makeClient(
+      { data: null, error: { message: "boom" } },
+      { data: [], error: null },
+    );
+    await expect(fetchBeatViewById("0001", client, true)).rejects.toThrow(
+      "Failed to fetch track: boom",
+    );
+  });
+
+  it("throws when the transition query fails", async () => {
+    const { client } = makeClient(
+      { data: trackRow, error: null },
+      { data: null, error: { message: "nope" } },
+    );
+    await expect(fetchBeatViewById("0001", client, true)).rejects.toThrow(
+      "Failed to fetch transitions: nope",
+    );
   });
 });

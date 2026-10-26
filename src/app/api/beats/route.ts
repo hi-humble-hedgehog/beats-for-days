@@ -1,31 +1,23 @@
 import { NextResponse } from "next/server";
-import { fetchBeatViews, fetchBeatViewById } from "@/lib/tracks";
+import { fetchBeatViewById } from "@/lib/tracks";
 
 /**
- * Route handler delivering the raw beat catalog or a single beat by ID.
+ * Route handler delivering a single beat by ID (`GET /api/beats?id=:id`).
  *
  * Rationale:
- * Delivers either the full catalog or single track views on demand (ADR 0010, ADR 0013).
+ * Cold loads and history jumps need one beat, not the catalog (ADR 0013).
+ * Next-beat resolution lives in `/api/beats/next` (ADR 0010), so the
+ * full-catalog response is retired.
  */
 export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const id = url.searchParams.get("id");
-
-  if (id) {
-    const beat = await fetchBeatViewById(id);
-    if (!beat) {
-      return NextResponse.json({ error: "Beat not found" }, { status: 404 });
-    }
-    return NextResponse.json({ beat });
+  const id = new URL(request.url).searchParams.get("id");
+  if (!id) {
+    return NextResponse.json({ error: "Missing beat id" }, { status: 400 });
   }
 
-  const rawLimit = Number.parseInt(url.searchParams.get("limit") || "0", 10);
-
-  const allBeats = await fetchBeatViews();
-  const beats = rawLimit > 0 ? allBeats.slice(0, rawLimit) : allBeats;
-
-  return NextResponse.json({
-    beats,
-    total: allBeats.length,
-  });
+  const beat = await fetchBeatViewById(id);
+  if (!beat) {
+    return NextResponse.json({ error: "Beat not found" }, { status: 404 });
+  }
+  return NextResponse.json({ beat });
 }

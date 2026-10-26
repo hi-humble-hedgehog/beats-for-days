@@ -1,11 +1,6 @@
 import { API_ROUTES } from "./constants";
 import type { BeatView, TransitionView } from "./types/beat";
 
-export interface GetBeatsResponse {
-  beats: BeatView[];
-  total: number;
-}
-
 export interface NextBeatRequest {
   currentTrackId?: string;
   playedTrackIds?: string[];
@@ -32,18 +27,6 @@ export interface JoinWaitlistResponse {
 }
 
 export const beatsApi = {
-  /**
-   * Loads the beat catalog from `/api/beats`.
-   * Keeps database queries on the server so the browser only gets ready-to-play URLs.
-   */
-  async getBeats(): Promise<GetBeatsResponse> {
-    const res = await fetch(API_ROUTES.BEATS);
-    if (!res.ok) {
-      throw new Error(`Failed to load beats: ${res.statusText}`);
-    }
-    return res.json();
-  },
-
   /**
    * Resolves the next beat from `/api/beats/next` using the client's listening history.
    * Keeps track selection and graph traversal on the server so the browser only gets the active beat.

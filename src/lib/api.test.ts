@@ -13,30 +13,6 @@ describe("beatsApi", () => {
     globalThis.fetch = originalFetch;
   });
 
-  it("getBeats fetches from /api/beats and returns data", async () => {
-    const mockData = { beats: [], total: 0 };
-    globalThis.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve(mockData),
-    });
-
-    const result = await beatsApi.getBeats();
-
-    expect(globalThis.fetch).toHaveBeenCalledWith(API_ROUTES.BEATS);
-    expect(result).toEqual(mockData);
-  });
-
-  it("getBeats throws error when response is not ok", async () => {
-    globalThis.fetch = vi.fn().mockResolvedValue({
-      ok: false,
-      statusText: "Internal Server Error",
-    });
-
-    await expect(beatsApi.getBeats()).rejects.toThrow(
-      "Failed to load beats: Internal Server Error",
-    );
-  });
-
   it("getNextBeat sends POST request to /api/beats/next with payload", async () => {
     const mockResponse = {
       beat: {

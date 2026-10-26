@@ -31,7 +31,8 @@ We will make the route URL the single source of truth for track playback on beat
 
 ### 2. On-Demand Beat Retrieval
 
-- Extend `GET /api/beats?id=:id` to fetch a single beat view by ID.
+- Extend `GET /api/beats?id=:id` to fetch a single beat view by ID. The server queries only that track and its outgoing transitions.
+- Retire the full-catalog response of `GET /api/beats`. Without an `id`, it returns `400`.
 - Add `beatsApi.getBeat(id)` to query the active beat on cold load or history jump.
 - Fall back to the next available beat if a requested ID is invalid or missing.
 
@@ -40,7 +41,7 @@ We will make the route URL the single source of truth for track playback on beat
 - Browser Back and Forward navigation changes both the UI and audio playback immediately.
 - Users can bookmark or share direct links to specific beats (e.g., `/beat/0042`).
 - The player state remains synchronized with Next.js App Router navigation.
-- Cold starts on `/beat/:slug` fetch only the requested track metadata (~1 KB) instead of full catalogs.
+- Cold starts on `/beat/:slug` read one track and its transitions, on the server and over the wire (~1 KB response).
 
 ## Alternatives considered
 

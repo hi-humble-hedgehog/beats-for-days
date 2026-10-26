@@ -126,10 +126,14 @@ Tracks and transitions form a **directed graph** (`public.tracks` + `public.tran
 - Visiting `/beats` redirects to the currently playing beat (`/beat/####`).
 - Every beat is **1 minute long and loops seamlessly** (`loop_start_ms` $\to$ `loop_end_ms`).
 
-### Loading the Catalog: Phase 1 vs. Phase 2
+### Loading Beats: One at a Time
 
-- **Phase 1 MVP (30–40 tracks):** `GET /api/beats` loads all seed tracks in one request (~15–20 KB gzipped) so playback starts right away.
-- **Phase 2 (up to 1,500 tracks):** Instead of loading the whole catalog, the player fetches only the current beat and its outgoing transitions (`GET /api/beats/[id]`), keeping each response under 1 KB.
+The browser never downloads the whole catalog.
+
+- **Next beat:** `POST /api/beats/next` picks the next beat from the browser's play history ([ADR 0010](../decisions/0010-history-based-next-track-api.md)).
+- **A specific beat:** `GET /api/beats?id=:id` returns one beat and its outgoing transitions, for cold loads and Back/Forward ([ADR 0013](../decisions/0013-url-as-source-of-truth-for-beat-routes.md)). The server reads only that track and its transitions.
+- `GET /api/beats` without an `id` returns `400`. The full-catalog response is retired.
+- `POST /api/beats/next` still reads the full catalog on the server to walk the graph. That is fine for the Phase 1 catalog (30–40 tracks) and is a known follow-up for larger catalogs.
 
 ### Browser Play History (`playedTrackIds`)
 

@@ -56,6 +56,25 @@ export function buildBeatViews(
   });
 }
 
+const TRACK_COLUMNS =
+  "id, name, bpm, duration_ms, loop_start_ms, loop_end_ms, audio_path";
+const TRANSITION_COLUMNS = "id, from_track_id, to_track_id, audio_path, timing";
+
+/** Picks local static files or Supabase Storage CDN URLs for audio paths. */
+function createAudioUrlResolver(
+  client: SupabaseClient,
+  useLocalAudio: boolean,
+): (audioPath: string) => string {
+  const shouldUseLocalAudio = useLocalAudio || !client.storage;
+  return (audioPath: string) => {
+    if (shouldUseLocalAudio) {
+      return audioPath.startsWith("/") ? audioPath : `/audio/${audioPath}`;
+    }
+    const { data } = client.storage.from("audio").getPublicUrl(audioPath);
+    return data.publicUrl;
+  };
+}
+
 /**
  * Loads all beats and transitions from Supabase with loop points and timing.
  * Serves audio from local static files or the Supabase Storage CDN based on configuration.
@@ -65,15 +84,8 @@ export async function fetchBeatViews(
   useLocalAudio: boolean = getServerEnv().USE_LOCAL_AUDIO,
 ): Promise<BeatView[]> {
   const [tracksResult, transitionsResult] = await Promise.all([
-    client
-      .from("tracks")
-      .select(
-        "id, name, bpm, duration_ms, loop_start_ms, loop_end_ms, audio_path",
-      )
-      .order("name"),
-    client
-      .from("transitions")
-      .select("id, from_track_id, to_track_id, audio_path, timing"),
+    client.from("tracks").select(TRACK_COLUMNS).order("name"),
+    client.from("transitions").select(TRANSITION_COLUMNS),
   ]);
 
   if (tracksResult.error) {
@@ -88,28 +100,47 @@ export async function fetchBeatViews(
   const tracks = (tracksResult.data ?? []) as TrackRow[];
   const transitions = (transitionsResult.data ?? []) as TransitionRow[];
 
-  const shouldUseLocalAudio = useLocalAudio || !client?.storage;
-
-  const resolveAudioUrl = (audioPath: string) => {
-    if (shouldUseLocalAudio) {
-      return audioPath.startsWith("/") ? audioPath : `/audio/${audioPath}`;
-    }
-    const { data } = client.storage.from("audio").getPublicUrl(audioPath);
-    return data.publicUrl;
-  };
-
-  return buildBeatViews(tracks, transitions, resolveAudioUrl);
+  return buildBeatViews(
+    tracks,
+    transitions,
+    createAudioUrlResolver(client, useLocalAudio),
+  );
 }
 
 /**
- * Loads a single beat view by its unique track ID.
- * Returns `null` when the requested track ID is not found.
+ * Loads one beat and only its outgoing transitions, so a cold load or history
+ * jump never reads the whole catalog (ADR 0013). Returns `null` for unknown ids.
  */
 export async function fetchBeatViewById(
   id: string,
   client: SupabaseClient = getSupabaseServerClient(),
   useLocalAudio: boolean = getServerEnv().USE_LOCAL_AUDIO,
 ): Promise<BeatView | null> {
-  const allBeats = await fetchBeatViews(client, useLocalAudio);
-  return allBeats.find((beat) => beat.id === id) ?? null;
+  const [trackResult, transitionsResult] = await Promise.all([
+    client.from("tracks").select(TRACK_COLUMNS).eq("id", id).maybeSingle(),
+    client
+      .from("transitions")
+      .select(TRANSITION_COLUMNS)
+      .eq("from_track_id", id),
+  ]);
+
+  if (trackResult.error) {
+    throw new Error(`Failed to fetch track: ${trackResult.error.message}`);
+  }
+  if (transitionsResult.error) {
+    throw new Error(
+      `Failed to fetch transitions: ${transitionsResult.error.message}`,
+    );
+  }
+  if (!trackResult.data) {
+    return null;
+  }
+
+  const transitions = (transitionsResult.data ?? []) as TransitionRow[];
+  const [beat] = buildBeatViews(
+    [trackResult.data as TrackRow],
+    transitions,
+    createAudioUrlResolver(client, useLocalAudio),
+  );
+  return beat ?? null;
 }
