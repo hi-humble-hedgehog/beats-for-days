@@ -13,8 +13,8 @@ const AXE_TAGS = [
 function visibleNowPlaying(page: Page) {
   return page
     .getByRole("region", { name: "Player" })
-    .filter({ visible: true })
-    .getByLabel(/Now playing beat number/i);
+    .getByLabel(/Now playing beat number/i)
+    .filter({ visible: true });
 }
 
 async function assertBornAccessible(page: Page) {

@@ -26,7 +26,9 @@ export function AppChrome({ children }: { children: ReactNode }) {
   const showBar = shouldShowPersistentPlayerBar(pathname, notFoundBeatId);
 
   if (!showBar) {
-    return <PosterPlayer startOnPlay>{children}</PosterPlayer>;
+    return (
+      <PosterPlayer startOnPlay={pathname === "/"}>{children}</PosterPlayer>
+    );
   }
 
   return (

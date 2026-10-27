@@ -16,7 +16,7 @@ export function useStartPlayback(): () => void {
   return useCallback(() => {
     void resolveStartBeat({
       current: s.current,
-      hasPausedBeat: s.hasPausedBeat,
+      hasPausedBeat: s.hasPausedBeat || Boolean(s.current),
       playedHistory: s.playedHistory ?? [],
       fetchNextBeat: (req) => beatsApi.getNextBeat(req),
       commitBeat: s.commitBeat,
