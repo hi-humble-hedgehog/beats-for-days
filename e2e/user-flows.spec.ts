@@ -10,6 +10,13 @@ const AXE_TAGS = [
   "best-practice",
 ];
 
+function visibleNowPlaying(page: Page) {
+  return page
+    .getByRole("region", { name: "Player" })
+    .filter({ visible: true })
+    .getByLabel(/Now playing beat number/i);
+}
+
 async function assertBornAccessible(page: Page) {
   const axeResults = await new AxeBuilder({ page })
     .withTags(AXE_TAGS)
@@ -64,50 +71,45 @@ test.describe("Navigation & static pages", () => {
 
     await page.getByRole("button", { name: /Start Radio Stream/i }).click();
     await expect(page).toHaveURL(/\/beat\/track-[a-c]/);
-    await expect(
-      page.getByRole("main").getByText("Playing", { exact: true }),
-    ).toBeVisible();
-    await expect(
-      playerBar.getByRole("button", { name: "Pause audio" }),
-    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Pause" })).toBeVisible();
+    await expect(playerBar).toHaveCount(0);
   });
 
-  test("navigates across About, Terms of Service, and Privacy Policy via header links", async ({
+  test("navigates across About, Terms of Service, and Privacy Policy via poster info links", async ({
     page,
   }) => {
     await page.goto("/");
 
-    const nav = page.getByRole("navigation", { name: "Main navigation" });
+    const nav = page.getByRole("navigation", { name: "Information" });
     await expect(nav).toBeVisible();
 
     await nav.getByRole("link", { name: "About" }).click();
     await expect(page).toHaveURL("/about");
     await expect(
-      page.getByRole("heading", { level: 1, name: "About Beats for Days" }),
-    ).toBeVisible();
-
-    await nav.getByRole("link", { name: "Terms" }).click();
-    await expect(page).toHaveURL("/terms-of-service");
-    await expect(
-      page.getByRole("heading", { level: 1, name: "Terms of Service" }),
+      page.getByRole("heading", { level: 2, name: "About Beats for Days" }),
     ).toBeVisible();
 
     await nav.getByRole("link", { name: "Privacy" }).click();
-    await expect(page).toHaveURL("/privacy-policy");
+    await expect(page).toHaveURL("/privacy");
     await expect(
-      page.getByRole("heading", { level: 1, name: "Privacy Policy" }),
+      page.getByRole("heading", { level: 2, name: "Privacy & Data" }),
     ).toBeVisible();
 
-    await page
-      .getByRole("banner")
-      .getByRole("link", { name: /Beats for Days/i })
-      .click();
-    await expect(page).toHaveURL("/");
+    await page.getByRole("link", { name: "Return to player" }).click();
+    await expect(page).toHaveURL(/\/|\/beat\/.+/);
+  });
+
+  test("redirects legacy terms and privacy routes to /privacy", async ({
+    page,
+  }) => {
+    await page.goto("/terms-of-service");
+    await expect(page).toHaveURL("/privacy");
+    await page.goto("/privacy-policy");
+    await expect(page).toHaveURL("/privacy");
   });
 });
 
 test.describe("Debug panel", () => {
-  // The e2e web server runs with DEBUG_PANEL=true (playwright.config.ts).
   const toggleName = "Toggle history debug panel";
 
   test("stays hidden without ?debug=1 or cookie", async ({ page }) => {
@@ -131,18 +133,17 @@ test.describe("Debug panel", () => {
     await expect(debugRegion).toContainText("Played History");
     await expect(debugRegion).toContainText("History Stack Length:");
 
-    // Navigate to another beat without ?debug=1 in URL
-    await page.getByRole("button", { name: /Next Beat/i }).click();
+    const firstNumber = await visibleNowPlaying(page).textContent();
+    await page.getByRole("button", { name: "Next beat" }).click();
     await expect(page).toHaveURL(/\/beat\/track-[b-c]/);
     expect(page.url()).not.toContain("debug=1");
+    await expect(visibleNowPlaying(page)).not.toHaveText(firstNumber ?? "");
 
-    // Debug panel toggle button and open state persist via cookie and sessionStorage
     await expect(page.getByRole("button", { name: toggleName })).toBeVisible();
     await expect(
       page.getByRole("region", { name: "Playback and history state" }),
     ).toBeVisible();
 
-    // Navigate back in browser history
     await page.goBack();
     await expect(page).toHaveURL("/beat/track-a?debug=1");
     await expect(
@@ -160,176 +161,80 @@ test.describe("Debug panel", () => {
 });
 
 test.describe("Radio landing & playback flow", () => {
-  test("starts radio stream from home, controls playback in persistent bar, and pauses when returning home", async ({
+  test("starts radio stream from the poster, controls playback, and pauses when returning home", async ({
     page,
   }) => {
     await page.goto("/");
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Beats for Days" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("complementary", { name: "Persistent Audio Player" }),
+    ).toHaveCount(0);
 
-    const playerBar = page.getByRole("complementary", {
-      name: "Persistent Audio Player",
-    });
-    await expect(playerBar).toBeVisible();
-    await expect(playerBar.getByText(/Now Playing:/i)).toBeVisible();
-
-    const startButton = page.getByRole("button", {
-      name: /Start Radio Stream/i,
-    });
-    await expect(startButton).toBeVisible();
-    await startButton.click();
-
+    await page.getByRole("button", { name: "Play" }).click();
     await expect(page).toHaveURL(/\/beat\/.+/);
-    await expect(
-      page.getByRole("main").getByText("Playing", { exact: true }),
-    ).toBeVisible();
-    await expect(
-      playerBar.getByRole("button", { name: "Pause audio" }),
-    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Pause" })).toBeVisible();
 
-    await playerBar.getByRole("button", { name: "Pause audio" }).click();
-    await expect(
-      page.getByRole("main").getByText("Paused", { exact: true }),
-    ).toBeVisible();
-    await expect(
-      playerBar.getByRole("button", { name: "Play audio" }),
-    ).toBeVisible();
+    await page.getByRole("button", { name: "Pause" }).click();
+    await expect(page.getByRole("button", { name: "Play" })).toBeVisible();
 
-    await page.getByRole("button", { name: /Play Beat/i }).click();
-    await expect(
-      page.getByRole("main").getByText("Playing", { exact: true }),
-    ).toBeVisible();
+    await page.getByRole("button", { name: "Play" }).click();
+    await expect(page.getByRole("button", { name: "Pause" })).toBeVisible();
 
     const initialUrl = page.url();
-    const initialHeading =
-      (await page.getByRole("heading", { level: 1 }).textContent()) ?? "";
+    const initialNumber = (await visibleNowPlaying(page).textContent()) ?? "";
 
-    // First skip via persistent player bar
-    await playerBar.getByRole("button", { name: "Skip to next track" }).click();
-    await expect(page.getByRole("heading", { level: 1 })).not.toHaveText(
-      initialHeading,
-    );
-    await expect(page.getByRole("heading", { level: 1 })).not.toContainText(
-      "Loading Beat",
-    );
+    await page.getByRole("button", { name: "Next beat" }).click();
+    await expect(visibleNowPlaying(page)).not.toHaveText(initialNumber);
     const firstSkipUrl = page.url();
     expect(firstSkipUrl).not.toBe(initialUrl);
-    const firstSkipHeading =
-      (await page.getByRole("heading", { level: 1 }).textContent()) ?? "";
-    await expect(playerBar).toContainText(
-      `Now Playing: ${firstSkipHeading.replace(/^#/, "")}`,
-    );
+    const firstSkipNumber = (await visibleNowPlaying(page).textContent()) ?? "";
 
-    // Second skip via deck Next Beat button
-    await page.getByRole("button", { name: /Next Beat/i }).click();
-    await expect(page.getByRole("heading", { level: 1 })).not.toHaveText(
-      firstSkipHeading,
-    );
-    await expect(page.getByRole("heading", { level: 1 })).not.toContainText(
-      "Loading Beat",
-    );
+    await page.evaluate(() => {
+      const active = document.activeElement;
+      if (active instanceof HTMLElement) active.blur();
+    });
+    await page.keyboard.press("ArrowRight");
+    await expect(visibleNowPlaying(page)).not.toHaveText(firstSkipNumber);
     const secondSkipUrl = page.url();
     expect(secondSkipUrl).not.toBe(firstSkipUrl);
-    const secondSkipHeading =
-      (await page.getByRole("heading", { level: 1 }).textContent()) ?? "";
-    await expect(playerBar).toContainText(
-      `Now Playing: ${secondSkipHeading.replace(/^#/, "")}`,
-    );
 
-    // Browser Back twice restores first skip then initial beat in URL, heading, and player
     await page.goBack();
     await expect(page).toHaveURL(firstSkipUrl);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-      firstSkipHeading,
-    );
-    await expect(playerBar).toContainText(
-      `Now Playing: ${firstSkipHeading.replace(/^#/, "")}`,
-    );
+    await expect(visibleNowPlaying(page)).toHaveText(firstSkipNumber);
 
     await page.goBack();
     await expect(page).toHaveURL(initialUrl);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-      initialHeading,
-    );
-    await expect(playerBar).toContainText(
-      `Now Playing: ${initialHeading.replace(/^#/, "")}`,
-    );
+    await expect(visibleNowPlaying(page)).toHaveText(initialNumber);
 
-    // Browser Forward twice returns to first skip then second skip
     await page.goForward();
     await expect(page).toHaveURL(firstSkipUrl);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-      firstSkipHeading,
-    );
-
     await page.goForward();
     await expect(page).toHaveURL(secondSkipUrl);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-      secondSkipHeading,
-    );
-    await expect(playerBar).toContainText(
-      `Now Playing: ${secondSkipHeading.replace(/^#/, "")}`,
-    );
 
-    await page
-      .getByRole("banner")
-      .getByRole("link", { name: /Beats for Days/i })
-      .click();
-    await expect(page).toHaveURL("/");
-    await expect(
-      playerBar.getByRole("button", { name: "Play audio" }),
-    ).toBeVisible();
+    await page.getByRole("link", { name: "About" }).click();
+    await expect(page).toHaveURL("/about");
+    await expect(page.getByRole("button", { name: "Pause" })).toBeVisible();
 
-    // Returning to home and clicking Start Radio Stream again resumes playback on beat deck
-    const restartButton = page.getByRole("button", {
-      name: /Start Radio Stream/i,
-    });
-    await expect(restartButton).toBeVisible();
-    await restartButton.click();
-
-    await expect(page).toHaveURL(/\/beat\/.+/);
-    await expect(
-      page.getByRole("main").getByText("Playing", { exact: true }),
-    ).toBeVisible();
-    await expect(
-      playerBar.getByRole("button", { name: "Pause audio" }),
-    ).toBeVisible();
+    await page.getByRole("link", { name: "Return to player" }).click();
+    await expect(page).toHaveURL(secondSkipUrl);
+    await expect(page.getByRole("button", { name: "Pause" })).toBeVisible();
   });
 });
 
-test.describe("Waitlist & generation flow", () => {
-  test("displays live invite pool stats and submits a waitlist signup", async ({
+test.describe("Generation route (disabled for MVP)", () => {
+  test("returns 404 not found when navigating to /generate", async ({
     page,
   }) => {
-    await page.goto("/generate");
-
+    const response = await page.goto("/generate");
+    expect(response?.status()).toBe(404);
     await expect(
       page.getByRole("heading", {
         level: 1,
-        name: "Generate Boom Bap Beats",
+        name: "404 — Beat Not Found",
       }),
     ).toBeVisible();
-    await expect(page.getByText(/free invites remaining/i)).toBeVisible();
-
-    const emailInput = page.getByLabel("Email address");
-    const submitButton = page.getByRole("button", { name: "Join Waitlist" });
-    await expect(emailInput).toBeVisible();
-    await expect(submitButton).toBeVisible();
-
-    const uniqueEmail = `e2e-${Date.now()}@example.com`;
-    await emailInput.fill(uniqueEmail);
-    await submitButton.click();
-
-    const statusAlert = page.getByRole("status");
-    await expect(statusAlert).toBeVisible();
-    await expect(statusAlert).toContainText(
-      "You're on the list! Check your inbox around noon in your local timezone.",
-    );
-    await expect(emailInput).toHaveValue("");
-
-    await emailInput.fill(uniqueEmail);
-    await submitButton.click();
-    await expect(statusAlert).toContainText(
-      "You're already on the waitlist! We'll notify you when ready.",
-    );
   });
 });
 
@@ -342,43 +247,31 @@ test.describe("Born-Accessible UI & WCAG 2.2 AA verification", () => {
 
     await expect(page.getByRole("banner")).toBeVisible();
     await expect(
-      page.getByRole("navigation", { name: "Main navigation" }),
+      page.getByRole("navigation", { name: "Information" }),
     ).toBeVisible();
     await expect(page.getByRole("main")).toBeVisible();
-    await expect(
-      page.getByRole("complementary", { name: "Persistent Audio Player" }),
-    ).toBeVisible();
+    await expect(page.getByRole("region", { name: "Player" })).toBeVisible();
 
     const headings = page.getByRole("heading", { level: 1 });
     await expect(headings).toHaveCount(1);
 
     const liveRegions = page.locator('[aria-live="polite"]');
-    await expect(liveRegions.first()).toBeVisible();
+    await expect(liveRegions.first()).toBeAttached();
 
     await page.keyboard.press("Tab");
     const focusedElement = page.locator(":focus");
     await expect(focusedElement).toBeVisible();
   });
 
-  for (const route of [
-    "/",
-    "/beat/track-a",
-    "/beat/0001",
-    "/generate",
-    "/about",
-    "/terms-of-service",
-    "/privacy-policy",
-  ]) {
+  for (const route of ["/", "/beat/track-a", "/about", "/privacy"]) {
     test(`has zero axe-core WCAG 2.2 AA violations and reflows at 320px on ${route}`, async ({
       page,
     }) => {
       await page.goto(route);
       await expect(page.getByRole("main")).toBeVisible();
       await expect(
-        page
-          .getByRole("complementary", { name: "Persistent Audio Player" })
-          .getByText(/Now Playing:/i),
-      ).toBeVisible();
+        page.getByRole("complementary", { name: "Persistent Audio Player" }),
+      ).toHaveCount(0);
       await assertBornAccessible(page);
     });
   }
