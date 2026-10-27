@@ -18,8 +18,8 @@ export const ROUTES = {
   BEAT: "/beat",
   GENERATE: "/generate",
   ABOUT: "/about",
-  TERMS: "/terms-of-service",
-  PRIVACY: "/privacy-policy",
+  TERMS: "/privacy",
+  PRIVACY: "/privacy",
 } as const;
 
 export const API_ROUTES = {

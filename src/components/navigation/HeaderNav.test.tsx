@@ -37,10 +37,9 @@ describe("HeaderNav", () => {
       "href",
       "/beat/0003",
     );
-    expect(screen.getByRole("link", { name: "Generate" })).toHaveAttribute(
-      "href",
-      "/generate",
-    );
+    expect(
+      screen.queryByRole("link", { name: "Generate" }),
+    ).not.toBeInTheDocument();
   });
 
   it("links to /beats fallback when no beat is loaded", () => {

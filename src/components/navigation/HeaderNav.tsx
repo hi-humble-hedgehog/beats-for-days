@@ -29,22 +29,10 @@ export function HeaderNav() {
             Beats
           </Link>
           <Link
-            href={ROUTES.GENERATE}
-            className="transition hover:text-foreground"
-          >
-            Generate
-          </Link>
-          <Link
             href={ROUTES.ABOUT}
             className="transition hover:text-foreground"
           >
             About
-          </Link>
-          <Link
-            href={ROUTES.TERMS}
-            className="transition hover:text-foreground"
-          >
-            Terms
           </Link>
           <Link
             href={ROUTES.PRIVACY}

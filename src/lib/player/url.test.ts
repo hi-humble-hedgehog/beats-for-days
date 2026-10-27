@@ -20,8 +20,7 @@ describe("isBeatPage", () => {
 
   it("returns false for non-beat pages", () => {
     expect(isBeatPage("/about")).toBe(false);
-    expect(isBeatPage("/terms-of-service")).toBe(false);
-    expect(isBeatPage("/privacy-policy")).toBe(false);
+    expect(isBeatPage("/privacy")).toBe(false);
     expect(isBeatPage("/generate")).toBe(false);
   });
 });
