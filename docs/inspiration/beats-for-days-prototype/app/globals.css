@@ -1,0 +1,118 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+  Palette drawn from 90s white label promo pressings:
+  sleeve paper, vinyl black, rubber-stamp red, pencil grey.
+*/
+:root {
+  color-scheme: light;
+  --sleeve: #eceae4;
+  --vinyl: #141414;
+  --stamp: #d62718;
+  --pencil: #6f6d67;
+
+  --background: var(--sleeve);
+  --foreground: var(--vinyl);
+  --card: var(--sleeve);
+  --card-foreground: var(--vinyl);
+  --popover: var(--sleeve);
+  --popover-foreground: var(--vinyl);
+  --primary: var(--stamp);
+  --primary-foreground: var(--sleeve);
+  --secondary: var(--vinyl);
+  --secondary-foreground: var(--sleeve);
+  --muted: var(--sleeve);
+  --muted-foreground: var(--pencil);
+  --accent: var(--stamp);
+  --accent-foreground: var(--sleeve);
+  --destructive: var(--stamp);
+  --border: var(--vinyl);
+  --input: var(--vinyl);
+  --ring: var(--stamp);
+  --radius: 0rem;
+}
+
+@theme inline {
+  --font-sans: var(--font-inter-tight), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: var(--radius);
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius);
+  --radius-xl: var(--radius);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Swiss range: hairline track, solid fill, square stamp thumb */
+.swiss-range {
+  --progress: 0%;
+  appearance: none;
+  width: 100%;
+  height: 20px;
+  background: transparent;
+  cursor: pointer;
+}
+.swiss-range::-webkit-slider-runnable-track {
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    var(--foreground) 0 var(--progress),
+    var(--muted-foreground) var(--progress) 100%
+  );
+}
+.swiss-range::-moz-range-track {
+  height: 2px;
+  background: var(--muted-foreground);
+}
+.swiss-range::-moz-range-progress {
+  height: 2px;
+  background: var(--foreground);
+}
+.swiss-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  margin-top: -5px;
+  background: var(--primary);
+  border: 0;
+  border-radius: 0;
+}
+.swiss-range::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: var(--primary);
+  border: 0;
+  border-radius: 0;
+}
+.swiss-range:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 4px;
+}
