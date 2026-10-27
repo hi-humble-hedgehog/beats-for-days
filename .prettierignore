@@ -7,3 +7,4 @@ reports/
 .stryker-tmp/
 public/
 next-env.d.ts
+docs/inspiration/

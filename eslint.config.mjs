@@ -106,6 +106,7 @@ const eslintConfig = defineConfig([
     "reports/**",
     ".stryker-tmp/**",
     ".agents/skills/born-accessible-ui/scripts/**",
+    "docs/inspiration/**",
   ]),
 ]);
 
