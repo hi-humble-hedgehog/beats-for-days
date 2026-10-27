@@ -15,7 +15,7 @@
     "lint": "eslint --max-warnings=0 .",
     "lint:fix": "eslint --fix .",
     "lint:a11y": "node .agents/skills/born-accessible-ui/scripts/lint.mjs --strict src/",
-    "audit:a11y": "node .agents/skills/born-accessible-ui/scripts/audit.mjs http://localhost:3000/ http://localhost:3000/beat/0001 http://localhost:3000/generate http://localhost:3000/about http://localhost:3000/terms-of-service http://localhost:3000/privacy-policy --out reports/a11y",
+    "audit:a11y": "node .agents/skills/born-accessible-ui/scripts/audit.mjs http://localhost:3000/ http://localhost:3000/beat/0001 http://localhost:3000/about http://localhost:3000/privacy --out reports/a11y",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
