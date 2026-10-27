@@ -48,7 +48,9 @@ module.exports = {
       comment:
         "Secrets and server-only clients (env, ElevenLabs) must never be bundled into client code. Access them from route handlers / server components only.",
       severity: "error",
-      from: { path: "^src/(components|lib/audio|lib/visualizer)/" },
+      from: {
+        path: "^src/(components|lib/audio|lib/grid|lib/player|lib/visualizer)/",
+      },
       to: { path: "^src/lib/(env|elevenlabs)" },
     },
     {
