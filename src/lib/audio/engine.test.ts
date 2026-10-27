@@ -467,6 +467,10 @@ describe("AudioEngine", () => {
     expect(analyser.connect).toHaveBeenCalledWith(mockAudio.createdGains[0]);
 
     const firstSource = mockAudio.createdSources[0];
+    const freq = new Uint8Array(128);
+    engine.getByteFrequencyData(freq);
+    expect(analyser.getByteFrequencyData).toHaveBeenCalledWith(freq);
+
     engine.pause();
     expect(firstSource?.disconnect).toHaveBeenCalled();
     expect(trackGain?.disconnect).toHaveBeenCalled();
@@ -700,6 +704,44 @@ describe("AudioEngine", () => {
     expect(
       secondSource?.playbackRate?.exponentialRampToValueAtTime,
     ).toHaveBeenCalledWith(1, 25.35);
+  });
+
+  it("stores a seek offset before a track is loaded, then clamps once duration is known", async () => {
+    engine.seek(12);
+    expect(engine.getSnapshot().positionSec).toBe(12);
+    await engine.loadTrack(trackA);
+    engine.seek(12.5);
+    expect(engine.getSnapshot().positionSec).toBeCloseTo(12.5, 5);
+  });
+
+  it("clamps seek to the loaded duration and updates a paused playhead", async () => {
+    await engine.loadTrack(trackA);
+    engine.seek(-4);
+    expect(engine.getSnapshot().positionSec).toBe(0);
+    engine.seek(90);
+    expect(engine.getSnapshot().positionSec).toBe(60);
+    engine.seek(12.5);
+    expect(engine.getSnapshot().positionSec).toBeCloseTo(12.5, 5);
+  });
+
+  it("restarts a playing source at the new offset and cancels an armed transition", async () => {
+    mockAudio.setTime(10);
+    await engine.loadTrack(trackA);
+    await engine.play();
+    await engine.armTransition(trackB, transitionAB);
+    expect(engine.getSnapshot().phase).toBe("armed");
+    const firstSource = mockAudio.createdSources[0];
+
+    mockAudio.setTime(20);
+    engine.seek(8);
+
+    expect(firstSource?.stop).toHaveBeenCalled();
+    const restarted = mockAudio.createdSources.at(-1);
+    expect(restarted?.start).toHaveBeenCalledWith(20, 8);
+    const snap = engine.getSnapshot();
+    expect(snap.positionSec).toBeCloseTo(8, 5);
+    expect(snap.phase).toBe("playing");
+    expect(snap.currentBeat?.id).toBe("track-a");
   });
 
   it("aborts superseded skip when user skips multiple times quickly with vinylEffects", async () => {

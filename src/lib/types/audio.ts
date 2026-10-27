@@ -15,6 +15,7 @@ export interface AudioPlayerState {
   isLoading: boolean;
   error: string | null;
   playedHistory?: string[];
+  muted?: boolean;
   togglePlay: () => void;
   play?: () => void;
   pause?: () => void;
@@ -23,4 +24,8 @@ export interface AudioPlayerState {
   skip?: () => void;
   autoAdvance?: () => void;
   advanceTrack: (mode?: AdvanceMode) => void;
+  toggleMute?: () => void;
+  seek?: (offsetSec: number) => void;
+  previous?: () => void;
+  getByteFrequencyData?: (array: Uint8Array) => void;
 }

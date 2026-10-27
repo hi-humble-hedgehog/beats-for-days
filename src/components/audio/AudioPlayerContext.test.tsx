@@ -85,10 +85,15 @@ function Consumer() {
     isPlaying,
     phase,
     secondsRemaining,
+    positionSec,
     isLoading,
     error,
+    muted,
     togglePlay,
     advanceTrack,
+    toggleMute,
+    seek,
+    previous,
   } = useAudioPlayer();
 
   return (
@@ -98,10 +103,15 @@ function Consumer() {
       <p>Phase: {phase ?? "idle"}</p>
       <p>Loading: {isLoading ? "yes" : "no"}</p>
       <p>Seconds: {secondsRemaining}</p>
+      <p>Position: {positionSec ?? 0}</p>
+      <p>Muted: {muted ? "yes" : "no"}</p>
       {error ? <p>Error: {error}</p> : null}
       <button onClick={togglePlay}>Toggle Play</button>
       <button onClick={() => advanceTrack()}>Advance</button>
       <button onClick={() => advanceTrack("auto")}>Auto Advance</button>
+      <button onClick={() => toggleMute?.()}>Toggle Mute</button>
+      <button onClick={() => seek?.(12)}>Seek</button>
+      <button onClick={() => previous?.()}>Previous</button>
     </div>
   );
 }
@@ -797,5 +807,91 @@ describe("AudioPlayerProvider", () => {
     expect(mockBeatsApi.getNextBeat).not.toHaveBeenCalled();
     expect(screen.getByText("Current: none")).toBeInTheDocument();
     expect(screen.getByText("Playing: no")).toBeInTheDocument();
+  });
+
+  it("toggles mute and seeks the loaded playhead", async () => {
+    render(
+      <AudioPlayerProvider engine={testHarness.engine}>
+        <Consumer />
+      </AudioPlayerProvider>,
+    );
+    expect(await screen.findByText(/Current: Soul Rhodes/)).toBeInTheDocument();
+    expect(screen.getByText("Muted: no")).toBeInTheDocument();
+
+    await act(async () => {
+      screen.getByRole("button", { name: "Toggle Mute" }).click();
+    });
+    expect(screen.getByText("Muted: yes")).toBeInTheDocument();
+
+    await act(async () => {
+      screen.getByRole("button", { name: "Seek" }).click();
+    });
+    expect(screen.getByText("Position: 12")).toBeInTheDocument();
+  });
+
+  it("seeks to the start when Previous is pressed past 3 seconds", async () => {
+    window.localStorage.setItem(
+      STORAGE_KEYS.PLAYED_TRACKS,
+      JSON.stringify(["0001", "0002"]),
+    );
+    mockPathname = "/beat/0001";
+    render(
+      <AudioPlayerProvider engine={testHarness.engine}>
+        <Consumer />
+      </AudioPlayerProvider>,
+    );
+    expect(await screen.findByText(/Current: Soul Rhodes/)).toBeInTheDocument();
+
+    await act(async () => {
+      screen.getByRole("button", { name: "Toggle Play" }).click();
+    });
+    testHarness.setTime(20);
+    await act(async () => {
+      screen.getByRole("button", { name: "Previous" }).click();
+    });
+    expect(screen.getByText(/Position: 0/)).toBeInTheDocument();
+    expect(screen.getByText(/Current: Soul Rhodes/)).toBeInTheDocument();
+  });
+
+  it("loads the prior track on Previous within 3 seconds and keeps history intact if fetch fails", async () => {
+    window.localStorage.setItem(
+      STORAGE_KEYS.PLAYED_TRACKS,
+      JSON.stringify(["0001", "0002"]),
+    );
+    mockPathname = "/beat/0002";
+    render(
+      <AudioPlayerProvider engine={testHarness.engine}>
+        <Consumer />
+      </AudioPlayerProvider>,
+    );
+    expect(await screen.findByText(/Current: Jazz Flute/)).toBeInTheDocument();
+
+    // First test a failed getBeat: playedHistory must NOT be lost
+    mockBeatsApi.getBeat.mockRejectedValueOnce(new Error("Previous failed"));
+    await act(async () => {
+      screen.getByRole("button", { name: "Previous" }).click();
+    });
+    expect(
+      await screen.findByText("Error: Previous failed"),
+    ).toBeInTheDocument();
+    expect(
+      JSON.parse(
+        window.localStorage.getItem(STORAGE_KEYS.PLAYED_TRACKS) ?? "[]",
+      ),
+    ).toEqual(["0001", "0002"]);
+
+    // Now succeed while playing: loads 0001 and trims history to ["0001"]
+    await act(async () => {
+      screen.getByRole("button", { name: "Toggle Play" }).click();
+    });
+    await act(async () => {
+      screen.getByRole("button", { name: "Previous" }).click();
+    });
+    expect(await screen.findByText(/Current: Soul Rhodes/)).toBeInTheDocument();
+    expect(
+      JSON.parse(
+        window.localStorage.getItem(STORAGE_KEYS.PLAYED_TRACKS) ?? "[]",
+      ),
+    ).toEqual(["0001"]);
   });
 });

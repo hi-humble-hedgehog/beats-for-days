@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import type { BeatView, TransitionView } from "@/lib/types/beat";
 import {
+  historyAfterPrevious,
   planAdvance,
+  resolvePreviousAction,
   resolveRouteIntent,
   selectBeatDisplayInfo,
 } from "./decisions";
@@ -183,6 +185,7 @@ describe("playerReducer", () => {
       phase: "idle",
       secondsRemaining: 0,
       positionSec: 0,
+      muted: false,
       error: null,
     });
   });
@@ -208,6 +211,10 @@ describe("playerReducer", () => {
 
     const toggledAgain = playerReducer(toggled, { type: "toggle_playing" });
     expect(toggledAgain.isPlaying).toBe(true);
+
+    const muted = playerReducer(initial, { type: "toggle_mute" });
+    expect(muted.muted).toBe(true);
+    expect(playerReducer(muted, { type: "toggle_mute" }).muted).toBe(false);
   });
 
   it("handles sync_snapshot action", () => {
@@ -401,6 +408,63 @@ describe("resolveStartBeat", () => {
       playedTrackIds: [],
       mode: "skip",
     });
+  });
+});
+
+describe("historyAfterPrevious", () => {
+  it("trims from the current id so the last remaining entry is the prior beat", () => {
+    expect(historyAfterPrevious(["a", "b", "c"], "c")).toEqual(["a", "b"]);
+    expect(historyAfterPrevious(["a", "b", "c"], "b")).toEqual(["a"]);
+    expect(historyAfterPrevious(["a"], "a")).toEqual([]);
+    expect(historyAfterPrevious(["a", "b"], null)).toEqual(["a"]);
+    expect(historyAfterPrevious(["a"], null)).toEqual([]);
+    expect(historyAfterPrevious([], null)).toEqual([]);
+  });
+});
+
+describe("resolvePreviousAction", () => {
+  it("restarts when playback is past 3 seconds", () => {
+    expect(
+      resolvePreviousAction({
+        positionSec: 3.01,
+        playedHistory: ["0001", "0002"],
+        currentId: "0002",
+      }),
+    ).toEqual({ kind: "seek_start" });
+  });
+
+  it("loads the previous history beat at or under 3 seconds", () => {
+    expect(
+      resolvePreviousAction({
+        positionSec: 3,
+        playedHistory: ["0001", "0002"],
+        currentId: "0002",
+      }),
+    ).toEqual({ kind: "load_previous", beatId: "0001" });
+    expect(
+      resolvePreviousAction({
+        positionSec: 0,
+        playedHistory: ["0001", "0002"],
+        currentId: "0002",
+      }),
+    ).toEqual({ kind: "load_previous", beatId: "0001" });
+  });
+
+  it("restarts when no earlier beat exists", () => {
+    expect(
+      resolvePreviousAction({
+        positionSec: 0,
+        playedHistory: ["0002"],
+        currentId: "0002",
+      }),
+    ).toEqual({ kind: "seek_start" });
+    expect(
+      resolvePreviousAction({
+        positionSec: 1,
+        playedHistory: [],
+        currentId: "0002",
+      }),
+    ).toEqual({ kind: "seek_start" });
   });
 });
 

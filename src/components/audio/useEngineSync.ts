@@ -9,6 +9,7 @@ import type { BeatView } from "@/lib/types/beat";
 export interface EngineSyncOptions {
   engine: AudioEngine;
   isPlaying: boolean;
+  muted: boolean;
   isLoading: boolean;
   current: BeatView | null;
   resolveAfterSec: number;
@@ -96,6 +97,7 @@ export function useEngineSync(opts: EngineSyncOptions) {
   const {
     engine,
     isPlaying,
+    muted,
     isLoading,
     current,
     resolveAfterSec,
@@ -116,6 +118,10 @@ export function useEngineSync(opts: EngineSyncOptions) {
     current,
     dispatch,
   });
+
+  useEffect(() => {
+    engine.setVolume(muted ? 0 : 1);
+  }, [engine, muted, isPlaying]);
 
   useEffect(() => {
     if (!isPlaying || isLoading || !current) return;

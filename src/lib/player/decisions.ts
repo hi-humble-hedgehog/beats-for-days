@@ -162,12 +162,14 @@ export interface PlayerUiState {
   phase: PlaybackPhase;
   secondsRemaining: number;
   positionSec: number;
+  muted: boolean;
   error: string | null;
 }
 
 export type PlayerAction =
   | { type: "set_playing"; isPlaying: boolean }
   | { type: "toggle_playing" }
+  | { type: "toggle_mute" }
   | {
       type: "sync_snapshot";
       phase: PlaybackPhase;
@@ -177,6 +179,43 @@ export type PlayerAction =
   | { type: "set_pathname"; pathname: string }
   | { type: "set_error"; error: string | null }
   | { type: "set_not_found"; beatId: string | null };
+
+export const PREVIOUS_RESTART_SEC = 3;
+
+export type PreviousAction =
+  { kind: "seek_start" } | { kind: "load_previous"; beatId: string };
+
+/**
+ * Drops the current beat from history so Previous can walk backward.
+ * History stays oldest-to-newest; the last remaining id is the prior track.
+ */
+export function historyAfterPrevious(
+  playedHistory: string[],
+  currentId: string | null,
+): string[] {
+  if (!currentId) {
+    return playedHistory.slice(0, -1);
+  }
+  const idx = playedHistory.lastIndexOf(currentId);
+  if (idx <= 0) return [];
+  return playedHistory.slice(0, idx);
+}
+
+/**
+ * Classic transport Previous: restart after 3s, else load the earlier beat.
+ * No earlier history also restarts so a first track never jumps into a void.
+ */
+export function resolvePreviousAction(opts: {
+  positionSec: number;
+  playedHistory: string[];
+  currentId: string | null;
+}): PreviousAction {
+  if (opts.positionSec > PREVIOUS_RESTART_SEC) return { kind: "seek_start" };
+  const prior = historyAfterPrevious(opts.playedHistory, opts.currentId);
+  const beatId = prior[prior.length - 1];
+  if (!beatId) return { kind: "seek_start" };
+  return { kind: "load_previous", beatId };
+}
 
 /**
  * Creates the initial UI reducer state for the audio player provider.
@@ -190,6 +229,7 @@ export function createInitialPlayerUiState(pathname: string): PlayerUiState {
     phase: "idle",
     secondsRemaining: 0,
     positionSec: 0,
+    muted: false,
     error: null,
   };
 }
@@ -215,6 +255,8 @@ export function playerReducer(
         isPlaying: !state.isPlaying,
         hasPausedBeat: true,
       };
+    case "toggle_mute":
+      return { ...state, muted: !state.muted };
     case "sync_snapshot":
       return {
         ...state,
