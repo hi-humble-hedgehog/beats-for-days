@@ -46,8 +46,14 @@ describe("resolveRouteIntent", () => {
     });
   });
 
-  it("returns none when beat route slug already matches current beat id", () => {
+  it("returns none when beat route slug already matches current beat id or its formatted URL", () => {
     expect(resolveRouteIntent("/beat/0002", "0002")).toEqual({
+      kind: "none",
+    });
+    expect(resolveRouteIntent("/beat/02", "track-02")).toEqual({
+      kind: "none",
+    });
+    expect(resolveRouteIntent("/beat/02", "0002")).toEqual({
       kind: "none",
     });
   });
@@ -341,7 +347,7 @@ describe("resolveStartBeat", () => {
     expect(fetchNextBeat).not.toHaveBeenCalled();
     expect(commitBeat).not.toHaveBeenCalled();
     expect(startPlay).toHaveBeenCalledTimes(1);
-    expect(navigate).toHaveBeenCalledWith("/beat/0002");
+    expect(navigate).toHaveBeenCalledWith("/beat/02");
   });
 
   it("fetches next beat passing current.id when hasPausedBeat is false on a fresh session", async () => {
@@ -372,7 +378,7 @@ describe("resolveStartBeat", () => {
     });
     expect(commitBeat).toHaveBeenCalledWith(nextBeat);
     expect(startPlay).toHaveBeenCalledTimes(1);
-    expect(navigate).toHaveBeenCalledWith("/beat/0003");
+    expect(navigate).toHaveBeenCalledWith("/beat/03");
     expect(result).toEqual(nextBeat);
   });
 

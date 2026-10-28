@@ -22,8 +22,8 @@ function TestComponent(props: UrlSyncOptions) {
 
 describe("useUrlSync", () => {
   const beatOne: BeatView = {
-    id: "0001",
-    name: "Beat One",
+    id: "01",
+    name: "01",
     audioUrl: "http://storage/1.m4a",
     durationMs: 60000,
     loopStartMs: 0,
@@ -33,8 +33,8 @@ describe("useUrlSync", () => {
   };
 
   const beatTwo: BeatView = {
-    id: "0002",
-    name: "Beat Two",
+    id: "02",
+    name: "02",
     audioUrl: "http://storage/2.m4a",
     durationMs: 60000,
     loopStartMs: 0,
@@ -50,7 +50,7 @@ describe("useUrlSync", () => {
 
   function makeStore(
     current: BeatView | null = beatTwo,
-    pathname = "/beat/0002",
+    pathname = "/beat/02",
   ) {
     return {
       setCurrent: mockSetCurrent,
@@ -70,8 +70,8 @@ describe("useUrlSync", () => {
     mockEngine = new AudioEngine();
 
     mockBeatsApi.getBeat.mockImplementation((id: string) => {
-      if (id === "0001") return Promise.resolve(beatOne);
-      if (id === "0002") return Promise.resolve(beatTwo);
+      if (id === "01" || id === "0001") return Promise.resolve(beatOne);
+      if (id === "02" || id === "0002") return Promise.resolve(beatTwo);
       return Promise.resolve(null);
     });
   });
@@ -82,7 +82,7 @@ describe("useUrlSync", () => {
     render(
       <TestComponent
         engine={mockEngine}
-        pathname="/beat/0002"
+        pathname="/beat/02"
         dispatch={mockDispatch}
         store={makeStore()}
       />,
@@ -90,15 +90,15 @@ describe("useUrlSync", () => {
 
     await act(async () => {
       window.dispatchEvent(
-        new PopStateEvent("popstate", { state: { beatId: "0001" } }),
+        new PopStateEvent("popstate", { state: { beatId: "01" } }),
       );
     });
 
     expect(mockDispatch).toHaveBeenCalledWith({
       type: "set_pathname",
-      pathname: "/beat/0001",
+      pathname: "/beat/01",
     });
-    expect(mockBeatsApi.getBeat).toHaveBeenCalledWith("0001");
+    expect(mockBeatsApi.getBeat).toHaveBeenCalledWith("01");
     expect(mockSetCurrent).toHaveBeenCalledWith(beatOne);
     expect(loadSpy).toHaveBeenCalledWith(beatOne);
   });
@@ -118,7 +118,7 @@ describe("useUrlSync", () => {
     render(
       <TestComponent
         engine={mockEngine}
-        pathname="/beat/0002"
+        pathname="/beat/02"
         dispatch={mockDispatch}
         store={makeStore()}
       />,
@@ -126,7 +126,7 @@ describe("useUrlSync", () => {
 
     await act(async () => {
       window.dispatchEvent(
-        new PopStateEvent("popstate", { state: { beatId: "0001" } }),
+        new PopStateEvent("popstate", { state: { beatId: "01" } }),
       );
     });
 
@@ -137,7 +137,7 @@ describe("useUrlSync", () => {
     render(
       <TestComponent
         engine={mockEngine}
-        pathname="/beat/0002"
+        pathname="/beat/02"
         dispatch={mockDispatch}
         store={makeStore()}
       />,
@@ -145,7 +145,7 @@ describe("useUrlSync", () => {
 
     await act(async () => {
       window.dispatchEvent(
-        new PopStateEvent("popstate", { state: { beatId: "0002" } }),
+        new PopStateEvent("popstate", { state: { beatId: "02" } }),
       );
     });
 
@@ -229,5 +229,41 @@ describe("useUrlSync", () => {
       beatId: "9999",
     });
     expect(mockSetCurrent).not.toHaveBeenCalled();
+  });
+
+  it("preserves playedHistory order when navigating backward via popstate and appends unrecorded beats", async () => {
+    vi.spyOn(mockEngine, "loadTrack").mockResolvedValue();
+    const store = makeStore(beatTwo, "/beat/02");
+    store.stateRef.current.playedHistory = ["01", "02", "03"];
+
+    render(
+      <TestComponent
+        engine={mockEngine}
+        pathname="/beat/02"
+        dispatch={mockDispatch}
+        store={store}
+      />,
+    );
+
+    await act(async () => {
+      window.dispatchEvent(
+        new PopStateEvent("popstate", { state: { beatId: "01" } }),
+      );
+    });
+
+    expect(mockSetPlayedHistory).toHaveBeenCalledWith(["01", "02", "03"]);
+
+    // When popstate navigates to an unrecorded beat, it appends without losing existing history
+    store.stateRef.current.playedHistory = ["02", "03"];
+    store.stateRef.current.current = beatTwo;
+    mockSetPlayedHistory.mockClear();
+
+    await act(async () => {
+      window.dispatchEvent(
+        new PopStateEvent("popstate", { state: { beatId: "01" } }),
+      );
+    });
+
+    expect(mockSetPlayedHistory).toHaveBeenCalledWith(["02", "03", "01"]);
   });
 });

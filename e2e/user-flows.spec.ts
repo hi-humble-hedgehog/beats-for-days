@@ -70,7 +70,7 @@ test.describe("Navigation & static pages", () => {
     ).toBeVisible();
 
     await page.getByRole("button", { name: /Start Radio Stream/i }).click();
-    await expect(page).toHaveURL(/\/beat\/track-[a-c]/);
+    await expect(page).toHaveURL(/\/beat\/(?:track-[a-c]|\d{2})/);
     await expect(page.getByRole("button", { name: "Pause" })).toBeVisible();
     await expect(playerBar).toHaveCount(0);
   });
@@ -113,7 +113,7 @@ test.describe("Debug panel", () => {
   const toggleName = "Toggle history debug panel";
 
   test("stays hidden without ?debug=1 or cookie", async ({ page }) => {
-    await page.goto("/beat/track-a");
+    await page.goto("/beat/01");
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await expect(page.getByRole("button", { name: toggleName })).toHaveCount(0);
   });
@@ -121,7 +121,7 @@ test.describe("Debug panel", () => {
   test("shows playback and history state with ?debug=1 and persists across back/forward navigation", async ({
     page,
   }) => {
-    await page.goto("/beat/track-a?debug=1");
+    await page.goto("/beat/01?debug=1");
     const debugButton = page.getByRole("button", { name: toggleName });
     await expect(debugButton).toBeVisible();
     await debugButton.click();
@@ -135,9 +135,9 @@ test.describe("Debug panel", () => {
 
     const firstNumber = await visibleNowPlaying(page).textContent();
     await page.getByRole("button", { name: "Next beat" }).click();
-    await expect(page).toHaveURL(/\/beat\/track-[b-c]/);
-    expect(page.url()).not.toContain("debug=1");
     await expect(visibleNowPlaying(page)).not.toHaveText(firstNumber ?? "");
+    await expect(page).not.toHaveURL(/\/beat\/01(\?|$)/);
+    expect(page.url()).not.toContain("debug=1");
 
     await expect(page.getByRole("button", { name: toggleName })).toBeVisible();
     await expect(
@@ -145,7 +145,7 @@ test.describe("Debug panel", () => {
     ).toBeVisible();
 
     await page.goBack();
-    await expect(page).toHaveURL("/beat/track-a?debug=1");
+    await expect(page).toHaveURL("/beat/01?debug=1");
     await expect(
       page.getByRole("region", { name: "Playback and history state" }),
     ).toBeVisible();
@@ -199,6 +199,30 @@ test.describe("Radio landing & playback flow", () => {
     await expect(visibleNowPlaying(page)).not.toHaveText(firstSkipNumber);
     const secondSkipUrl = page.url();
     expect(secondSkipUrl).not.toBe(firstSkipUrl);
+    const secondSkipNumber =
+      (await visibleNowPlaying(page).textContent()) ?? "";
+
+    // In-app Previous button and ArrowLeft step backward through played history
+    await page.getByRole("button", { name: "Previous beat" }).click();
+    await expect(page).toHaveURL(firstSkipUrl);
+    await expect(visibleNowPlaying(page)).toHaveText(firstSkipNumber);
+
+    await page.evaluate(() => {
+      const active = document.activeElement;
+      if (active instanceof HTMLElement) active.blur();
+    });
+    await page.keyboard.press("ArrowLeft");
+    await expect(page).toHaveURL(initialUrl);
+    await expect(visibleNowPlaying(page)).toHaveText(initialNumber);
+
+    // Clicking Next beat after Previous deterministically traverses forward through the same tracks
+    await page.getByRole("button", { name: "Next beat" }).click();
+    await expect(page).toHaveURL(firstSkipUrl);
+    await expect(visibleNowPlaying(page)).toHaveText(firstSkipNumber);
+
+    await page.getByRole("button", { name: "Next beat" }).click();
+    await expect(page).toHaveURL(secondSkipUrl);
+    await expect(visibleNowPlaying(page)).toHaveText(secondSkipNumber);
 
     await page.goBack();
     await expect(page).toHaveURL(firstSkipUrl);
@@ -210,8 +234,10 @@ test.describe("Radio landing & playback flow", () => {
 
     await page.goForward();
     await expect(page).toHaveURL(firstSkipUrl);
+    await expect(visibleNowPlaying(page)).toHaveText(firstSkipNumber);
     await page.goForward();
     await expect(page).toHaveURL(secondSkipUrl);
+    await expect(visibleNowPlaying(page)).toHaveText(secondSkipNumber);
 
     await page.getByRole("link", { name: "About" }).click();
     await expect(page).toHaveURL("/about");
@@ -263,7 +289,7 @@ test.describe("Born-Accessible UI & WCAG 2.2 AA verification", () => {
     await expect(focusedElement).toBeVisible();
   });
 
-  for (const route of ["/", "/beat/track-a", "/about", "/privacy"]) {
+  for (const route of ["/", "/beat/01", "/about", "/privacy"]) {
     test(`has zero axe-core WCAG 2.2 AA violations and reflows at 320px on ${route}`, async ({
       page,
     }) => {

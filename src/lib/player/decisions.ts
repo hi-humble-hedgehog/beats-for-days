@@ -27,7 +27,10 @@ export function resolveRouteIntent(
   if (!targetBeatId) {
     return { kind: "background" };
   }
-  if (targetBeatId === currentBeatId) {
+  if (
+    currentBeatId &&
+    formatBeatUrl(targetBeatId) === formatBeatUrl(currentBeatId)
+  ) {
     return { kind: "none" };
   }
   return { kind: "load", beatId: targetBeatId };

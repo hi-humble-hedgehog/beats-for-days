@@ -172,7 +172,7 @@ describe("AudioPlayerProvider", () => {
     });
 
     mockBeatsApi.getBeat.mockImplementation((id: string) => {
-      if (id === "0002") {
+      if (id === "0002" || id === "02") {
         return Promise.resolve({
           id: "0002",
           name: "Jazz Flute",
@@ -184,7 +184,7 @@ describe("AudioPlayerProvider", () => {
           transitions: [],
         });
       }
-      if (id === "0001") {
+      if (id === "0001" || id === "01") {
         return Promise.resolve({
           id: "0001",
           name: "Soul Rhodes",
@@ -892,7 +892,7 @@ describe("AudioPlayerProvider", () => {
     expect(replaceStateSpy).toHaveBeenCalledWith(
       { beatId: "0001" },
       "",
-      "/beat/0001",
+      "/beat/01",
     );
     expect(
       JSON.parse(
@@ -980,7 +980,7 @@ describe("AudioPlayerProvider", () => {
     );
     mockPathname = "/beat/0005";
     mockBeatsApi.getBeat.mockImplementation((id: string) =>
-      Promise.resolve(beatsById[id] ?? null),
+      Promise.resolve(beatsById[id] ?? beatsById[id.padStart(4, "0")] ?? null),
     );
     mockBeatsApi.getNextBeat.mockImplementation(() =>
       Promise.resolve({
@@ -1063,6 +1063,36 @@ describe("AudioPlayerProvider", () => {
         window.localStorage.getItem(STORAGE_KEYS.PLAYED_TRACKS) ?? "[]",
       ),
     ).toEqual(["0001", "0002", "0003", "0004", "0005", "0006"]);
+
+    // 6. Browser Back (popstate) to Beat 4 keeps ["0001".."0006"] intact, so Previous -> Beat 3 and Next -> Beat 4 -> Beat 5 are deterministic
+    mockBeatsApi.getNextBeat.mockClear();
+    await act(async () => {
+      window.dispatchEvent(
+        new PopStateEvent("popstate", { state: { beatId: "0004" } }),
+      );
+    });
+    expect(screen.getByText("Current: Beat 4")).toBeInTheDocument();
+    expect(
+      JSON.parse(
+        window.localStorage.getItem(STORAGE_KEYS.PLAYED_TRACKS) ?? "[]",
+      ),
+    ).toEqual(["0001", "0002", "0003", "0004", "0005", "0006"]);
+
+    await act(async () => {
+      screen.getByRole("button", { name: "Previous" }).click();
+    });
+    expect(screen.getByText("Current: Beat 3")).toBeInTheDocument();
+
+    await act(async () => {
+      screen.getByRole("button", { name: "Advance" }).click();
+    });
+    expect(screen.getByText("Current: Beat 4")).toBeInTheDocument();
+
+    await act(async () => {
+      screen.getByRole("button", { name: "Advance" }).click();
+    });
+    expect(screen.getByText("Current: Beat 5")).toBeInTheDocument();
+    expect(mockBeatsApi.getNextBeat).not.toHaveBeenCalled();
 
     vi.useRealTimers();
   });
