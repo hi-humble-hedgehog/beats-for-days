@@ -24,8 +24,9 @@ We will make the route URL the single source of truth for track playback on beat
 ### 1. Bidirectional URL and Player Synchronization
 
 - **On beat routes (`/beat/:slug`):** The URL slug dictates which beat is active in UI and audio.
-- **Track advance (Engine ➔ URL):** When a track changes naturally or by skipping, the player updates the URL to `/beat/:nextId`.
-- **History navigation (URL ➔ Engine):** When the user navigates back or forward, the player detects the route change. If the target beat differs from the active track, the player loads that track and switches playback.
+- **Track advance (Engine ➔ URL):** When a track changes naturally or by skipping, the player updates the URL to `/beat/:nextId` with `history.pushState`.
+- **Previous & forward history traversal:** Pressing Previous steps backward along `playedHistory` without dropping later tracks, and updates the URL with `history.replaceState` so backward steps do not pollute the browser's Back stack. Subsequent Next or auto-advance steps replay the remaining history in order before querying `/api/beats/next` at the tip.
+- **History navigation (URL ➔ Engine):** When the user navigates back or forward, the player detects the route change. If the target beat differs from the active track, the player loads that track and switches playback while preserving `playedHistory` order.
 - **Non-beat routes (`/about`, `/generate`):** Background audio continues playing without modifying the URL.
 - **Root route (`/`) and 404 routes:** Returning to the landing page or landing on an unknown beat ID pauses playback. Pressing Play on either route (via the page button or the persistent player bar) calls `resolveStartBeat`: it resumes the paused beat if playback had already started in the session, or calls `POST /api/beats/next` with the current track ID and play history and navigates to `/beat/:nextId`.
 

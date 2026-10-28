@@ -23,16 +23,36 @@ export function formatBeatUrl(beatId: string | number): string {
 
 export interface HistoryPushTarget {
   pushState: (data: unknown, unused: string, url?: string | URL | null) => void;
+  replaceState?: (
+    data: unknown,
+    unused: string,
+    url?: string | URL | null,
+  ) => void;
+}
+
+function writeHistoryEntry(
+  target: HistoryPushTarget | undefined,
+  beatId: string | number,
+  targetUrl: string,
+  replace: boolean,
+): void {
+  if (!target) return;
+  if (replace && target.replaceState) {
+    target.replaceState({ beatId }, "", targetUrl);
+    return;
+  }
+  target.pushState({ beatId }, "", targetUrl);
 }
 
 /**
- * Updates the browser URL with `history.pushState` when a new beat starts.
+ * Updates the browser URL with `history.pushState` (or `replaceState` when stepping back) when a beat starts.
  * Avoids a Next.js route navigation so the audio player never remounts mid-stream.
  */
 export function syncBeatUrl(
   pathname: string,
   beatId: string | number,
   historyTarget?: HistoryPushTarget,
+  replace = false,
 ): boolean {
   if (!isBeatPage(pathname)) {
     return false;
@@ -50,9 +70,7 @@ export function syncBeatUrl(
   const target =
     historyTarget ??
     (typeof window !== "undefined" ? window.history : undefined);
-  if (target) {
-    target.pushState({ beatId }, "", targetUrl);
-  }
+  writeHistoryEntry(target, beatId, targetUrl, replace);
   return true;
 }
 

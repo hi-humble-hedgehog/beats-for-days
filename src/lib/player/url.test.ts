@@ -49,7 +49,7 @@ describe("formatBeatUrl", () => {
 
 describe("syncBeatUrl", () => {
   it("calls pushState when on a beat page", () => {
-    const mockHistory = { pushState: vi.fn() };
+    const mockHistory = { pushState: vi.fn(), replaceState: vi.fn() };
     const synced = syncBeatUrl("/beat/0001", "0002", mockHistory);
 
     expect(synced).toBe(true);
@@ -57,6 +57,32 @@ describe("syncBeatUrl", () => {
       { beatId: "0002" },
       "",
       "/beat/0002",
+    );
+    expect(mockHistory.replaceState).not.toHaveBeenCalled();
+  });
+
+  it("calls replaceState instead of pushState when replace is true", () => {
+    const mockHistory = { pushState: vi.fn(), replaceState: vi.fn() };
+    const synced = syncBeatUrl("/beat/0002", "0001", mockHistory, true);
+
+    expect(synced).toBe(true);
+    expect(mockHistory.replaceState).toHaveBeenCalledWith(
+      { beatId: "0001" },
+      "",
+      "/beat/0001",
+    );
+    expect(mockHistory.pushState).not.toHaveBeenCalled();
+  });
+
+  it("falls back to pushState when replace is true but historyTarget lacks replaceState", () => {
+    const mockHistory = { pushState: vi.fn() };
+    const synced = syncBeatUrl("/beat/0002", "0001", mockHistory, true);
+
+    expect(synced).toBe(true);
+    expect(mockHistory.pushState).toHaveBeenCalledWith(
+      { beatId: "0001" },
+      "",
+      "/beat/0001",
     );
   });
 

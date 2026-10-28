@@ -578,7 +578,7 @@ describe("AudioPlayerProvider", () => {
       JSON.parse(
         window.localStorage.getItem(STORAGE_KEYS.PLAYED_TRACKS) ?? "[]",
       ),
-    ).toEqual(["0099", "0002"]);
+    ).toEqual(["0099", "0001", "0002"]);
   });
 
   it("handles corrupted JSON in localStorage gracefully", async () => {
@@ -880,7 +880,8 @@ describe("AudioPlayerProvider", () => {
       ),
     ).toEqual(["0001", "0002"]);
 
-    // Now succeed while playing: loads 0001 and trims history to ["0001"]
+    // Now succeed while playing: loads 0001 and preserves ["0001", "0002"] for deterministic forward navigation
+    const replaceStateSpy = vi.spyOn(window.history, "replaceState");
     await act(async () => {
       screen.getByRole("button", { name: "Toggle Play" }).click();
     });
@@ -888,10 +889,181 @@ describe("AudioPlayerProvider", () => {
       screen.getByRole("button", { name: "Previous" }).click();
     });
     expect(await screen.findByText(/Current: Soul Rhodes/)).toBeInTheDocument();
+    expect(replaceStateSpy).toHaveBeenCalledWith(
+      { beatId: "0001" },
+      "",
+      "/beat/0001",
+    );
     expect(
       JSON.parse(
         window.localStorage.getItem(STORAGE_KEYS.PLAYED_TRACKS) ?? "[]",
       ),
-    ).toEqual(["0001"]);
+    ).toEqual(["0001", "0002"]);
+  });
+
+  it("traverses 1..5 -> Prev(4) -> Prev(3) -> Next(4) -> auto-ride(5) -> Next(new 6 from pipeline)", async () => {
+    vi.useFakeTimers();
+
+    const transition4To5 = {
+      id: "tr-4-5",
+      targetTrackId: "0005",
+      audioUrl: "http://storage/tr-4-5.m4a",
+      timing: { handleMs: 250, crossfadeMs: 100, glueMs: 7200, landMs: 0 },
+    };
+
+    const beatsById: Record<string, BeatView> = {
+      "0001": {
+        id: "0001",
+        name: "Beat 1",
+        audioUrl: "http://storage/1.m4a",
+        durationMs: 60000,
+        loopStartMs: 10000,
+        loopEndMs: 50000,
+        bpm: 86,
+        transitions: [],
+      },
+      "0002": {
+        id: "0002",
+        name: "Beat 2",
+        audioUrl: "http://storage/2.m4a",
+        durationMs: 60000,
+        loopStartMs: 10000,
+        loopEndMs: 50000,
+        bpm: 86,
+        transitions: [],
+      },
+      "0003": {
+        id: "0003",
+        name: "Beat 3",
+        audioUrl: "http://storage/3.m4a",
+        durationMs: 60000,
+        loopStartMs: 10000,
+        loopEndMs: 50000,
+        bpm: 86,
+        transitions: [],
+      },
+      "0004": {
+        id: "0004",
+        name: "Beat 4",
+        audioUrl: "http://storage/4.m4a",
+        durationMs: 60000,
+        loopStartMs: 10000,
+        loopEndMs: 50000,
+        bpm: 86,
+        transitions: [transition4To5],
+      },
+      "0005": {
+        id: "0005",
+        name: "Beat 5",
+        audioUrl: "http://storage/5.m4a",
+        durationMs: 60000,
+        loopStartMs: 10000,
+        loopEndMs: 50000,
+        bpm: 86,
+        transitions: [],
+      },
+      "0006": {
+        id: "0006",
+        name: "Beat 6",
+        audioUrl: "http://storage/6.m4a",
+        durationMs: 60000,
+        loopStartMs: 10000,
+        loopEndMs: 50000,
+        bpm: 86,
+        transitions: [],
+      },
+    };
+
+    window.localStorage.setItem(
+      STORAGE_KEYS.PLAYED_TRACKS,
+      JSON.stringify(["0001", "0002", "0003", "0004", "0005"]),
+    );
+    mockPathname = "/beat/0005";
+    mockBeatsApi.getBeat.mockImplementation((id: string) =>
+      Promise.resolve(beatsById[id] ?? null),
+    );
+    mockBeatsApi.getNextBeat.mockImplementation(() =>
+      Promise.resolve({
+        beat: beatsById["0006"]!,
+        transition: null,
+        resolveAfterSec: 30,
+      }),
+    );
+
+    render(
+      <AudioPlayerProvider engine={testHarness.engine}>
+        <Consumer />
+      </AudioPlayerProvider>,
+    );
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(screen.getByText("Current: Beat 5")).toBeInTheDocument();
+
+    // Start playing on Beat 5
+    await act(async () => {
+      screen.getByRole("button", { name: "Toggle Play" }).click();
+    });
+    mockBeatsApi.getNextBeat.mockClear();
+
+    // 1. Previous -> Beat 4
+    await act(async () => {
+      screen.getByRole("button", { name: "Previous" }).click();
+    });
+    expect(screen.getByText("Current: Beat 4")).toBeInTheDocument();
+
+    // 2. Previous -> Beat 3
+    await act(async () => {
+      screen.getByRole("button", { name: "Previous" }).click();
+    });
+    expect(screen.getByText("Current: Beat 3")).toBeInTheDocument();
+
+    // 3. Next (skip) from Beat 3 -> deterministically loads Beat 4 without calling getNextBeat
+    await act(async () => {
+      screen.getByRole("button", { name: "Advance" }).click();
+    });
+    expect(screen.getByText("Current: Beat 4")).toBeInTheDocument();
+    expect(mockBeatsApi.getNextBeat).not.toHaveBeenCalled();
+
+    // 4. Let Beat 4 ride -> autoAdvance arms transition4To5 into Beat 5 without calling getNextBeat
+    testHarness.setTime(30);
+    await act(async () => {
+      vi.advanceTimersByTime(250);
+      await Promise.resolve();
+    });
+    expect(mockBeatsApi.getNextBeat).not.toHaveBeenCalled();
+    expect(screen.getByText("Phase: armed")).toBeInTheDocument();
+
+    // Complete transition bridge into Beat 5
+    testHarness.setTime(97.3);
+    await act(async () => {
+      vi.advanceTimersByTime(250);
+      await Promise.resolve();
+    });
+    expect(screen.getByText("Current: Beat 5")).toBeInTheDocument();
+    expect(
+      JSON.parse(
+        window.localStorage.getItem(STORAGE_KEYS.PLAYED_TRACKS) ?? "[]",
+      ),
+    ).toEqual(["0001", "0002", "0003", "0004", "0005"]);
+
+    // 5. Next from Beat 5 (tip of history) -> queries pipeline getNextBeat -> Beat 6
+    await act(async () => {
+      screen.getByRole("button", { name: "Advance" }).click();
+    });
+    expect(mockBeatsApi.getNextBeat).toHaveBeenCalledWith({
+      currentTrackId: "0005",
+      playedTrackIds: ["0001", "0002", "0003", "0004", "0005"],
+      mode: "skip",
+    });
+    expect(screen.getByText("Current: Beat 6")).toBeInTheDocument();
+    expect(
+      JSON.parse(
+        window.localStorage.getItem(STORAGE_KEYS.PLAYED_TRACKS) ?? "[]",
+      ),
+    ).toEqual(["0001", "0002", "0003", "0004", "0005", "0006"]);
+
+    vi.useRealTimers();
   });
 });

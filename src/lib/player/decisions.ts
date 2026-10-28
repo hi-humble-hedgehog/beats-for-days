@@ -1,5 +1,6 @@
 import type { AdvanceMode, PlaybackPhase } from "@/lib/types/audio";
 import type { BeatView, TransitionView } from "@/lib/types/beat";
+import { updatePlayedTrackIds } from "./graph";
 import { extractBeatIdFromPathname, formatBeatUrl } from "./url";
 
 export type { AdvanceMode, PlaybackPhase };
@@ -186,8 +187,8 @@ export type PreviousAction =
   { kind: "seek_start" } | { kind: "load_previous"; beatId: string };
 
 /**
- * Drops the current beat from history so Previous can walk backward.
- * History stays oldest-to-newest; the last remaining id is the prior track.
+ * Returns the slice of `playedHistory` preceding `currentId` so Previous can locate the prior track.
+ * Returns the full history when `currentId` has not yet been recorded.
  */
 export function historyAfterPrevious(
   playedHistory: string[],
@@ -197,8 +198,60 @@ export function historyAfterPrevious(
     return playedHistory.slice(0, -1);
   }
   const idx = playedHistory.lastIndexOf(currentId);
-  if (idx <= 0) return [];
+  if (idx === -1) return playedHistory;
   return playedHistory.slice(0, idx);
+}
+
+/**
+ * Returns the next beat ID in `playedHistory` when `currentId` sits before the tip of the timeline.
+ * Returns `null` when at the tip or absent, signaling that the player should query `/api/beats/next`.
+ */
+export function resolveForwardBeatId(
+  playedHistory: string[],
+  currentId: string | null,
+): string | null {
+  if (!currentId) return null;
+  const idx = playedHistory.lastIndexOf(currentId);
+  if (idx === -1) return null;
+  return playedHistory[idx + 1] ?? null;
+}
+
+/**
+ * Builds a next-beat resolution when stepping forward to a beat already in history.
+ * Pairs the beat with any matching transition from `currentBeat` so auto-advance still crossfades seamlessly.
+ */
+export function buildForwardResolution(
+  currentBeat: BeatView,
+  nextBeat: BeatView,
+): NextBeatResolution {
+  const transition =
+    currentBeat.transitions.find((tr) => tr.targetTrackId === nextBeat.id) ??
+    null;
+  return { beat: nextBeat, transition };
+}
+
+/**
+ * Updates `playedHistory` when transitioning from `currentId` to `nextBeatId`.
+ * Preserves timeline order when traversing existing tracks so Previous and Next stay deterministic,
+ * and appends new or tip-recycled tracks at the end.
+ */
+export function advancePlayedHistory(
+  playedHistory: string[],
+  currentId: string | null,
+  nextBeatId: string,
+  traverse = false,
+): string[] {
+  const base =
+    currentId && !playedHistory.includes(currentId)
+      ? updatePlayedTrackIds(playedHistory, currentId)
+      : playedHistory;
+
+  const isForwardStep = resolveForwardBeatId(base, currentId) === nextBeatId;
+  if ((traverse || isForwardStep) && base.includes(nextBeatId)) {
+    return base;
+  }
+
+  return updatePlayedTrackIds(base, nextBeatId);
 }
 
 /**

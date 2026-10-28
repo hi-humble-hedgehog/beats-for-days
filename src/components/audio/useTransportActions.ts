@@ -4,7 +4,6 @@ import { useCallback } from "react";
 import { beatsApi } from "@/lib/api";
 import type { AudioEngine } from "@/lib/audio/engine";
 import {
-  historyAfterPrevious,
   resolvePreviousAction,
   type PlayerAction,
 } from "@/lib/player/decisions";
@@ -31,16 +30,18 @@ function syncSnapshot(
 
 /**
  * Seek, mute, and previous-track actions for the poster transport.
- * Previous trims history only after the prior beat resolves so failed fetches keep history intact.
+ * Previous walks backward along `playedHistory` without discarding forward tracks so Next remains deterministic.
  */
 export function useTransportActions(opts: {
   engine: AudioEngine;
   stateRef: React.MutableRefObject<TransportRefs>;
-  setPlayedHistory: React.Dispatch<React.SetStateAction<string[]>>;
-  commitNextBeat: (beat: BeatView) => void;
+  commitNextBeat: (
+    beat: BeatView,
+    opts?: { traverse?: boolean; replaceUrl?: boolean },
+  ) => void;
   dispatch: React.Dispatch<PlayerAction>;
 }) {
-  const { engine, stateRef, setPlayedHistory, commitNextBeat, dispatch } = opts;
+  const { engine, stateRef, commitNextBeat, dispatch } = opts;
 
   const toggleMute = useCallback(() => {
     dispatch({ type: "toggle_mute" });
@@ -67,19 +68,12 @@ export function useTransportActions(opts: {
       return;
     }
 
-    const currentId = current?.id ?? null;
     void beatsApi
       .getBeat(action.beatId)
       .then(async (beat) => {
         if (!beat) return;
-        const trimmed = historyAfterPrevious(
-          stateRef.current.playedHistory,
-          currentId,
-        );
-        stateRef.current.playedHistory = trimmed;
-        setPlayedHistory(trimmed);
         const wasPlaying = engine.getSnapshot().isPlaying;
-        commitNextBeat(beat);
+        commitNextBeat(beat, { traverse: true, replaceUrl: true });
         if (wasPlaying) await engine.skipToTrack(beat);
         else await engine.loadTrack(beat);
         syncSnapshot(engine, dispatch);
@@ -90,7 +84,38 @@ export function useTransportActions(opts: {
           error: err instanceof Error ? err.message : "Failed to load beat",
         });
       });
-  }, [commitNextBeat, dispatch, engine, setPlayedHistory, stateRef]);
+  }, [commitNextBeat, dispatch, engine, stateRef]);
 
   return { toggleMute, seek, previous };
+}
+
+/**
+ * Play, pause, toggle, and SSR hydration commands for the audio player context.
+ */
+export function usePlaybackCommands(
+  dispatch: React.Dispatch<PlayerAction>,
+  setCurrent: (beat: BeatView) => void,
+  stateRef: React.MutableRefObject<TransportRefs>,
+) {
+  const hydrateBeat = useCallback(
+    (beat: BeatView) => {
+      if (stateRef.current.current) return;
+      stateRef.current.current = beat;
+      setCurrent(beat);
+    },
+    [setCurrent, stateRef],
+  );
+  const togglePlay = useCallback(
+    () => dispatch({ type: "toggle_playing" }),
+    [dispatch],
+  );
+  const play = useCallback(
+    () => dispatch({ type: "set_playing", isPlaying: true }),
+    [dispatch],
+  );
+  const pause = useCallback(
+    () => dispatch({ type: "set_playing", isPlaying: false }),
+    [dispatch],
+  );
+  return { hydrateBeat, togglePlay, play, pause };
 }

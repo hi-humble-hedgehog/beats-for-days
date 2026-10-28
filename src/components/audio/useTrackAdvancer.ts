@@ -4,11 +4,13 @@ import { useCallback } from "react";
 import { beatsApi } from "@/lib/api";
 import type { AudioEngine } from "@/lib/audio/engine";
 import {
+  buildForwardResolution,
   planAdvance,
+  resolveForwardBeatId,
   type AdvanceMode,
+  type NextBeatResolution,
   type PlayerAction,
 } from "@/lib/player/decisions";
-import { updatePlayedTrackIds } from "@/lib/player/graph";
 import type { BeatView } from "@/lib/types/beat";
 
 export interface TrackAdvanceOptions {
@@ -23,9 +25,29 @@ export interface TrackAdvanceOptions {
   dispatch: React.Dispatch<PlayerAction>;
 }
 
+async function resolveTargetBeat(opts: {
+  cur: BeatView;
+  hist: string[];
+  mode: AdvanceMode;
+}): Promise<NextBeatResolution> {
+  const { cur, hist, mode } = opts;
+  const forwardId = resolveForwardBeatId(hist, cur.id);
+  if (forwardId) {
+    const forwardBeat = await beatsApi.getBeat(forwardId);
+    if (forwardBeat) {
+      return buildForwardResolution(cur, forwardBeat);
+    }
+  }
+  return beatsApi.getNextBeat({
+    currentTrackId: cur.id,
+    playedTrackIds: hist,
+    mode,
+  });
+}
+
 /**
  * Handles manually skipping or automatically advancing to the next beat.
- * Delegates engine action planning to `planAdvance` in `src/lib/player/decisions.ts`.
+ * Steps forward deterministically through `playedHistory` after Previous, or queries `/api/beats/next` at the tip.
  */
 export function useTrackAdvancer(opts: TrackAdvanceOptions) {
   const { engine, stateRef, isResolvingRef, commitNextBeat, dispatch } = opts;
@@ -34,20 +56,18 @@ export function useTrackAdvancer(opts: TrackAdvanceOptions) {
     (mode: AdvanceMode = "skip") => {
       const snap = engine.getSnapshot();
       let cur = stateRef.current.current;
-      let hist = stateRef.current.playedHistory;
 
       if (snap.currentBeat && snap.currentBeat.id !== cur?.id) {
         cur = snap.currentBeat;
-        hist = updatePlayedTrackIds(hist, cur.id);
         commitNextBeat(cur);
       }
 
       if (!cur || isResolvingRef.current) return;
 
+      const hist = stateRef.current.playedHistory;
       isResolvingRef.current = true;
 
-      beatsApi
-        .getNextBeat({ currentTrackId: cur.id, playedTrackIds: hist, mode })
+      resolveTargetBeat({ cur, hist, mode })
         .then(async (res) => {
           const plan = planAdvance(mode, res, engine.getSnapshot().isPlaying);
 
