@@ -159,7 +159,7 @@ flowchart TD
     EnterLoop2 --> CheckExits["Look up existing transitions from Track A"]
     CheckExits --> HasUnheard{"Any existing exit NOT in playedTrackIds?"}
 
-    HasUnheard -->|Yes| PickUnheard["Pick one of those unheard exits at random<br/>($0 cost, preload & blend at end of current loop)"]
+    HasUnheard -->|Yes| PickUnheard["Pick unheard exit via 1-step Warnsdorff lookahead<br/>(prefers exits with fewest > 0 unheard exits of their own)<br/>($0 cost, preload & blend at end of current loop)"]
     HasUnheard -->|No| CheckCap{"Does Track A have < max outgoing transitions<br/>(8 in Phase 1)?"}
 
     CheckCap -->|No, at cap| PickOldest["Pick existing exit whose to_track_id is oldest in playedTrackIds<br/>($0 cost, preload & blend at end of current loop)"]
@@ -170,13 +170,16 @@ flowchart TD
     HasCandidate -->|Yes| GenerateOnFly["Generate A -> B transition on the fly<br/>Keep looping Track A until ready, then blend at end of loop<br/>Save permanently to public.transitions"]
 ```
 
+- **Sliding Cooldown After Full-Crate Completion (`REPEAT_COOLDOWN_WINDOW = 20`):**
+  - While the listener has heard fewer than all tracks in the catalog, all played tracks stay marked as heard so the player traverses the full 36-track crate with zero duplicates.
+  - Once every catalog track appears in `playedTrackIds`, only the most recent **20 tracks** stay on cooldown (`playedTrackIds.slice(-20)`), reopening the oldest tracks for Warnsdorff selection across multi-session listening and continuous radio streaming.
 - **Degree Caps:**
   - **Phase 1 Seed Tracks (30–40 tracks):** Capped at **max 8 incoming and max 8 outgoing transitions** per track ($40 \times 8 \times \$0.07 = \$22.40$ hard ceiling).
   - **Phase 2 Community Tracks:** Configurable cap (e.g. **max 3–6 incoming/outgoing** per new track), automatically prioritized because brand-new tracks start at `in_degree = 0` and are chosen first by the _"lowest `in_degree`"_ rule.
 
 ### Manual Skip & Anonymous Skip Telemetry
 
-- **Client-side skip transition (`$0` API cost):** If a listener clicks **Skip / Next**, the player does **not** generate or play an AI transition. Instead, it picks an unheard track and performs a client-side Web Audio transition.
+- **Client-side skip transition (`$0` API cost):** If a listener clicks **Skip / Next**, the player does **not** generate or play an AI transition (`transition: null`). It first walks `currentTrack`'s unheard outgoing transitions using 1-step Warnsdorff lookahead (so stepping back with **Previous** and letting the beat ride still has a valid transition bridge), or jumps to an unheard catalog track with open exits if all outgoing transitions from `currentTrack` were already heard.
 - **Anonymous skip telemetry (`public.track_skip_events`):** Each skip records `{ track_id, skipped_at_sec, loop_count }` in Supabase with **zero IP addresses, User-Agents, cookies, or session/user IDs** ([ADR 0008](../decisions/0008-gdpr-and-wcag-accessibility-compliance.md)). Basic aggregate page traffic is measured cookielessly via **Vercel Web Analytics** (`@vercel/analytics`).
 
 ---
