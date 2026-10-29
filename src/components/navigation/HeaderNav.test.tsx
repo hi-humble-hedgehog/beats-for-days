@@ -35,7 +35,7 @@ describe("HeaderNav", () => {
     ).toHaveAttribute("href", "/");
     expect(screen.getByRole("link", { name: "Beats" })).toHaveAttribute(
       "href",
-      "/beat/0003",
+      "/beat/03",
     );
     expect(
       screen.queryByRole("link", { name: "Generate" }),

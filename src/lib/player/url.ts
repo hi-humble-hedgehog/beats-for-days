@@ -10,15 +10,18 @@ export function isBeatPage(pathname: string): boolean {
 }
 
 /**
- * Formats a beat ID as a 4-digit path like `/beat/0001`.
+ * Formats a beat ID as a 2-digit path like `/beat/01` (with leading zeros below 10).
+ * Handles numeric values, numeric strings, and prefixed strings like "track-01".
  * Non-numeric IDs are URL-encoded as-is.
  */
 export function formatBeatUrl(beatId: string | number): string {
-  const num = typeof beatId === "number" ? beatId : Number(beatId);
-  if (!Number.isNaN(num) && Number.isInteger(num) && num > 0) {
-    return `/beat/${String(num).padStart(4, "0")}`;
+  const str = String(beatId);
+  const trackMatch = /^track-(\d+)$/i.exec(str);
+  const rawNum = trackMatch ? Number(trackMatch[1]) : Number(str);
+  if (!Number.isNaN(rawNum) && Number.isInteger(rawNum) && rawNum > 0) {
+    return `/beat/${String(rawNum).padStart(2, "0")}`;
   }
-  return `/beat/${encodeURIComponent(String(beatId))}`;
+  return `/beat/${encodeURIComponent(str)}`;
 }
 
 export interface HistoryPushTarget {

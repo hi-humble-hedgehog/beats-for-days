@@ -94,7 +94,7 @@ describe("NotFound page", () => {
     );
     expect(screen.getByTestId("playing-state")).toHaveTextContent("yes");
     expect(mockPause).not.toHaveBeenCalled();
-    expect(mockPush).toHaveBeenCalledWith("/beat/0002");
+    expect(mockPush).toHaveBeenCalledWith("/beat/02");
   });
 
   it("fetches next beat and navigates when clicking Start Radio Stream without a paused beat", async () => {
@@ -147,7 +147,7 @@ describe("NotFound page", () => {
       });
       expect(mockCommitBeat).toHaveBeenCalledWith(nextBeat);
       expect(mockPlay).toHaveBeenCalledTimes(1);
-      expect(mockPush).toHaveBeenCalledWith("/beat/0003");
+      expect(mockPush).toHaveBeenCalledWith("/beat/03");
     });
   });
 });

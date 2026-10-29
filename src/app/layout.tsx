@@ -28,8 +28,17 @@ import { PALETTE } from "@/lib/design-tokens";
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${interTight.variable} h-full antialiased`}>
+    <html
+      lang="en"
+      className={`${interTight.variable} h-full bg-background text-foreground antialiased`}
+      style={{ backgroundColor: PALETTE.sleeve, color: PALETTE.vinyl }}
+    >
       <head>
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `html,body{background-color:${PALETTE.sleeve};color:${PALETTE.vinyl};}`,
+          }}
+        />
         <link
           rel="preload"
           href={API_ROUTES.BEATS_NEXT}

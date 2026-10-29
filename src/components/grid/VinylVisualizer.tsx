@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { renderVinylFrame, type VinylPalette } from "@/lib/grid/canvas-draw";
 import type { Geometry } from "@/lib/grid/poster-geometry";
+
+const useIsomorphicLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 function readCssColor(name: string, fallback: string): string {
   if (typeof window === "undefined") return fallback;
@@ -46,7 +49,7 @@ export function VinylVisualizer({ geometry }: VinylVisualizerProps) {
   const colorsRef = useRef<VinylPalette | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 

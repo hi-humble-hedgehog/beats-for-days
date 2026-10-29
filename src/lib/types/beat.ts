@@ -21,4 +21,5 @@ export interface BeatView {
   loopEndMs: number;
   bpm: number;
   transitions: TransitionView[];
+  index?: number;
 }

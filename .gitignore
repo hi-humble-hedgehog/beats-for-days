@@ -42,4 +42,5 @@ next-env.d.ts
 
 # Design-reference audio. The prototype samples are local only.
 docs/inspiration/**/*.wav
+docs/beats-launch-pack/**/*.wav
 

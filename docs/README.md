@@ -12,6 +12,7 @@ way it is. Keep docs close to reality: update them in the same PR as the code.
 | [`guides/testing.md`](guides/testing.md)                                 | Test conventions, the CRAP gate, mutation testing           |
 | [`guides/workflow.md`](guides/workflow.md)                               | Local workflow, git hooks, CI, commit conventions           |
 | [`guides/compliance-and-a11y.md`](guides/compliance-and-a11y.md)         | GDPR privacy-by-design & WCAG 2.2 AA accessibility rules    |
+| [`guides/audio-asset-handoff.md`](guides/audio-asset-handoff.md)         | 36-track & transition audio package prep for audio teams    |
 
 Agent-facing instructions live in [`/AGENTS.md`](../AGENTS.md) and
 [`/.agents/`](../.agents) (skills + hooks).

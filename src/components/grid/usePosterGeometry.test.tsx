@@ -1,4 +1,5 @@
 import { act, render, renderHook, screen } from "@testing-library/react";
+import gsap from "gsap";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { usePosterGeometry } from "./usePosterGeometry";
 
@@ -142,5 +143,21 @@ describe("usePosterGeometry", () => {
     rerender(<SeedProbe seed={999} />);
 
     expect(screen.getByTestId("seed-probe")).toBeDefined();
+  });
+
+  it("does not trigger GSAP tween when transitioning from seed 0", () => {
+    const gsapSpy = vi.spyOn(gsap, "to");
+
+    function SeedProbe({ seed }: { seed: number }) {
+      const [, geometry] = usePosterGeometry<HTMLDivElement>(seed);
+      return <div data-testid="seed-probe">{geometry.start}</div>;
+    }
+
+    const { rerender } = render(<SeedProbe seed={0} />);
+    gsapSpy.mockClear();
+
+    rerender(<SeedProbe seed={1} />);
+    expect(gsapSpy).not.toHaveBeenCalled();
+    gsapSpy.mockRestore();
   });
 });

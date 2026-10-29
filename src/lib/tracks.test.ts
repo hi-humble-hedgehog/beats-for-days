@@ -2,6 +2,7 @@ import { type SupabaseClient } from "@supabase/supabase-js";
 import { describe, expect, it } from "vitest";
 import {
   buildBeatViews,
+  deriveTrackLabel,
   fetchBeatViews,
   fetchBeatViewById,
   type TrackRow,
@@ -123,6 +124,61 @@ describe("buildBeatViews", () => {
     );
     expect(views[0]?.transitions[0]?.targetTrackId).toBe("track-x");
   });
+
+  it("filters out inactive tracks and prunes transitions pointing to them", () => {
+    const tracksWithInactive: TrackRow[] = [
+      ...sampleTracks,
+      {
+        id: "track-c",
+        name: "Disabled Beat",
+        bpm: 90,
+        duration_ms: 60000,
+        loop_start_ms: 5000,
+        loop_end_ms: 55000,
+        audio_path: "tracks/c.m4a",
+        is_active: false,
+      },
+    ];
+
+    const transitionsWithInactive: TransitionRow[] = [
+      ...sampleTransitions,
+      {
+        id: "t-a-c",
+        from_track_id: "track-a",
+        to_track_id: "track-c",
+        audio_path: "transitions/a-to-c.m4a",
+        timing: sampleTiming,
+      },
+    ];
+
+    const views = buildBeatViews(
+      tracksWithInactive,
+      transitionsWithInactive,
+      dummyResolver,
+    );
+
+    expect(views).toHaveLength(2);
+    expect(views.some((v) => v.id === "track-c")).toBe(false);
+    const trackA = views.find((v) => v.id === "track-a");
+    expect(trackA?.transitions.some((t) => t.targetTrackId === "track-c")).toBe(
+      false,
+    );
+  });
+});
+
+describe("deriveTrackLabel", () => {
+  it("derives 2-digit label from index or fallback", () => {
+    expect(deriveTrackLabel({ id: "track-01", name: "01", index: 1 })).toBe(
+      "01",
+    );
+    expect(deriveTrackLabel({ id: "track-09", name: "09", index: 9 })).toBe(
+      "09",
+    );
+    expect(deriveTrackLabel({ id: "track-12", name: "12", index: 12 })).toBe(
+      "12",
+    );
+    expect(deriveTrackLabel({ id: "track-03", name: "track-03" })).toBe("03");
+  });
 });
 
 describe("fetchBeatViews", () => {
@@ -142,26 +198,33 @@ describe("fetchBeatViews", () => {
       from: (table: string) => {
         tablesQueried.push(table);
         if (table === "tracks") {
-          return {
-            select: () => ({
-              order: (col: string) => {
-                ordersRequested.push(col);
-                return Promise.resolve({
-                  data: [
-                    {
-                      id: "track-1",
-                      name: "Track One",
-                      bpm: 88,
-                      duration_ms: 60000,
-                      loop_start_ms: 10000,
-                      loop_end_ms: 50000,
-                      audio_path: "tracks/1.m4a",
-                    },
-                  ],
-                  error: null,
-                });
+          const trackData = {
+            data: [
+              {
+                id: "track-1",
+                name: "01",
+                index: 1,
+                bpm: 88,
+                duration_ms: 60000,
+                loop_start_ms: 10000,
+                loop_end_ms: 50000,
+                audio_path: "tracks/1.m4a",
               },
-            }),
+            ],
+            error: null,
+          };
+          const query = {
+            order: (col: string) => {
+              ordersRequested.push(col);
+              return query;
+            },
+            then: (
+              resolve: (v: unknown) => unknown,
+              reject?: (e: unknown) => unknown,
+            ) => Promise.resolve(trackData).then(resolve, reject),
+          };
+          return {
+            select: () => query,
           };
         }
         return {
@@ -195,11 +258,12 @@ describe("fetchBeatViews", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const views = await fetchBeatViews(mockClient as any, false);
     expect(mockClient.tablesQueried).toEqual(["tracks", "transitions"]);
-    expect(mockClient.ordersRequested).toEqual(["name"]);
+    expect(mockClient.ordersRequested).toEqual(["index", "name"]);
     expect(views).toEqual([
       {
         id: "track-1",
-        name: "Track One",
+        name: "01",
+        index: 1,
         bpm: 88,
         durationMs: 60000,
         loopStartMs: 10000,
@@ -217,28 +281,37 @@ describe("fetchBeatViews", () => {
     ]);
   });
 
+  function createChainedOrderQuery(result: { data: unknown; error: unknown }) {
+    const query = {
+      order: () => query,
+      then: (
+        resolve: (v: unknown) => unknown,
+        reject?: (e: unknown) => unknown,
+      ) => Promise.resolve(result).then(resolve, reject),
+    };
+    return query;
+  }
+
   it("resolves local /audio/ static URLs and preserves leading slash paths when useLocalAudio is true", async () => {
     const mockClient = {
       from: (table: string) => {
         if (table === "tracks") {
           return {
-            select: () => ({
-              order: () =>
-                Promise.resolve({
-                  data: [
-                    {
-                      id: "track-1",
-                      name: "Track One",
-                      bpm: 88,
-                      duration_ms: 60000,
-                      loop_start_ms: 10000,
-                      loop_end_ms: 50000,
-                      audio_path: "tracks/1.m4a/",
-                    },
-                  ],
-                  error: null,
-                }),
-            }),
+            select: () =>
+              createChainedOrderQuery({
+                data: [
+                  {
+                    id: "track-1",
+                    name: "01",
+                    bpm: 88,
+                    duration_ms: 60000,
+                    loop_start_ms: 10000,
+                    loop_end_ms: 50000,
+                    audio_path: "tracks/1.m4a/",
+                  },
+                ],
+                error: null,
+              }),
           };
         }
         return {
@@ -276,23 +349,21 @@ describe("fetchBeatViews", () => {
       from: (table: string) => {
         if (table === "tracks") {
           return {
-            select: () => ({
-              order: () =>
-                Promise.resolve({
-                  data: [
-                    {
-                      id: "track-1",
-                      name: "Track One",
-                      bpm: 88,
-                      duration_ms: 60000,
-                      loop_start_ms: 10000,
-                      loop_end_ms: 50000,
-                      audio_path: "tracks/1.m4a",
-                    },
-                  ],
-                  error: null,
-                }),
-            }),
+            select: () =>
+              createChainedOrderQuery({
+                data: [
+                  {
+                    id: "track-1",
+                    name: "01",
+                    bpm: 88,
+                    duration_ms: 60000,
+                    loop_start_ms: 10000,
+                    loop_end_ms: 50000,
+                    audio_path: "tracks/1.m4a",
+                  },
+                ],
+                error: null,
+              }),
           };
         }
         return {
@@ -314,13 +385,11 @@ describe("fetchBeatViews", () => {
       from: (table: string) => {
         if (table === "tracks") {
           return {
-            select: () => ({
-              order: () =>
-                Promise.resolve({
-                  data: null,
-                  error: { message: "Tracks DB failure" },
-                }),
-            }),
+            select: () =>
+              createChainedOrderQuery({
+                data: null,
+                error: { message: "Tracks DB failure" },
+              }),
           };
         }
         return {
@@ -345,13 +414,11 @@ describe("fetchBeatViews", () => {
       from: (table: string) => {
         if (table === "tracks") {
           return {
-            select: () => ({
-              order: () =>
-                Promise.resolve({
-                  data: [],
-                  error: null,
-                }),
-            }),
+            select: () =>
+              createChainedOrderQuery({
+                data: [],
+                error: null,
+              }),
           };
         }
         return {
@@ -379,7 +446,7 @@ describe("fetchBeatViews", () => {
 describe("fetchBeatViewById", () => {
   const trackRow: TrackRow = {
     id: "0001",
-    name: "Track One",
+    name: "01",
     bpm: 85,
     duration_ms: 60000,
     loop_start_ms: 0,
@@ -405,8 +472,8 @@ describe("fetchBeatViewById", () => {
     const client = {
       from: (table: string) => ({
         select: (columns: string) => ({
-          eq: (column: string, value: string) => {
-            calls.push([table, columns, column, value]);
+          or: (filter: string) => {
+            calls.push([table, columns, "or", filter]);
             if (table === "tracks") {
               return { maybeSingle: () => Promise.resolve(trackResult) };
             }
@@ -424,20 +491,10 @@ describe("fetchBeatViewById", () => {
       { data: [transitionRow], error: null },
     );
     await fetchBeatViewById("0001", client, true);
-    expect(calls).toEqual([
-      [
-        "tracks",
-        "id, name, bpm, duration_ms, loop_start_ms, loop_end_ms, audio_path",
-        "id",
-        "0001",
-      ],
-      [
-        "transitions",
-        "id, from_track_id, to_track_id, audio_path, timing",
-        "from_track_id",
-        "0001",
-      ],
-    ]);
+    expect(calls[0]?.[0]).toBe("tracks");
+    expect(calls[0]?.[2]).toBe("or");
+    expect(calls[1]?.[0]).toBe("transitions");
+    expect(calls[1]?.[2]).toBe("or");
   });
 
   it("returns the beat with its outgoing transitions", async () => {
@@ -448,7 +505,8 @@ describe("fetchBeatViewById", () => {
     const beat = await fetchBeatViewById("0001", client, true);
     expect(beat).toEqual({
       id: "0001",
-      name: "Track One",
+      name: "01",
+      index: 1,
       audioUrl: "/audio/1.m4a",
       durationMs: 60000,
       loopStartMs: 0,

@@ -6,7 +6,7 @@ import { GridOverlay } from "@/components/grid/GridOverlay";
 import { SpectrumBars } from "@/components/grid/SpectrumBars";
 import { VinylVisualizer } from "@/components/grid/VinylVisualizer";
 import { usePosterGeometry } from "@/components/grid/usePosterGeometry";
-import { ROUTES } from "@/lib/constants";
+import { ROUTES, STARTER_BEAT_ID } from "@/lib/constants";
 import { formatBeatNumber, seedFromBeatId } from "@/lib/grid/format";
 import type { Geometry } from "@/lib/grid/poster-geometry";
 import { resolvePosterShortcut } from "@/lib/player/shortcuts";
@@ -51,7 +51,7 @@ function usePosterShortcuts(opts: {
 function PosterHeader({ geometry }: { geometry: Geometry }) {
   return (
     <header
-      className="absolute z-20 flex flex-col gap-3"
+      className="absolute top-4 left-4 z-20 flex flex-col gap-3 md:top-8 md:left-8"
       style={{ left: geometry.margin, top: geometry.margin }}
     >
       <h1 className="text-3xl leading-[0.85] font-bold tracking-tighter md:text-5xl">
@@ -94,10 +94,9 @@ function PosterTransport(opts: {
   } = opts;
   return (
     <section
-      className="absolute z-20 flex flex-col justify-end gap-2 md:gap-4"
+      className="absolute right-4 bottom-4 left-4 z-20 flex flex-col justify-end gap-2 md:right-8 md:bottom-8 md:left-[calc((500vw/12)+12px)] md:gap-4"
       style={{
         left: geometry.px + geometry.gap / 2,
-        top: geometry.py + geometry.gap / 2,
         right: geometry.margin,
         bottom: geometry.margin,
       }}
@@ -159,7 +158,12 @@ function resolvePosterBeatId(
   player: AudioPlayerState,
   fallbackBeatId?: string,
 ): string {
-  return player.current?.id ?? player.notFoundBeatId ?? fallbackBeatId ?? "00";
+  return (
+    player.current?.id ??
+    player.notFoundBeatId ??
+    fallbackBeatId ??
+    STARTER_BEAT_ID
+  );
 }
 
 /**
@@ -222,8 +226,10 @@ export function PosterPlayer({
       >
         <PosterHeader geometry={geometry} />
         <main className="absolute inset-0">
-          <SpectrumBars geometry={geometry} />
-          <VinylVisualizer geometry={geometry} />
+          <div className="animate-canvas-fade-in pointer-events-none absolute inset-0">
+            <SpectrumBars geometry={geometry} />
+            <VinylVisualizer geometry={geometry} />
+          </div>
           <PosterTransport
             geometry={geometry}
             player={player}

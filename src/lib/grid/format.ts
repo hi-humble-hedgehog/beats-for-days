@@ -19,6 +19,8 @@ export function formatTime(seconds: number): string {
  */
 export function seedFromBeatId(id: string): number {
   if (!id || id === "—") return 0;
+  const trackMatch = /^track-(\d+)$/i.exec(id);
+  if (trackMatch && trackMatch[1]) return Number.parseInt(trackMatch[1], 10);
   if (NUMERIC_ID.test(id)) return Number.parseInt(id, 10);
   let hash = 2166136261;
   for (const char of id) {

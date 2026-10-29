@@ -31,3 +31,4 @@ and its consequences. Format: lightweight [MADR](https://adr.github.io/madr/).
 | [0013](0013-url-as-source-of-truth-for-beat-routes.md)  | URL as source of truth for beats          | Accepted |
 | [0014](0014-swiss-geometric-grid-engine.md)             | Two-part Swiss poster and editorial grid  | Accepted |
 | [0015](0015-gsap-poster-geometry-transitions.md)        | GSAP poster geometry transitions          | Accepted |
+| [0016](0016-local-only-admin-catalog-management.md)     | Local-only admin catalog management       | Accepted |

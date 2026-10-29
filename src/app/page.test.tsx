@@ -62,7 +62,7 @@ describe("Home page", () => {
     expect(screen.getByRole("main")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Play" }));
     expect(mockTogglePlay).toHaveBeenCalled();
-    expect(mockPush).toHaveBeenCalledWith("/beat/0001");
+    expect(mockPush).toHaveBeenCalledWith("/beat/01");
   });
 
   it("calls play when provided in context upon clicking Play", () => {
@@ -74,7 +74,7 @@ describe("Home page", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Play" }));
     expect(mockPlay).toHaveBeenCalledTimes(1);
-    expect(mockPush).toHaveBeenCalledWith("/beat/0002");
+    expect(mockPush).toHaveBeenCalledWith("/beat/02");
   });
 
   it("resolves the next beat via beatsApi.getNextBeat when no beat is paused", async () => {
@@ -103,7 +103,7 @@ describe("Home page", () => {
       });
       expect(mockCommitBeat).toHaveBeenCalledWith(nextBeat);
       expect(mockPlay).toHaveBeenCalledTimes(1);
-      expect(mockPush).toHaveBeenCalledWith("/beat/0003");
+      expect(mockPush).toHaveBeenCalledWith("/beat/03");
     });
   });
 });

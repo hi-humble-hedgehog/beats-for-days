@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import gsap from "gsap";
 import { computeGeometry } from "@/lib/grid/poster-geometry";
 import type { Geometry } from "@/lib/grid/poster-model";
 import { interpolateGeometry } from "@/lib/grid/poster-transition";
 
 const SSR_VIEWPORT = { w: 1280, h: 800 };
+
+const useIsomorphicLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 function isReducedMotionPreferred(): boolean {
   return (
@@ -26,7 +29,7 @@ export function usePosterGeometry<T extends HTMLElement>(seed: number) {
   const ref = useRef<T>(null);
   const [size, setSize] = useState(SSR_VIEWPORT);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
     const update = () => {
@@ -58,13 +61,16 @@ export function usePosterGeometry<T extends HTMLElement>(seed: number) {
     setPrevSize(size);
     setPrevSeed(seed);
     setGeometry(targetGeometry);
-  } else if (prevSeed !== seed && isReducedMotionPreferred()) {
+  } else if (
+    prevSeed !== seed &&
+    (prevSeed === 0 || isReducedMotionPreferred())
+  ) {
     setPrevSeed(seed);
     setGeometry(targetGeometry);
   }
 
   useEffect(() => {
-    if (prevSeed === seed || isReducedMotionPreferred()) {
+    if (prevSeed === 0 || prevSeed === seed || isReducedMotionPreferred()) {
       return;
     }
 

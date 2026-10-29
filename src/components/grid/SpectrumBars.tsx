@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import {
   markerEdgeInset,
   markerRadii,
   markerTilts,
 } from "@/lib/grid/canvas-draw";
 import { visibleSpans, type Geometry } from "@/lib/grid/poster-geometry";
+
+const useIsomorphicLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 const MARKER_GROUP_SIZE = 2;
 
@@ -124,7 +127,7 @@ export interface SpectrumBarsProps {
 export function SpectrumBars({ geometry }: SpectrumBarsProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
