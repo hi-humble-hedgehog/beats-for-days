@@ -16,11 +16,10 @@ const config = {
   checkers: ["typescript"],
   tsconfigFile: "tsconfig.json",
 
-  // Logic lives in .ts files and is mutation-tested; .tsx stays presentational.
+  // Logic lives in .ts files in src/lib and is mutation-tested; presentation stays in components/app.
   mutate: [
-    "src/**/*.ts",
+    "src/lib/**/*.ts",
     "scripts/**/*.ts",
-    "!src/components/**",
     "!**/*.test.ts",
     "!**/*.d.ts",
     "!scripts/**/cli.ts",
