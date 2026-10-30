@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useReducer,
   useRef,
   useState,
@@ -236,7 +237,7 @@ export function AudioPlayerProvider({
   );
   const engine = injectedEngine ?? defaultEngine;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     stateRef.current = {
       current: playerState.current,
       pathname: playerState.ui.activePathname,
