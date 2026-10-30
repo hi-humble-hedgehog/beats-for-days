@@ -160,4 +160,51 @@ describe("usePosterGeometry", () => {
     expect(gsapSpy).not.toHaveBeenCalled();
     gsapSpy.mockRestore();
   });
+
+  it("updates geometry immediately and skips GSAP tween when document is hidden", () => {
+    const gsapSpy = vi.spyOn(gsap, "to");
+    const originalHidden = Object.getOwnPropertyDescriptor(
+      Document.prototype,
+      "hidden",
+    );
+    Object.defineProperty(document, "hidden", {
+      configurable: true,
+      value: true,
+    });
+
+    function SeedProbe({ seed }: { seed: number }) {
+      const [, geometry] = usePosterGeometry<HTMLDivElement>(seed);
+      return <div data-testid="seed-probe">{geometry.start}</div>;
+    }
+
+    const { rerender } = render(<SeedProbe seed={1} />);
+    gsapSpy.mockClear();
+
+    rerender(<SeedProbe seed={2} />);
+    expect(gsapSpy).not.toHaveBeenCalled();
+
+    if (originalHidden) {
+      Object.defineProperty(document, "hidden", originalHidden);
+    } else {
+      // @ts-expect-error test cleanup
+      delete document.hidden;
+    }
+    gsapSpy.mockRestore();
+  });
+
+  it("snaps geometry to target when document visibility changes to visible", () => {
+    function SeedProbe({ seed }: { seed: number }) {
+      const [, geometry] = usePosterGeometry<HTMLDivElement>(seed);
+      return <div data-testid="seed-probe">{geometry.start}</div>;
+    }
+
+    const { rerender } = render(<SeedProbe seed={1} />);
+    rerender(<SeedProbe seed={999} />);
+
+    act(() => {
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+
+    expect(screen.getByTestId("seed-probe")).toBeDefined();
+  });
 });

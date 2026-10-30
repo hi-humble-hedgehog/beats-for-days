@@ -263,6 +263,42 @@ describe("AudioPlayerProvider", () => {
     expect(testHarness.engine.getSnapshot().positionSec).toBeCloseTo(15, 2);
   });
 
+  it("synchronizes snapshot immediately when document becomes visible or window gains focus", async () => {
+    render(
+      <AudioPlayerProvider engine={testHarness.engine}>
+        <Consumer />
+      </AudioPlayerProvider>,
+    );
+
+    expect(await screen.findByText(/Current: Soul Rhodes/)).toBeInTheDocument();
+
+    await act(async () => {
+      screen.getByRole("button", { name: "Toggle Play" }).click();
+    });
+    expect(screen.getByText("Playing: yes")).toBeInTheDocument();
+
+    // Switch to fake timers to freeze the 100ms polling interval
+    vi.useFakeTimers();
+
+    // Advance audio clock without advancing the fake timer interval
+    testHarness.setTime(25);
+
+    // Document visibility change to visible triggers immediate sync
+    act(() => {
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    expect(screen.getByText("Position: 25")).toBeInTheDocument();
+
+    // Window focus triggers immediate sync
+    testHarness.setTime(35);
+    act(() => {
+      window.dispatchEvent(new Event("focus"));
+    });
+    expect(screen.getByText("Position: 35")).toBeInTheDocument();
+
+    vi.useRealTimers();
+  });
+
   it("pauses playback when navigating to '/' and stays paused on leaving '/' until Play is pressed", async () => {
     mockPathname = "/beat/0001";
     const { rerender } = render(
@@ -485,6 +521,46 @@ describe("AudioPlayerProvider", () => {
     await act(async () => {
       vi.advanceTimersByTime(250);
     });
+    expect(screen.getByText(/Current: Jazz Flute/)).toBeInTheDocument();
+    expect(screen.getByText("Phase: playing")).toBeInTheDocument();
+    vi.useRealTimers();
+  });
+
+  it("completes armed transition immediately when document becomes visible or window gains focus without waiting for timers", async () => {
+    vi.useFakeTimers();
+
+    render(
+      <AudioPlayerProvider engine={testHarness.engine}>
+        <Consumer />
+      </AudioPlayerProvider>,
+    );
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(screen.getByText(/Current: Soul Rhodes/)).toBeInTheDocument();
+
+    // Start playback
+    await act(async () => {
+      screen.getByRole("button", { name: "Toggle Play" }).click();
+    });
+
+    // Advance audio clock to 30s and arm transition
+    testHarness.setTime(30);
+    await act(async () => {
+      vi.advanceTimersByTime(250);
+      await Promise.resolve();
+    });
+    expect(screen.getByText("Phase: armed")).toBeInTheDocument();
+
+    // Now audio clock passes nextStart (97.3s), but NO timer tick is run (simulating background tab where timer is frozen)
+    testHarness.setTime(97.3);
+
+    // Document visibility change to visible triggers immediate handoff
+    act(() => {
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+
     expect(screen.getByText(/Current: Jazz Flute/)).toBeInTheDocument();
     expect(screen.getByText("Phase: playing")).toBeInTheDocument();
     vi.useRealTimers();

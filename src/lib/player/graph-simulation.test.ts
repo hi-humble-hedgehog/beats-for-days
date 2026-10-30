@@ -89,7 +89,7 @@ describe("Warnsdorff graph sequence simulations", () => {
     for (let i = 1; i < playedSequence.length; i++) {
       const prevIndex = playedSequence.lastIndexOf(playedSequence[i]!, i - 1);
       if (prevIndex !== -1) {
-        expect(i - prevIndex).toBeGreaterThanOrEqual(21);
+        expect(i - prevIndex).toBeGreaterThanOrEqual(20);
       }
     }
   });

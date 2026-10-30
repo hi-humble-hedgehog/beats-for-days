@@ -93,6 +93,10 @@ export function useEngineHandoff(opts: EngineHandoffOptions) {
   }, [engine, commitNextBeat, dispatch]);
 }
 
+/**
+ * Synchronizes React player state with the Web Audio engine during active playback.
+ * Polls audio progress and immediately reconciles state on focus and visibility change.
+ */
 export function useEngineSync(opts: EngineSyncOptions) {
   const {
     engine,
@@ -126,7 +130,7 @@ export function useEngineSync(opts: EngineSyncOptions) {
   useEffect(() => {
     if (!isPlaying || isLoading || !current) return;
 
-    const interval = setInterval(() => {
+    const syncState = () => {
       const prevBeatId = latestRef.current.current?.id;
       const snap = engine.getSnapshot();
       dispatch({
@@ -150,9 +154,28 @@ export function useEngineSync(opts: EngineSyncOptions) {
       ) {
         autoAdvance();
       }
-    }, 100);
+    };
 
-    return () => clearInterval(interval);
+    const interval = setInterval(syncState, 100);
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        syncState();
+      }
+    };
+
+    const onFocus = () => {
+      syncState();
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("focus", onFocus);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("focus", onFocus);
+    };
   }, [
     engine,
     isPlaying,

@@ -18,15 +18,11 @@ function isReducedMotionPreferred(): boolean {
   );
 }
 
-/**
- * Measures the poster wrapper and rebuilds Tonhalle geometry on resize.
- * Smoothly morphs concentric bands and marker bars with GSAP when the beat seed changes.
- * Starts at 1280×800 so SSR HTML already has landmarks and the heading.
- * Ignores an empty box: a 0×0 measure makes the first ring radius negative
- * and the vinyl canvas throws on `arc`.
- */
-export function usePosterGeometry<T extends HTMLElement>(seed: number) {
-  const ref = useRef<T>(null);
+function isDocumentHidden(): boolean {
+  return typeof document !== "undefined" && Boolean(document.hidden);
+}
+
+function useElementSize<T extends HTMLElement>(ref: React.RefObject<T | null>) {
   const [size, setSize] = useState(SSR_VIEWPORT);
 
   useIsomorphicLayoutEffect(() => {
@@ -41,36 +37,39 @@ export function usePosterGeometry<T extends HTMLElement>(seed: number) {
     const observer = new ResizeObserver(update);
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [ref]);
 
-  const targetGeometry = useMemo(
-    () => computeGeometry(size.w, size.h, seed),
-    [size, seed],
-  );
+  return size;
+}
 
-  const [geometry, setGeometry] = useState<Geometry>(targetGeometry);
-  const [prevSeed, setPrevSeed] = useState(seed);
-  const [prevSize, setPrevSize] = useState(size);
-  const currentGeometryRef = useRef<Geometry>(targetGeometry);
+interface GeometryTweenOptions {
+  seed: number;
+  prevSeed: number;
+  setPrevSeed: (seed: number) => void;
+  targetGeometry: Geometry;
+  currentGeometryRef: React.MutableRefObject<Geometry>;
+  setGeometry: (geometry: Geometry) => void;
+  tweenRef: React.MutableRefObject<gsap.core.Tween | null>;
+}
 
-  useEffect(() => {
-    currentGeometryRef.current = geometry;
-  }, [geometry]);
-
-  if (prevSize.w !== size.w || prevSize.h !== size.h) {
-    setPrevSize(size);
-    setPrevSeed(seed);
-    setGeometry(targetGeometry);
-  } else if (
-    prevSeed !== seed &&
-    (prevSeed === 0 || isReducedMotionPreferred())
-  ) {
-    setPrevSeed(seed);
-    setGeometry(targetGeometry);
-  }
+function useGeometryTween(options: GeometryTweenOptions) {
+  const {
+    seed,
+    prevSeed,
+    setPrevSeed,
+    targetGeometry,
+    currentGeometryRef,
+    setGeometry,
+    tweenRef,
+  } = options;
 
   useEffect(() => {
-    if (prevSeed === 0 || prevSeed === seed || isReducedMotionPreferred()) {
+    if (
+      prevSeed === 0 ||
+      prevSeed === seed ||
+      isReducedMotionPreferred() ||
+      isDocumentHidden()
+    ) {
       return;
     }
 
@@ -87,15 +86,95 @@ export function usePosterGeometry<T extends HTMLElement>(seed: number) {
         );
       },
       onComplete: () => {
+        tweenRef.current = null;
         setGeometry(targetGeometry);
         setPrevSeed(seed);
       },
     });
 
+    tweenRef.current = tween;
+
     return () => {
       tween.kill();
+      if (tweenRef.current === tween) {
+        tweenRef.current = null;
+      }
     };
-  }, [prevSeed, seed, targetGeometry]);
+  }, [
+    prevSeed,
+    seed,
+    targetGeometry,
+    currentGeometryRef,
+    setGeometry,
+    setPrevSeed,
+    tweenRef,
+  ]);
+}
+
+/**
+ * Measures the poster wrapper and rebuilds Tonhalle geometry on resize.
+ * Smoothly morphs concentric bands with GSAP, snapping immediately when hidden or refocused.
+ * Starts at 1280×800 so SSR HTML already has landmarks and the heading.
+ * Ignores an empty box: a 0×0 measure makes the first ring radius negative
+ * and the vinyl canvas throws on `arc`.
+ */
+export function usePosterGeometry<T extends HTMLElement>(seed: number) {
+  const ref = useRef<T>(null);
+  const size = useElementSize(ref);
+
+  const targetGeometry = useMemo(
+    () => computeGeometry(size.w, size.h, seed),
+    [size, seed],
+  );
+
+  const [geometry, setGeometry] = useState<Geometry>(targetGeometry);
+  const [prevSeed, setPrevSeed] = useState(seed);
+  const [prevSize, setPrevSize] = useState(size);
+  const currentGeometryRef = useRef<Geometry>(targetGeometry);
+  const tweenRef = useRef<gsap.core.Tween | null>(null);
+
+  useEffect(() => {
+    currentGeometryRef.current = geometry;
+  }, [geometry]);
+
+  if (prevSize.w !== size.w || prevSize.h !== size.h) {
+    setPrevSize(size);
+    setPrevSeed(seed);
+    setGeometry(targetGeometry);
+  } else if (
+    prevSeed !== seed &&
+    (prevSeed === 0 || isReducedMotionPreferred() || isDocumentHidden())
+  ) {
+    setPrevSeed(seed);
+    setGeometry(targetGeometry);
+  }
+
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        if (tweenRef.current) {
+          tweenRef.current.kill();
+          tweenRef.current = null;
+        }
+        setGeometry(targetGeometry);
+        setPrevSeed(seed);
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, [seed, targetGeometry]);
+
+  useGeometryTween({
+    seed,
+    prevSeed,
+    setPrevSeed,
+    targetGeometry,
+    currentGeometryRef,
+    setGeometry,
+    tweenRef,
+  });
 
   return [ref, geometry] as const;
 }
