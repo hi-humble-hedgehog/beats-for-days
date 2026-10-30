@@ -1,5 +1,6 @@
 import type { AdvanceMode, PlaybackPhase } from "@/lib/types/audio";
 import type { BeatView, TransitionView } from "@/lib/types/beat";
+import { updatePlayedTrackIds } from "./graph";
 import { extractBeatIdFromPathname, formatBeatUrl } from "./url";
 
 export type { AdvanceMode, PlaybackPhase };
@@ -26,7 +27,10 @@ export function resolveRouteIntent(
   if (!targetBeatId) {
     return { kind: "background" };
   }
-  if (targetBeatId === currentBeatId) {
+  if (
+    currentBeatId &&
+    formatBeatUrl(targetBeatId) === formatBeatUrl(currentBeatId)
+  ) {
     return { kind: "none" };
   }
   return { kind: "load", beatId: targetBeatId };
@@ -162,12 +166,14 @@ export interface PlayerUiState {
   phase: PlaybackPhase;
   secondsRemaining: number;
   positionSec: number;
+  muted: boolean;
   error: string | null;
 }
 
 export type PlayerAction =
   | { type: "set_playing"; isPlaying: boolean }
   | { type: "toggle_playing" }
+  | { type: "toggle_mute" }
   | {
       type: "sync_snapshot";
       phase: PlaybackPhase;
@@ -177,6 +183,95 @@ export type PlayerAction =
   | { type: "set_pathname"; pathname: string }
   | { type: "set_error"; error: string | null }
   | { type: "set_not_found"; beatId: string | null };
+
+export const PREVIOUS_RESTART_SEC = 3;
+
+export type PreviousAction =
+  { kind: "seek_start" } | { kind: "load_previous"; beatId: string };
+
+/**
+ * Returns the slice of `playedHistory` preceding `currentId` so Previous can locate the prior track.
+ * Returns the full history when `currentId` has not yet been recorded.
+ */
+export function historyAfterPrevious(
+  playedHistory: string[],
+  currentId: string | null,
+): string[] {
+  if (!currentId) {
+    return playedHistory.slice(0, -1);
+  }
+  const idx = playedHistory.lastIndexOf(currentId);
+  if (idx === -1) return playedHistory;
+  return playedHistory.slice(0, idx);
+}
+
+/**
+ * Returns the next beat ID in `playedHistory` when `currentId` sits before the tip of the timeline.
+ * Returns `null` when at the tip or absent, signaling that the player should query `/api/beats/next`.
+ */
+export function resolveForwardBeatId(
+  playedHistory: string[],
+  currentId: string | null,
+): string | null {
+  if (!currentId) return null;
+  const idx = playedHistory.lastIndexOf(currentId);
+  if (idx === -1) return null;
+  return playedHistory[idx + 1] ?? null;
+}
+
+/**
+ * Builds a next-beat resolution when stepping forward to a beat already in history.
+ * Pairs the beat with any matching transition from `currentBeat` so auto-advance still crossfades seamlessly.
+ */
+export function buildForwardResolution(
+  currentBeat: BeatView,
+  nextBeat: BeatView,
+): NextBeatResolution {
+  const transition =
+    currentBeat.transitions.find((tr) => tr.targetTrackId === nextBeat.id) ??
+    null;
+  return { beat: nextBeat, transition };
+}
+
+/**
+ * Updates `playedHistory` when transitioning from `currentId` to `nextBeatId`.
+ * Preserves timeline order when traversing existing tracks so Previous and Next stay deterministic,
+ * and appends new or tip-recycled tracks at the end.
+ */
+export function advancePlayedHistory(
+  playedHistory: string[],
+  currentId: string | null,
+  nextBeatId: string,
+  traverse = false,
+): string[] {
+  const base =
+    currentId && !playedHistory.includes(currentId)
+      ? updatePlayedTrackIds(playedHistory, currentId)
+      : playedHistory;
+
+  const isForwardStep = resolveForwardBeatId(base, currentId) === nextBeatId;
+  if ((traverse || isForwardStep) && base.includes(nextBeatId)) {
+    return base;
+  }
+
+  return updatePlayedTrackIds(base, nextBeatId);
+}
+
+/**
+ * Classic transport Previous: restart after 3s, else load the earlier beat.
+ * No earlier history also restarts so a first track never jumps into a void.
+ */
+export function resolvePreviousAction(opts: {
+  positionSec: number;
+  playedHistory: string[];
+  currentId: string | null;
+}): PreviousAction {
+  if (opts.positionSec > PREVIOUS_RESTART_SEC) return { kind: "seek_start" };
+  const prior = historyAfterPrevious(opts.playedHistory, opts.currentId);
+  const beatId = prior[prior.length - 1];
+  if (!beatId) return { kind: "seek_start" };
+  return { kind: "load_previous", beatId };
+}
 
 /**
  * Creates the initial UI reducer state for the audio player provider.
@@ -190,6 +285,7 @@ export function createInitialPlayerUiState(pathname: string): PlayerUiState {
     phase: "idle",
     secondsRemaining: 0,
     positionSec: 0,
+    muted: false,
     error: null,
   };
 }
@@ -215,6 +311,8 @@ export function playerReducer(
         isPlaying: !state.isPlaying,
         hasPausedBeat: true,
       };
+    case "toggle_mute":
+      return { ...state, muted: !state.muted };
     case "sync_snapshot":
       return {
         ...state,

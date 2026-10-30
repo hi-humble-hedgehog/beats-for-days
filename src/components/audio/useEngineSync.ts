@@ -9,6 +9,7 @@ import type { BeatView } from "@/lib/types/beat";
 export interface EngineSyncOptions {
   engine: AudioEngine;
   isPlaying: boolean;
+  muted: boolean;
   isLoading: boolean;
   current: BeatView | null;
   resolveAfterSec: number;
@@ -92,10 +93,15 @@ export function useEngineHandoff(opts: EngineHandoffOptions) {
   }, [engine, commitNextBeat, dispatch]);
 }
 
+/**
+ * Synchronizes React player state with the Web Audio engine during active playback.
+ * Polls audio progress and immediately reconciles state on focus and visibility change.
+ */
 export function useEngineSync(opts: EngineSyncOptions) {
   const {
     engine,
     isPlaying,
+    muted,
     isLoading,
     current,
     resolveAfterSec,
@@ -118,9 +124,13 @@ export function useEngineSync(opts: EngineSyncOptions) {
   });
 
   useEffect(() => {
+    engine.setVolume(muted ? 0 : 1);
+  }, [engine, muted, isPlaying]);
+
+  useEffect(() => {
     if (!isPlaying || isLoading || !current) return;
 
-    const interval = setInterval(() => {
+    const syncState = () => {
       const prevBeatId = latestRef.current.current?.id;
       const snap = engine.getSnapshot();
       dispatch({
@@ -144,9 +154,28 @@ export function useEngineSync(opts: EngineSyncOptions) {
       ) {
         autoAdvance();
       }
-    }, 100);
+    };
 
-    return () => clearInterval(interval);
+    const interval = setInterval(syncState, 100);
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        syncState();
+      }
+    };
+
+    const onFocus = () => {
+      syncState();
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("focus", onFocus);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("focus", onFocus);
+    };
   }, [
     engine,
     isPlaying,

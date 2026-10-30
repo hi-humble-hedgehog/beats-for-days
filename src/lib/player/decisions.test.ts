@@ -1,7 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import type { BeatView, TransitionView } from "@/lib/types/beat";
 import {
+  advancePlayedHistory,
+  buildForwardResolution,
+  historyAfterPrevious,
   planAdvance,
+  resolveForwardBeatId,
+  resolvePreviousAction,
   resolveRouteIntent,
   selectBeatDisplayInfo,
 } from "./decisions";
@@ -41,8 +46,14 @@ describe("resolveRouteIntent", () => {
     });
   });
 
-  it("returns none when beat route slug already matches current beat id", () => {
+  it("returns none when beat route slug already matches current beat id or its formatted URL", () => {
     expect(resolveRouteIntent("/beat/0002", "0002")).toEqual({
+      kind: "none",
+    });
+    expect(resolveRouteIntent("/beat/02", "track-02")).toEqual({
+      kind: "none",
+    });
+    expect(resolveRouteIntent("/beat/02", "0002")).toEqual({
       kind: "none",
     });
   });
@@ -183,6 +194,7 @@ describe("playerReducer", () => {
       phase: "idle",
       secondsRemaining: 0,
       positionSec: 0,
+      muted: false,
       error: null,
     });
   });
@@ -208,6 +220,10 @@ describe("playerReducer", () => {
 
     const toggledAgain = playerReducer(toggled, { type: "toggle_playing" });
     expect(toggledAgain.isPlaying).toBe(true);
+
+    const muted = playerReducer(initial, { type: "toggle_mute" });
+    expect(muted.muted).toBe(true);
+    expect(playerReducer(muted, { type: "toggle_mute" }).muted).toBe(false);
   });
 
   it("handles sync_snapshot action", () => {
@@ -331,7 +347,7 @@ describe("resolveStartBeat", () => {
     expect(fetchNextBeat).not.toHaveBeenCalled();
     expect(commitBeat).not.toHaveBeenCalled();
     expect(startPlay).toHaveBeenCalledTimes(1);
-    expect(navigate).toHaveBeenCalledWith("/beat/0002");
+    expect(navigate).toHaveBeenCalledWith("/beat/02");
   });
 
   it("fetches next beat passing current.id when hasPausedBeat is false on a fresh session", async () => {
@@ -362,7 +378,7 @@ describe("resolveStartBeat", () => {
     });
     expect(commitBeat).toHaveBeenCalledWith(nextBeat);
     expect(startPlay).toHaveBeenCalledTimes(1);
-    expect(navigate).toHaveBeenCalledWith("/beat/0003");
+    expect(navigate).toHaveBeenCalledWith("/beat/03");
     expect(result).toEqual(nextBeat);
   });
 
@@ -401,6 +417,154 @@ describe("resolveStartBeat", () => {
       playedTrackIds: [],
       mode: "skip",
     });
+  });
+});
+
+describe("historyAfterPrevious", () => {
+  it("trims from the current id so the last remaining entry is the prior beat", () => {
+    expect(historyAfterPrevious(["a", "b", "c"], "c")).toEqual(["a", "b"]);
+    expect(historyAfterPrevious(["a", "b", "c"], "b")).toEqual(["a"]);
+    expect(historyAfterPrevious(["a"], "a")).toEqual([]);
+    expect(historyAfterPrevious(["a", "b"], "unrecorded")).toEqual(["a", "b"]);
+    expect(historyAfterPrevious(["a", "b"], null)).toEqual(["a"]);
+    expect(historyAfterPrevious(["a"], null)).toEqual([]);
+    expect(historyAfterPrevious([], null)).toEqual([]);
+  });
+});
+
+describe("resolveForwardBeatId", () => {
+  it("returns the next beat ID in playedHistory when currentId sits before the tip", () => {
+    const history = ["0001", "0002", "0003", "0004", "0005"];
+    expect(resolveForwardBeatId(history, "0003")).toBe("0004");
+    expect(resolveForwardBeatId(history, "0004")).toBe("0005");
+  });
+
+  it("returns null when currentId is at the tip, missing from history, or null", () => {
+    const history = ["0001", "0002", "0003", "0004", "0005"];
+    expect(resolveForwardBeatId(history, "0005")).toBeNull();
+    expect(resolveForwardBeatId(history, "9999")).toBeNull();
+    expect(resolveForwardBeatId(history, null)).toBeNull();
+    expect(resolveForwardBeatId([], "0001")).toBeNull();
+  });
+});
+
+describe("buildForwardResolution", () => {
+  const otherTransition: TransitionView = {
+    ...sampleTransition,
+    id: "t-1-99",
+    targetTrackId: "0099",
+  };
+
+  it("pairs the target beat with a matching transition from currentBeat when available", () => {
+    const beatWithTransition: BeatView = {
+      ...sampleBeat,
+      id: "0001",
+      transitions: [otherTransition, sampleTransition],
+    };
+    expect(buildForwardResolution(beatWithTransition, sampleBeat)).toEqual({
+      beat: sampleBeat,
+      transition: sampleTransition,
+    });
+  });
+
+  it("returns transition: null when currentBeat has no matching transition to nextBeat", () => {
+    const beatWithoutMatch: BeatView = {
+      ...sampleBeat,
+      id: "0001",
+      transitions: [otherTransition],
+    };
+    expect(buildForwardResolution(beatWithoutMatch, sampleBeat)).toEqual({
+      beat: sampleBeat,
+      transition: null,
+    });
+  });
+});
+
+describe("advancePlayedHistory", () => {
+  it("seeds an unrecorded currentId before appending nextBeatId", () => {
+    expect(advancePlayedHistory([], "0001", "0002")).toEqual(["0001", "0002"]);
+    expect(advancePlayedHistory(["0099"], "0001", "0002")).toEqual([
+      "0099",
+      "0001",
+      "0002",
+    ]);
+  });
+
+  it("preserves exact history order when stepping backward or forward through existing tracks", () => {
+    const history = ["0001", "0002", "0003", "0004", "0005"];
+    expect(advancePlayedHistory(history, "0005", "0004", true)).toEqual(
+      history,
+    );
+    expect(advancePlayedHistory(history, "0004", "0003", true)).toEqual(
+      history,
+    );
+    expect(advancePlayedHistory(history, "0003", "0004")).toEqual(history);
+    expect(advancePlayedHistory(history, "0004", "0005")).toEqual(history);
+  });
+
+  it("appends a brand-new beat at the tip and moves a tip-recycled beat to the end", () => {
+    const history = ["0001", "0002", "0003", "0004", "0005"];
+    expect(advancePlayedHistory(history, "0005", "0006")).toEqual([
+      "0001",
+      "0002",
+      "0003",
+      "0004",
+      "0005",
+      "0006",
+    ]);
+    expect(advancePlayedHistory(history, "0005", "0001")).toEqual([
+      "0002",
+      "0003",
+      "0004",
+      "0005",
+      "0001",
+    ]);
+  });
+});
+
+describe("resolvePreviousAction", () => {
+  it("restarts when playback is past 3 seconds", () => {
+    expect(
+      resolvePreviousAction({
+        positionSec: 3.01,
+        playedHistory: ["0001", "0002"],
+        currentId: "0002",
+      }),
+    ).toEqual({ kind: "seek_start" });
+  });
+
+  it("loads the previous history beat at or under 3 seconds", () => {
+    expect(
+      resolvePreviousAction({
+        positionSec: 3,
+        playedHistory: ["0001", "0002"],
+        currentId: "0002",
+      }),
+    ).toEqual({ kind: "load_previous", beatId: "0001" });
+    expect(
+      resolvePreviousAction({
+        positionSec: 0,
+        playedHistory: ["0001", "0002"],
+        currentId: "0002",
+      }),
+    ).toEqual({ kind: "load_previous", beatId: "0001" });
+  });
+
+  it("restarts when no earlier beat exists", () => {
+    expect(
+      resolvePreviousAction({
+        positionSec: 0,
+        playedHistory: ["0002"],
+        currentId: "0002",
+      }),
+    ).toEqual({ kind: "seek_start" });
+    expect(
+      resolvePreviousAction({
+        positionSec: 1,
+        playedHistory: [],
+        currentId: "0002",
+      }),
+    ).toEqual({ kind: "seek_start" });
   });
 });
 

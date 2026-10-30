@@ -63,6 +63,58 @@ export function convertWavToM4a(
   );
 }
 
+function resolveDefaultStarterDir(customDir?: string): string {
+  if (customDir) return customDir;
+  return fs.existsSync(path.resolve("docs/beats-launch-pack"))
+    ? path.resolve("docs/beats-launch-pack")
+    : path.resolve("raw-audio");
+}
+
+function processJob(
+  job: ConversionJob,
+  bitrate: string,
+  skipExisting: boolean,
+): void {
+  if (skipExisting && fs.existsSync(job.outputPath)) {
+    return;
+  }
+  convertWavToM4a(job.inputPath, job.outputPath, bitrate);
+}
+
+function cleanTargetDir(targetDir: string): void {
+  if (fs.existsSync(targetDir)) {
+    const entries = fs.readdirSync(targetDir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.isFile() && entry.name.toLowerCase().endsWith(".m4a")) {
+        fs.unlinkSync(path.join(targetDir, entry.name));
+      }
+    }
+  }
+}
+
+function cleanTargetDirectories(baseDir: string): void {
+  cleanTargetDir(path.join(baseDir, "tracks"));
+  cleanTargetDir(path.join(baseDir, "transitions"));
+}
+
+function executeConversionJobs(
+  jobs: ConversionJob[],
+  bitrate: string,
+  skipExisting: boolean,
+  onProgress?: (current: number, total: number, file: string) => void,
+): string[] {
+  const converted: string[] = [];
+  for (let i = 0; i < jobs.length; i++) {
+    const job = jobs[i]!;
+    processJob(job, bitrate, skipExisting);
+    converted.push(job.outputPath);
+    if (onProgress) {
+      onProgress(i + 1, jobs.length, job.outputPath);
+    }
+  }
+  return converted;
+}
+
 /**
  * Converts WAV files in sourceDir into M4A assets in public/audio/.
  */
@@ -70,10 +122,18 @@ export function convertStarterPackAudio(options?: {
   starterPackDir?: string;
   outputBaseDir?: string;
   bitrate?: string;
+  skipExisting?: boolean;
+  clean?: boolean;
+  onProgress?: (current: number, total: number, file: string) => void;
 }): { converted: string[] } {
-  const starterPackDir = options?.starterPackDir ?? path.resolve("raw-audio");
-  const outputBaseDir = options?.outputBaseDir ?? path.resolve("public/audio");
-  const bitrate = options?.bitrate ?? "192k";
+  const starterPackDir = resolveDefaultStarterDir(options?.starterPackDir);
+  const outputBaseDir = options?.outputBaseDir || path.resolve("public/audio");
+  const bitrate = options?.bitrate || "192k";
+  const skipExisting = Boolean(options?.skipExisting);
+
+  if (options?.clean) {
+    cleanTargetDirectories(outputBaseDir);
+  }
 
   const trackJobs = findConversionJobs(
     path.join(starterPackDir, "tracks"),
@@ -85,26 +145,41 @@ export function convertStarterPackAudio(options?: {
     path.join(outputBaseDir, "transitions"),
   );
 
-  const allJobs = [...trackJobs, ...transitionJobs];
-  const converted: string[] = [];
-
-  for (const job of allJobs) {
-    convertWavToM4a(job.inputPath, job.outputPath, bitrate);
-    converted.push(job.outputPath);
-  }
+  const converted = executeConversionJobs(
+    [...trackJobs, ...transitionJobs],
+    bitrate,
+    skipExisting,
+    options?.onProgress,
+  );
 
   return { converted };
 }
 
 function runCli(): void {
-  console.log("Converting starter pack WAV files to AAC (.m4a)...");
-  const { converted } = convertStarterPackAudio();
-  console.log(`Converted ${converted.length} files to public/audio/:`);
-  for (const file of converted) {
-    const stats = fs.statSync(file);
-    const sizeMb = (stats.size / (1024 * 1024)).toFixed(2);
-    console.log(`  ✓ ${path.basename(file)} (${sizeMb} MB)`);
-  }
+  const cliDir = process.argv.slice(2).find((arg) => !arg.startsWith("--"));
+  const skipExisting = process.argv.includes("--skip-existing");
+  const clean = process.argv.includes("--clean");
+  const candidate = cliDir
+    ? path.resolve(cliDir)
+    : fs.existsSync(path.resolve("docs/beats-launch-pack"))
+      ? path.resolve("docs/beats-launch-pack")
+      : path.resolve("raw-audio");
+
+  console.log(`Converting audio files from ${candidate} to AAC (.m4a)...`);
+  const { converted } = convertStarterPackAudio({
+    starterPackDir: candidate,
+    skipExisting,
+    clean,
+    onProgress: (current, total, file) => {
+      const fileName = path.basename(file);
+      process.stdout.write(
+        `\r[${current}/${total}] Processing ${fileName.padEnd(45)}`,
+      );
+    },
+  });
+  console.log(
+    `\nFinished converting ${converted.length} files to public/audio/.`,
+  );
 }
 
 if (process.argv[1]?.endsWith("convert.ts")) {

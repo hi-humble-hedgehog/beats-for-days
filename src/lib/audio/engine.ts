@@ -255,6 +255,15 @@ export class AudioEngine {
   }
 
   /**
+   * Reads frequency spectrum data from the master analyser into a byte array.
+   */
+  getByteFrequencyData(array: Uint8Array): void {
+    if (this.analyser?.getByteFrequencyData) {
+      this.analyser.getByteFrequencyData(array);
+    }
+  }
+
+  /**
    * Sets master output volume level.
    */
   setVolume(volume: number): void {
@@ -263,6 +272,39 @@ export class AudioEngine {
       Math.max(0, Math.min(1, volume)),
       this.ctx.currentTime,
     );
+  }
+
+  /**
+   * Jumps the playhead. Clamps to the loaded duration and restarts a live loop.
+   * Cancels an armed transition so the splice cannot fire from the old offset.
+   */
+  seek(offsetSec: number): void {
+    const durationSec =
+      this.currentBuffer?.duration ??
+      (this.currentBeat?.durationMs ?? 0) / 1000;
+    const upper = durationSec > 0 ? durationSec : Number.POSITIVE_INFINITY;
+    const next = Math.max(0, Math.min(upper, offsetSec));
+    this.pausedOffsetSec = next;
+    this.initialOffsetSec = next;
+    if (this.isPlaying) this.restartPlayingAt(next);
+  }
+
+  private restartPlayingAt(offsetSec: number): void {
+    const ctx = this.ctx;
+    const beat = this.currentBeat;
+    const buffer = this.currentBuffer;
+    if (!ctx || !beat || !buffer || !this.masterGain) return;
+    this.transitions.cancel(this.currentGain, ctx);
+    this.stopCurrentNode(false);
+    this.isResumingFromPause = false;
+    const { source, gain } = createLoopingTrackNodes(ctx, buffer, beat);
+    this.currentSource = source;
+    this.currentGain = gain;
+    this.currentGain.gain.setValueAtTime(1, ctx.currentTime);
+    connectSourceToOutputs(this.currentGain, this.analyser, this.masterGain);
+    source.start(ctx.currentTime, offsetSec);
+    this.segmentStartTime = ctx.currentTime;
+    this.phase = "playing";
   }
 
   private stopCurrentNode(withBrake = false): void {

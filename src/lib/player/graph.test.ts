@@ -225,6 +225,124 @@ describe("selectNextGraphTrack", () => {
 
     expect(nextId).toBe("0001");
   });
+
+  it("prefers an unheard exit that has its own unheard exit over a dead-end exit (Warnsdorff)", () => {
+    const trackBDeadEnd: BeatView = {
+      ...trackB,
+      transitions: [
+        {
+          id: "t-2-1",
+          targetTrackId: "0001", // points back to currentTrack
+          audioUrl: "http://storage/t2-1.m4a",
+          timing: defaultTiming,
+        },
+        {
+          id: "t-2-2",
+          targetTrackId: "0002", // self-loop
+          audioUrl: "http://storage/t2-2.m4a",
+          timing: defaultTiming,
+        },
+        {
+          id: "t-2-5",
+          targetTrackId: "0005", // already played
+          audioUrl: "http://storage/t2-5.m4a",
+          timing: defaultTiming,
+        },
+      ],
+    };
+    const trackCWithRunway: BeatView = {
+      ...trackC,
+      transitions: [
+        {
+          id: "t-3-4",
+          targetTrackId: "0004", // unheard exit!
+          audioUrl: "http://storage/t3-4.m4a",
+          timing: defaultTiming,
+        },
+      ],
+    };
+
+    const nextId = selectNextGraphTrack({
+      currentTrack: trackA,
+      playedTrackIds: ["0001", "0005"],
+      allTracks: [trackA, trackBDeadEnd, trackCWithRunway, trackD, trackE],
+      pickRandom: () => 0,
+    });
+
+    expect(nextId).toBe("0003");
+  });
+
+  it("prefers the unheard exit with the fewest positive unheard exits (Warnsdorff bottleneck first)", () => {
+    const trackBWide: BeatView = {
+      ...trackB,
+      transitions: [
+        {
+          id: "t-2-4",
+          targetTrackId: "0004",
+          audioUrl: "http://storage/t2-4.m4a",
+          timing: defaultTiming,
+        },
+        {
+          id: "t-2-5",
+          targetTrackId: "0005",
+          audioUrl: "http://storage/t2-5.m4a",
+          timing: defaultTiming,
+        },
+      ],
+    };
+    const trackCTight: BeatView = {
+      ...trackC,
+      transitions: [
+        {
+          id: "t-3-4",
+          targetTrackId: "0004",
+          audioUrl: "http://storage/t3-4.m4a",
+          timing: defaultTiming,
+        },
+      ],
+    };
+
+    const nextId = selectNextGraphTrack({
+      currentTrack: trackA,
+      playedTrackIds: ["0001"],
+      allTracks: [trackA, trackBWide, trackCTight, trackD, trackE],
+      pickRandom: () => 0,
+    });
+
+    expect(nextId).toBe("0003");
+  });
+
+  it("reopens tracks outside the sliding cooldown window once all catalog tracks have been heard", () => {
+    // All 4 tracks heard; cooldownWindow = 2 keeps only the last 2 ("0004", "0001") on cooldown.
+    // Both "0002" and "0003" become eligible unheard exits again, so pickRandom(() => 1) picks "0003".
+    const played = ["0002", "0003", "0004", "0001"];
+    const nextId = selectNextGraphTrack({
+      currentTrack: trackA,
+      playedTrackIds: played,
+      allTracks: [trackA, trackB, trackC, trackD],
+      maxDegreeCap: 2,
+      cooldownWindow: 2,
+      pickRandom: () => 1,
+    });
+
+    expect(nextId).toBe("0003");
+  });
+
+  it("keeps all played tracks on cooldown until every track in the catalog has been heard", () => {
+    // 3 of 4 tracks heard ("0004" is still unheard); even with cooldownWindow = 2,
+    // "0002" must stay marked as heard so "0003" (the only unheard exit) or "0004" is chosen first.
+    const played = ["0002", "0005", "0001"];
+    const nextId = selectNextGraphTrack({
+      currentTrack: trackA,
+      playedTrackIds: played,
+      allTracks: [trackA, trackB, trackC, trackD, trackE],
+      maxDegreeCap: 2,
+      cooldownWindow: 2,
+      pickRandom: () => 0,
+    });
+
+    expect(nextId).toBe("0003");
+  });
 });
 
 describe("resolveNextBeat", () => {
@@ -291,6 +409,17 @@ describe("resolveNextBeat", () => {
     expect(result).not.toBeNull();
     expect(result?.beat.id).toBe("0001");
     expect(result?.transition).toBeNull();
+  });
+
+  it("deterministically returns first track on cold start even when pickRandom returns a non-zero index", () => {
+    const result = resolveNextBeat({
+      playedTrackIds: [],
+      allTracks: [trackA, trackB, trackC],
+      mode: "skip",
+      pickRandom: () => 2,
+    });
+
+    expect(result?.beat.id).toBe("0001");
   });
 
   it("resolves next track with matching transition in auto mode", () => {
@@ -416,6 +545,88 @@ describe("resolveNextBeat", () => {
     });
 
     expect(result?.beat.id).toBe("0001");
+    expect(result?.transition).toBeNull();
+  });
+
+  it("uses Warnsdorff lookahead along outgoing transitions in skip mode while returning transition: null", () => {
+    const trackD: BeatView = {
+      ...trackC,
+      id: "0004",
+      name: "Beat Four",
+    };
+    const trackCWithRunway: BeatView = {
+      ...trackC,
+      transitions: [
+        {
+          id: "t-3-4",
+          targetTrackId: "0004",
+          audioUrl: "http://storage/t3-4.m4a",
+          timing: defaultTiming,
+        },
+      ],
+    };
+
+    const result = resolveNextBeat({
+      currentTrackId: "0001",
+      playedTrackIds: ["0001"],
+      allTracks: [trackA, trackB, trackCWithRunway, trackD],
+      mode: "skip",
+      pickRandom: () => 0,
+    });
+
+    expect(result?.beat.id).toBe("0003");
+    expect(result?.transition).toBeNull();
+  });
+
+  it("escapes a local graph dead-end in skip mode by jumping to an unheard catalog track with runway", () => {
+    const trackD: BeatView = {
+      ...trackC,
+      id: "0004",
+      name: "Beat Four",
+    };
+    const trackEWithRunway: BeatView = {
+      ...trackC,
+      id: "0005",
+      name: "Beat Five",
+      transitions: [
+        {
+          id: "t-5-4",
+          targetTrackId: "0004",
+          audioUrl: "http://storage/t5-4.m4a",
+          timing: defaultTiming,
+        },
+      ],
+    };
+
+    const result = resolveNextBeat({
+      currentTrackId: "0001",
+      playedTrackIds: ["0002", "0003", "0001"],
+      allTracks: [trackA, trackB, trackC, trackD, trackEWithRunway],
+      mode: "skip",
+      maxDegreeCap: 2,
+      pickRandom: () => 0,
+    });
+
+    expect(result?.beat.id).toBe("0005");
+    expect(result?.transition).toBeNull();
+  });
+
+  it("applies the sliding cooldown window in skip mode once all catalog tracks have been heard", () => {
+    const trackD: BeatView = {
+      ...trackC,
+      id: "0004",
+      name: "Beat Four",
+    };
+    const result = resolveNextBeat({
+      currentTrackId: "0001",
+      playedTrackIds: ["0002", "0003", "0004", "0001"],
+      allTracks: [trackA, trackB, trackC, trackD],
+      mode: "skip",
+      cooldownWindow: 2,
+      pickRandom: () => 1,
+    });
+
+    expect(result?.beat.id).toBe("0003");
     expect(result?.transition).toBeNull();
   });
 });

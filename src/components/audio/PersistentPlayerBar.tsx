@@ -1,8 +1,10 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { shouldShowPersistentPlayerBar } from "@/lib/player/chrome";
 import { shouldResolveStartOnPlay } from "@/lib/player/decisions";
-import { useAudioPlayer, useStartPlayback } from "./AudioPlayerContext";
+import { useAudioPlayer } from "./AudioPlayerContext";
+import { useStartPlayback } from "./useStartPlayback";
 
 function PlayerStatusBanner({
   message,
@@ -178,6 +180,11 @@ export function PersistentPlayerBar() {
     advanceTrack,
   } = useAudioPlayer();
   const startPlayback = useStartPlayback();
+  const activeRoute = activePathname ?? pathname;
+
+  if (!shouldShowPersistentPlayerBar(activeRoute, notFoundBeatId)) {
+    return null;
+  }
 
   if (isLoading) {
     return <PlayerStatusBanner message="Loading beat catalog..." />;
@@ -188,7 +195,6 @@ export function PersistentPlayerBar() {
   }
 
   const durationSec = (current?.durationMs ?? 0) / 1000;
-  const activeRoute = activePathname ?? pathname;
   const handleTogglePlay = () => {
     if (
       shouldResolveStartOnPlay(isPlaying, activeRoute, current, notFoundBeatId)

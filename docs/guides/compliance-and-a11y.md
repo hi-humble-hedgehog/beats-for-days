@@ -8,7 +8,7 @@ Beats for Days is **GDPR compliant by design** and targets **WCAG 2.2 Level AA**
 
 1. **Collect minimal data & use cookieless metrics**
    - Do not add cookie-based analytics, ad pixels, or cross-site trackers without an ADR and an opt-in consent banner (with an equally easy reject button).
-   - **Approved cookieless metrics (no banner needed, listed in `/privacy-policy`):**
+   - **Approved cookieless metrics (no banner needed, listed in `/privacy`):**
      - **Vercel Web Analytics (`@vercel/analytics`):** Counts pageviews and referrers without cookies or `localStorage`. Session hashes rotate daily and expire after 24 hours.
      - **Anonymous skip events (`public.track_skip_events`):** Saves only `{ track_id, skipped_at_sec, loop_count }` in Supabase. Never save IP addresses, User-Agents, or user IDs.
 2. **Never leak visitor IPs to third-party CDNs**
@@ -20,7 +20,7 @@ Beats for Days is **GDPR compliant by design** and targets **WCAG 2.2 Level AA**
 4. **Server API routes**
    - Route handlers (`src/app/api/**`) and server clients (`src/lib/elevenlabs/`, `src/lib/supabase.ts`) must never forward visitor IP addresses, cookies, or personal data to external AI or media services.
 5. **Legal pages & user rights**
-   - Keep `/terms-of-service`, `/privacy-policy`, and `/about` reachable from every route without stopping audio playback.
+   - Keep `/privacy` and `/about` reachable from every route without stopping audio playback. Legacy `/terms-of-service` and `/privacy-policy` redirect to `/privacy`.
    - Any feature that saves personal data (such as waitlist emails) must support data export (Article 20) and deletion (Article 17).
 
 ## Accessibility (WCAG 2.2 AA) Checklist

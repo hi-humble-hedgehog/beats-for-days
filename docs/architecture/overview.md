@@ -37,11 +37,12 @@ src/
 ├── app/                 # Next.js routes, layouts, route handlers (entry points)
 │   └── api/             # Server endpoints: generation, inpainting
 ├── components/          # React UI: thin, presentational (.tsx)
-│   ├── audio/           # Transport, volume, player controls
-│   └── visualizer/      # Canvas / scene components
+│   ├── audio/           # Transport, poster player, persistent bar
+│   └── grid/            # Vinyl canvas, spectrum markers, editorial layout
 └── lib/                 # Framework-agnostic logic (.ts): unit & mutation tested
     ├── audio/           # AudioContext, buffers, sample-accurate scheduling
-    ├── visualizer/      # Analyser → visual parameter mapping
+    ├── grid/            # Tonhalle poster geometry, format, canvas math
+    ├── player/          # Route intent, advance, mute, previous-track rules
     ├── elevenlabs/      # API client & inpainting helpers (server-only)
     ├── types/           # Shared types
     └── env.ts           # Validated server env (server-only)

@@ -21,6 +21,7 @@ export interface GraphSelectionParams {
   allTracks: BeatView[];
   inDegreeMap?: Record<string, number>;
   maxDegreeCap?: number;
+  cooldownWindow?: number;
   pickRandom?: (max: number) => number;
 }
 
@@ -28,14 +29,71 @@ function defaultPickRandom(max: number): number {
   return Math.floor(Math.random() * max);
 }
 
+function getEffectivePlayedSet(
+  playedTrackIds: string[],
+  allTracks: BeatView[],
+  cooldownWindow: number,
+): Set<string> {
+  const fullSet = new Set(playedTrackIds);
+  if (
+    allTracks.length > cooldownWindow &&
+    allTracks.every((t) => fullSet.has(t.id))
+  ) {
+    return new Set(playedTrackIds.slice(-cooldownWindow));
+  }
+  return fullSet;
+}
+
+function countUnheardExits(
+  track: BeatView | undefined,
+  playedSet: Set<string>,
+  excludedId: string,
+): number {
+  if (!track) return 0;
+  return track.transitions.filter(
+    (t) =>
+      !playedSet.has(t.targetTrackId) &&
+      t.targetTrackId !== excludedId &&
+      t.targetTrackId !== track.id,
+  ).length;
+}
+
+function pickByWarnsdorffDegree<T>(
+  items: T[],
+  getDegree: (item: T) => number,
+  pickRandom: (max: number) => number,
+): T | null {
+  if (items.length === 0) return null;
+  const scored = items.map((item) => ({ item, degree: getDegree(item) }));
+  const withRunway = scored.filter((s) => s.degree > 0);
+  const pool = withRunway.length > 0 ? withRunway : scored;
+  const minDegree = Math.min(...pool.map((s) => s.degree));
+  const best = pool.filter((s) => s.degree === minDegree);
+  const picked = best[pickRandom(best.length)] ?? best[0];
+  return picked ? picked.item : null;
+}
+
 function findUnheardExit(
-  transitions: BeatView["transitions"],
+  currentTrack: BeatView,
+  allTracks: BeatView[],
   playedSet: Set<string>,
   pickRandom: (max: number) => number,
 ): string | null {
-  const unheard = transitions.filter((t) => !playedSet.has(t.targetTrackId));
-  if (unheard.length === 0) return null;
-  const picked = unheard[pickRandom(unheard.length)] ?? unheard[0];
+  const unheard = currentTrack.transitions.filter(
+    (t) =>
+      !playedSet.has(t.targetTrackId) && t.targetTrackId !== currentTrack.id,
+  );
+  const trackMap = new Map(allTracks.map((t) => [t.id, t]));
+  const picked = pickByWarnsdorffDegree(
+    unheard,
+    (t) =>
+      countUnheardExits(
+        trackMap.get(t.targetTrackId),
+        playedSet,
+        currentTrack.id,
+      ),
+    pickRandom,
+  );
   return picked ? picked.targetTrackId : null;
 }
 
@@ -47,21 +105,9 @@ function findLowestInDegreeCandidate(
 ): string | null {
   const valid = candidates.filter((t) => (inDegreeMap[t.id] ?? 0) < cap);
   if (valid.length === 0) return null;
-
-  let lowestDegree = Number.POSITIVE_INFINITY;
-  for (const c of valid) {
-    const deg = inDegreeMap[c.id] ?? 0;
-    if (deg < lowestDegree) {
-      lowestDegree = deg;
-    }
-  }
-
-  const bestCandidates = valid.filter(
-    (c) => (inDegreeMap[c.id] ?? 0) === lowestDegree,
-  );
-  const picked =
-    bestCandidates[pickRandom(bestCandidates.length)] ?? bestCandidates[0];
-  return picked?.id ?? null;
+  const lowest = Math.min(...valid.map((c) => inDegreeMap[c.id] ?? 0));
+  const best = valid.filter((c) => (inDegreeMap[c.id] ?? 0) === lowest);
+  return (best[pickRandom(best.length)] ?? best[0])?.id ?? null;
 }
 
 function findOldestHeardExit(
@@ -70,7 +116,6 @@ function findOldestHeardExit(
 ): string | null {
   let oldestTarget: string | null = null;
   let oldestIndex = Number.POSITIVE_INFINITY;
-
   for (const tr of transitions) {
     const idx = playedTrackIds.indexOf(tr.targetTrackId);
     if (idx !== -1 && idx < oldestIndex) {
@@ -78,7 +123,6 @@ function findOldestHeardExit(
       oldestTarget = tr.targetTrackId;
     }
   }
-
   return oldestTarget;
 }
 
@@ -87,19 +131,14 @@ function findFallbackTrack(
   currentTrackId: string,
   pickRandom: (max: number) => number,
 ): string {
-  const fallbackCandidates = allTracks.filter((t) => t.id !== currentTrackId);
-  if (fallbackCandidates.length === 0) {
-    return currentTrackId;
-  }
-  const picked =
-    fallbackCandidates[pickRandom(fallbackCandidates.length)] ??
-    fallbackCandidates[0];
-  return picked?.id ?? currentTrackId;
+  const valid = allTracks.filter((t) => t.id !== currentTrackId);
+  if (valid.length === 0) return currentTrackId;
+  return (valid[pickRandom(valid.length)] ?? valid[0])?.id ?? currentTrackId;
 }
 
 /**
  * Picks the next beat to play in three steps:
- * 1. Use an existing transition to an unheard beat (free, no AI call).
+ * 1. Use Warnsdorff 1-step lookahead to pick an unheard transition exit that still has open exits of its own.
  * 2. If this beat has room for more outgoing transitions, pick an unheard beat with the fewest incoming links.
  * 3. Otherwise, reuse the existing transition to the beat heard longest ago.
  */
@@ -110,48 +149,41 @@ export function selectNextGraphTrack(params: GraphSelectionParams): string {
     allTracks,
     inDegreeMap = {},
     maxDegreeCap = LIMITS.MAX_DEGREE_CAP,
+    cooldownWindow = LIMITS.REPEAT_COOLDOWN_WINDOW,
     pickRandom = defaultPickRandom,
   } = params;
 
-  const playedSet = new Set(playedTrackIds);
+  const playedSet = getEffectivePlayedSet(
+    playedTrackIds,
+    allTracks,
+    cooldownWindow,
+  );
 
-  // 1. Pick an unheard existing exit if available (randomly if multiple exist)
   const unheardExit = findUnheardExit(
-    currentTrack.transitions,
+    currentTrack,
+    allTracks,
     playedSet,
     pickRandom,
   );
-  if (unheardExit) {
-    return unheardExit;
-  }
+  if (unheardExit) return unheardExit;
 
-  // 2. If below outgoing cap, find unheard candidate with lowest in_degree
   if (currentTrack.transitions.length < maxDegreeCap) {
-    const unheardCandidates = allTracks.filter(
+    const unheard = allTracks.filter(
       (t) => t.id !== currentTrack.id && !playedSet.has(t.id),
     );
     const candidateId = findLowestInDegreeCandidate(
-      unheardCandidates,
+      unheard,
       inDegreeMap,
       maxDegreeCap,
       pickRandom,
     );
-    if (candidateId) {
-      return candidateId;
-    }
+    if (candidateId) return candidateId;
   }
 
-  // 3. Fallback: pick existing exit whose target is oldest in played history
-  const oldestExit = findOldestHeardExit(
-    currentTrack.transitions,
-    playedTrackIds,
+  return (
+    findOldestHeardExit(currentTrack.transitions, playedTrackIds) ??
+    findFallbackTrack(allTracks, currentTrack.id, pickRandom)
   );
-  if (oldestExit) {
-    return oldestExit;
-  }
-
-  // Final fallback if no transitions exist at all
-  return findFallbackTrack(allTracks, currentTrack.id, pickRandom);
 }
 
 export interface ResolveNextBeatParams {
@@ -161,6 +193,7 @@ export interface ResolveNextBeatParams {
   mode?: "auto" | "skip";
   inDegreeMap?: Record<string, number>;
   maxDegreeCap?: number;
+  cooldownWindow?: number;
   pickRandom?: (max: number) => number;
 }
 
@@ -179,7 +212,14 @@ function findSkipCandidate(
     (t) => !playedSet.has(t.id) && t.id !== currentTrackId,
   );
   if (unheard.length > 0) {
-    const picked = unheard[pickRandom(unheard.length)] ?? unheard[0];
+    if (playedSet.size === 0 && !currentTrackId && unheard[0]) {
+      return unheard[0];
+    }
+    const picked = pickByWarnsdorffDegree(
+      unheard,
+      (t) => countUnheardExits(t, playedSet, currentTrackId ?? t.id),
+      pickRandom,
+    );
     if (picked) return picked;
   }
   const fallback = allTracks.filter((t) => t.id !== currentTrackId);
@@ -190,9 +230,26 @@ function findSkipCandidate(
   return allTracks[0]!;
 }
 
+function resolveSkipBeat(
+  currentTrack: BeatView | undefined,
+  allTracks: BeatView[],
+  playedSet: Set<string>,
+  pickRandom: (max: number) => number,
+): NextBeatResult {
+  const exitId = currentTrack
+    ? findUnheardExit(currentTrack, allTracks, playedSet, pickRandom)
+    : null;
+  const exitBeat = exitId ? allTracks.find((t) => t.id === exitId) : undefined;
+  const beat =
+    exitBeat ??
+    findSkipCandidate(allTracks, playedSet, pickRandom, currentTrack?.id);
+  return { beat, transition: null };
+}
+
 /**
  * Resolves the next beat and transition audio to play based on recent listening history.
- * Evaluates the transition graph in auto mode, or picks an unheard track with no transition in skip mode.
+ * Walks the transition graph with 1-step Warnsdorff lookahead and a sliding repeat cooldown window in both auto and skip modes,
+ * escaping local dead-ends to an unheard track with open exits in skip mode (`transition: null`).
  */
 export function resolveNextBeat(
   params: ResolveNextBeatParams,
@@ -204,24 +261,21 @@ export function resolveNextBeat(
     mode = "auto",
     inDegreeMap,
     maxDegreeCap,
+    cooldownWindow = LIMITS.REPEAT_COOLDOWN_WINDOW,
     pickRandom = defaultPickRandom,
   } = params;
-
   if (allTracks.length === 0) return null;
 
   const currentTrack = currentTrackId
     ? allTracks.find((t) => t.id === currentTrackId)
     : undefined;
-
   if (!currentTrack || mode !== "auto") {
-    const playedSet = new Set(playedTrackIds);
-    const candidate = findSkipCandidate(
+    const playedSet = getEffectivePlayedSet(
+      playedTrackIds,
       allTracks,
-      playedSet,
-      pickRandom,
-      currentTrackId,
+      cooldownWindow,
     );
-    return { beat: candidate, transition: null };
+    return resolveSkipBeat(currentTrack, allTracks, playedSet, pickRandom);
   }
 
   const nextId = selectNextGraphTrack({
@@ -230,13 +284,12 @@ export function resolveNextBeat(
     allTracks,
     inDegreeMap,
     maxDegreeCap,
+    cooldownWindow,
     pickRandom,
   });
-
   const nextBeat = allTracks.find((t) => t.id === nextId) ?? allTracks[0]!;
   const transition =
     currentTrack.transitions.find((tr) => tr.targetTrackId === nextBeat.id) ??
     null;
-
   return { beat: nextBeat, transition };
 }

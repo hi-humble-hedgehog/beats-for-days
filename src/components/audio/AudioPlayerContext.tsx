@@ -5,21 +5,21 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useReducer,
   useRef,
   useState,
   type ReactNode,
 } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { beatsApi } from "@/lib/api";
 import { AudioEngine } from "@/lib/audio/engine";
 import {
+  advancePlayedHistory,
   createInitialPlayerUiState,
   playerReducer,
-  resolveStartBeat,
   type PlayerAction,
 } from "@/lib/player/decisions";
-import { updatePlayedTrackIds } from "@/lib/player/graph";
 import { loadPlayedHistory, savePlayedHistory } from "@/lib/player/history";
 import {
   extractBeatIdFromPathname,
@@ -30,6 +30,10 @@ import type { AudioPlayerState } from "@/lib/types/audio";
 import type { BeatView } from "@/lib/types/beat";
 import { useEngineHandoff, useEngineSync } from "./useEngineSync";
 import { useTrackAdvancer } from "./useTrackAdvancer";
+import {
+  usePlaybackCommands,
+  useTransportActions,
+} from "./useTransportActions";
 import { useUrlSync } from "./useUrlSync";
 
 export const AudioPlayerContext = createContext<AudioPlayerState | null>(null);
@@ -114,7 +118,10 @@ function useBeatCommit(
   dispatch: React.Dispatch<PlayerAction>,
 ) {
   return useCallback(
-    (nextBeat: BeatView) => {
+    (
+      nextBeat: BeatView,
+      opts?: { traverse?: boolean; replaceUrl?: boolean },
+    ) => {
       const {
         pathname: path,
         playedHistory: hist,
@@ -122,13 +129,21 @@ function useBeatCommit(
       } = stateRef.current;
       dispatch({ type: "set_not_found", beatId: null });
       if (cur?.id === nextBeat.id) return;
-      const nextHistory = updatePlayedTrackIds(hist, nextBeat.id);
-      stateRef.current.current = nextBeat;
-      stateRef.current.playedHistory = nextHistory;
+      const nextHistory = advancePlayedHistory(
+        hist,
+        cur?.id ?? null,
+        nextBeat.id,
+        opts?.traverse,
+      );
+      stateRef.current = {
+        ...stateRef.current,
+        current: nextBeat,
+        playedHistory: nextHistory,
+      };
       setPlayedHistory(nextHistory);
       savePlayedHistory(nextHistory);
       setCurrent(nextBeat);
-      if (syncBeatUrl(path, nextBeat.id)) {
+      if (syncBeatUrl(path, nextBeat.id, undefined, opts?.replaceUrl)) {
         const nextPathname = formatBeatUrl(nextBeat.id);
         stateRef.current.pathname = nextPathname;
         dispatch({ type: "set_pathname", pathname: nextPathname });
@@ -192,6 +207,7 @@ function useAudioCoordinator(opts: {
   useEngineSync({
     engine,
     isPlaying: state.ui.isPlaying,
+    muted: state.ui.muted,
     isLoading: state.isLoading,
     current: state.current,
     resolveAfterSec: state.resolveAfterSec,
@@ -221,7 +237,7 @@ export function AudioPlayerProvider({
   );
   const engine = injectedEngine ?? defaultEngine;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     stateRef.current = {
       current: playerState.current,
       pathname: playerState.ui.activePathname,
@@ -235,53 +251,41 @@ export function AudioPlayerProvider({
     playerState.setPlayedHistory,
     playerState.dispatch,
   );
-
-  const { advanceTrack, skip, autoAdvance } = useAudioCoordinator({
+  const advancer = useAudioCoordinator({
     engine,
     pathname,
     state: playerState,
     commitNextBeat,
     stateRef,
   });
-
-  const { setCurrent, dispatch, ui } = playerState;
-  const hydrateBeat = useCallback(
-    (beat: BeatView) => {
-      if (!stateRef.current.current) {
-        stateRef.current.current = beat;
-        setCurrent(beat);
-      }
-    },
-    [setCurrent],
+  const commands = usePlaybackCommands(
+    playerState.dispatch,
+    playerState.setCurrent,
+    stateRef,
   );
-  const togglePlay = useCallback(
-    () => dispatch({ type: "toggle_playing" }),
-    [dispatch],
-  );
-  const play = useCallback(
-    () => dispatch({ type: "set_playing", isPlaying: true }),
-    [dispatch],
-  );
-  const pause = useCallback(
-    () => dispatch({ type: "set_playing", isPlaying: false }),
-    [dispatch],
+  const transport = useTransportActions({
+    engine,
+    stateRef,
+    commitNextBeat,
+    dispatch: playerState.dispatch,
+  });
+  const getByteFrequencyData = useCallback(
+    (array: Uint8Array) => engine.getByteFrequencyData(array),
+    [engine],
   );
 
   return (
     <AudioPlayerContext.Provider
       value={{
-        ...ui,
+        ...playerState.ui,
         current: playerState.current,
         isLoading: playerState.isLoading,
         playedHistory: playerState.playedHistory,
-        togglePlay,
-        play,
-        pause,
+        ...commands,
+        ...advancer,
+        ...transport,
         commitBeat: commitNextBeat,
-        hydrateBeat,
-        skip,
-        autoAdvance,
-        advanceTrack,
+        getByteFrequencyData,
       }}
     >
       {children}
@@ -297,24 +301,4 @@ export function useAudioPlayer(): AudioPlayerState {
     );
   }
   return context;
-}
-
-/**
- * Shared callback used by Home, 404, and the persistent player bar to start playback
- * via `resolveStartBeat` and navigate to the target beat deck.
- */
-export function useStartPlayback(): () => void {
-  const router = useRouter();
-  const s = useAudioPlayer();
-  return useCallback(() => {
-    void resolveStartBeat({
-      current: s.current,
-      hasPausedBeat: s.hasPausedBeat,
-      playedHistory: s.playedHistory ?? [],
-      fetchNextBeat: (req) => beatsApi.getNextBeat(req),
-      commitBeat: s.commitBeat,
-      startPlay: () => (s.play ? s.play() : !s.isPlaying && s.togglePlay()),
-      navigate: (url) => router.push(url),
-    });
-  }, [router, s]);
 }

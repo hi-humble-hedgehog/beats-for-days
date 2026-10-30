@@ -10,29 +10,52 @@ export function isBeatPage(pathname: string): boolean {
 }
 
 /**
- * Formats a beat ID as a 4-digit path like `/beat/0001`.
+ * Formats a beat ID as a 2-digit path like `/beat/01` (with leading zeros below 10).
+ * Handles numeric values, numeric strings, and prefixed strings like "track-01".
  * Non-numeric IDs are URL-encoded as-is.
  */
 export function formatBeatUrl(beatId: string | number): string {
-  const num = typeof beatId === "number" ? beatId : Number(beatId);
-  if (!Number.isNaN(num) && Number.isInteger(num) && num > 0) {
-    return `/beat/${String(num).padStart(4, "0")}`;
+  const str = String(beatId);
+  const trackMatch = /^track-(\d+)$/i.exec(str);
+  const rawNum = trackMatch ? Number(trackMatch[1]) : Number(str);
+  if (!Number.isNaN(rawNum) && Number.isInteger(rawNum) && rawNum > 0) {
+    return `/beat/${String(rawNum).padStart(2, "0")}`;
   }
-  return `/beat/${encodeURIComponent(String(beatId))}`;
+  return `/beat/${encodeURIComponent(str)}`;
 }
 
 export interface HistoryPushTarget {
   pushState: (data: unknown, unused: string, url?: string | URL | null) => void;
+  replaceState?: (
+    data: unknown,
+    unused: string,
+    url?: string | URL | null,
+  ) => void;
+}
+
+function writeHistoryEntry(
+  target: HistoryPushTarget | undefined,
+  beatId: string | number,
+  targetUrl: string,
+  replace: boolean,
+): void {
+  if (!target) return;
+  if (replace && target.replaceState) {
+    target.replaceState({ beatId }, "", targetUrl);
+    return;
+  }
+  target.pushState({ beatId }, "", targetUrl);
 }
 
 /**
- * Updates the browser URL with `history.pushState` when a new beat starts.
+ * Updates the browser URL with `history.pushState` (or `replaceState` when stepping back) when a beat starts.
  * Avoids a Next.js route navigation so the audio player never remounts mid-stream.
  */
 export function syncBeatUrl(
   pathname: string,
   beatId: string | number,
   historyTarget?: HistoryPushTarget,
+  replace = false,
 ): boolean {
   if (!isBeatPage(pathname)) {
     return false;
@@ -50,9 +73,7 @@ export function syncBeatUrl(
   const target =
     historyTarget ??
     (typeof window !== "undefined" ? window.history : undefined);
-  if (target) {
-    target.pushState({ beatId }, "", targetUrl);
-  }
+  writeHistoryEntry(target, beatId, targetUrl, replace);
   return true;
 }
 

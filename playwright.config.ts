@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const PORT = process.env.PORT || 3100;
+const PORT = process.env.PORT || 3000;
 
 export default defineConfig({
   testDir: "./e2e",
@@ -28,7 +28,10 @@ export default defineConfig({
     url: `http://localhost:${PORT}`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
-    // Lets e2e check the debug panel gate. It still needs ?debug=1 to show.
-    env: { DEBUG_PANEL: "true" },
+    // Lets e2e check the debug panel gate and always target local seeded Supabase.
+    env: {
+      DEBUG_PANEL: "true",
+      USE_LOCAL_AUDIO: "true",
+    },
   },
 });

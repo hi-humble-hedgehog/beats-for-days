@@ -85,10 +85,15 @@ function Consumer() {
     isPlaying,
     phase,
     secondsRemaining,
+    positionSec,
     isLoading,
     error,
+    muted,
     togglePlay,
     advanceTrack,
+    toggleMute,
+    seek,
+    previous,
   } = useAudioPlayer();
 
   return (
@@ -98,10 +103,15 @@ function Consumer() {
       <p>Phase: {phase ?? "idle"}</p>
       <p>Loading: {isLoading ? "yes" : "no"}</p>
       <p>Seconds: {secondsRemaining}</p>
+      <p>Position: {positionSec ?? 0}</p>
+      <p>Muted: {muted ? "yes" : "no"}</p>
       {error ? <p>Error: {error}</p> : null}
       <button onClick={togglePlay}>Toggle Play</button>
       <button onClick={() => advanceTrack()}>Advance</button>
       <button onClick={() => advanceTrack("auto")}>Auto Advance</button>
+      <button onClick={() => toggleMute?.()}>Toggle Mute</button>
+      <button onClick={() => seek?.(12)}>Seek</button>
+      <button onClick={() => previous?.()}>Previous</button>
     </div>
   );
 }
@@ -162,7 +172,7 @@ describe("AudioPlayerProvider", () => {
     });
 
     mockBeatsApi.getBeat.mockImplementation((id: string) => {
-      if (id === "0002") {
+      if (id === "0002" || id === "02") {
         return Promise.resolve({
           id: "0002",
           name: "Jazz Flute",
@@ -174,7 +184,7 @@ describe("AudioPlayerProvider", () => {
           transitions: [],
         });
       }
-      if (id === "0001") {
+      if (id === "0001" || id === "01") {
         return Promise.resolve({
           id: "0001",
           name: "Soul Rhodes",
@@ -251,6 +261,42 @@ describe("AudioPlayerProvider", () => {
     // Must NOT re-load track on resume, and positionSec must be preserved at 15
     expect(loadTrackSpy).not.toHaveBeenCalled();
     expect(testHarness.engine.getSnapshot().positionSec).toBeCloseTo(15, 2);
+  });
+
+  it("synchronizes snapshot immediately when document becomes visible or window gains focus", async () => {
+    render(
+      <AudioPlayerProvider engine={testHarness.engine}>
+        <Consumer />
+      </AudioPlayerProvider>,
+    );
+
+    expect(await screen.findByText(/Current: Soul Rhodes/)).toBeInTheDocument();
+
+    await act(async () => {
+      screen.getByRole("button", { name: "Toggle Play" }).click();
+    });
+    expect(screen.getByText("Playing: yes")).toBeInTheDocument();
+
+    // Switch to fake timers to freeze the 100ms polling interval
+    vi.useFakeTimers();
+
+    // Advance audio clock without advancing the fake timer interval
+    testHarness.setTime(25);
+
+    // Document visibility change to visible triggers immediate sync
+    act(() => {
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    expect(screen.getByText("Position: 25")).toBeInTheDocument();
+
+    // Window focus triggers immediate sync
+    testHarness.setTime(35);
+    act(() => {
+      window.dispatchEvent(new Event("focus"));
+    });
+    expect(screen.getByText("Position: 35")).toBeInTheDocument();
+
+    vi.useRealTimers();
   });
 
   it("pauses playback when navigating to '/' and stays paused on leaving '/' until Play is pressed", async () => {
@@ -480,6 +526,46 @@ describe("AudioPlayerProvider", () => {
     vi.useRealTimers();
   });
 
+  it("completes armed transition immediately when document becomes visible or window gains focus without waiting for timers", async () => {
+    vi.useFakeTimers();
+
+    render(
+      <AudioPlayerProvider engine={testHarness.engine}>
+        <Consumer />
+      </AudioPlayerProvider>,
+    );
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(screen.getByText(/Current: Soul Rhodes/)).toBeInTheDocument();
+
+    // Start playback
+    await act(async () => {
+      screen.getByRole("button", { name: "Toggle Play" }).click();
+    });
+
+    // Advance audio clock to 30s and arm transition
+    testHarness.setTime(30);
+    await act(async () => {
+      vi.advanceTimersByTime(250);
+      await Promise.resolve();
+    });
+    expect(screen.getByText("Phase: armed")).toBeInTheDocument();
+
+    // Now audio clock passes nextStart (97.3s), but NO timer tick is run (simulating background tab where timer is frozen)
+    testHarness.setTime(97.3);
+
+    // Document visibility change to visible triggers immediate handoff
+    act(() => {
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+
+    expect(screen.getByText(/Current: Jazz Flute/)).toBeInTheDocument();
+    expect(screen.getByText("Phase: playing")).toBeInTheDocument();
+    vi.useRealTimers();
+  });
+
   it("does not re-arm or poll-resolve transition while armTransition is still in flight", async () => {
     vi.useFakeTimers();
 
@@ -568,7 +654,7 @@ describe("AudioPlayerProvider", () => {
       JSON.parse(
         window.localStorage.getItem(STORAGE_KEYS.PLAYED_TRACKS) ?? "[]",
       ),
-    ).toEqual(["0099", "0002"]);
+    ).toEqual(["0099", "0001", "0002"]);
   });
 
   it("handles corrupted JSON in localStorage gracefully", async () => {
@@ -797,5 +883,293 @@ describe("AudioPlayerProvider", () => {
     expect(mockBeatsApi.getNextBeat).not.toHaveBeenCalled();
     expect(screen.getByText("Current: none")).toBeInTheDocument();
     expect(screen.getByText("Playing: no")).toBeInTheDocument();
+  });
+
+  it("toggles mute and seeks the loaded playhead", async () => {
+    render(
+      <AudioPlayerProvider engine={testHarness.engine}>
+        <Consumer />
+      </AudioPlayerProvider>,
+    );
+    expect(await screen.findByText(/Current: Soul Rhodes/)).toBeInTheDocument();
+    expect(screen.getByText("Muted: no")).toBeInTheDocument();
+
+    await act(async () => {
+      screen.getByRole("button", { name: "Toggle Mute" }).click();
+    });
+    expect(screen.getByText("Muted: yes")).toBeInTheDocument();
+
+    await act(async () => {
+      screen.getByRole("button", { name: "Seek" }).click();
+    });
+    expect(screen.getByText("Position: 12")).toBeInTheDocument();
+  });
+
+  it("seeks to the start when Previous is pressed past 3 seconds", async () => {
+    window.localStorage.setItem(
+      STORAGE_KEYS.PLAYED_TRACKS,
+      JSON.stringify(["0001", "0002"]),
+    );
+    mockPathname = "/beat/0001";
+    render(
+      <AudioPlayerProvider engine={testHarness.engine}>
+        <Consumer />
+      </AudioPlayerProvider>,
+    );
+    expect(await screen.findByText(/Current: Soul Rhodes/)).toBeInTheDocument();
+
+    await act(async () => {
+      screen.getByRole("button", { name: "Toggle Play" }).click();
+    });
+    testHarness.setTime(20);
+    await act(async () => {
+      screen.getByRole("button", { name: "Previous" }).click();
+    });
+    expect(screen.getByText(/Position: 0/)).toBeInTheDocument();
+    expect(screen.getByText(/Current: Soul Rhodes/)).toBeInTheDocument();
+  });
+
+  it("loads the prior track on Previous within 3 seconds and keeps history intact if fetch fails", async () => {
+    window.localStorage.setItem(
+      STORAGE_KEYS.PLAYED_TRACKS,
+      JSON.stringify(["0001", "0002"]),
+    );
+    mockPathname = "/beat/0002";
+    render(
+      <AudioPlayerProvider engine={testHarness.engine}>
+        <Consumer />
+      </AudioPlayerProvider>,
+    );
+    expect(await screen.findByText(/Current: Jazz Flute/)).toBeInTheDocument();
+
+    // First test a failed getBeat: playedHistory must NOT be lost
+    mockBeatsApi.getBeat.mockRejectedValueOnce(new Error("Previous failed"));
+    await act(async () => {
+      screen.getByRole("button", { name: "Previous" }).click();
+    });
+    expect(
+      await screen.findByText("Error: Previous failed"),
+    ).toBeInTheDocument();
+    expect(
+      JSON.parse(
+        window.localStorage.getItem(STORAGE_KEYS.PLAYED_TRACKS) ?? "[]",
+      ),
+    ).toEqual(["0001", "0002"]);
+
+    // Now succeed while playing: loads 0001 and preserves ["0001", "0002"] for deterministic forward navigation
+    const replaceStateSpy = vi.spyOn(window.history, "replaceState");
+    await act(async () => {
+      screen.getByRole("button", { name: "Toggle Play" }).click();
+    });
+    await act(async () => {
+      screen.getByRole("button", { name: "Previous" }).click();
+    });
+    expect(await screen.findByText(/Current: Soul Rhodes/)).toBeInTheDocument();
+    expect(replaceStateSpy).toHaveBeenCalledWith(
+      { beatId: "0001" },
+      "",
+      "/beat/01",
+    );
+    expect(
+      JSON.parse(
+        window.localStorage.getItem(STORAGE_KEYS.PLAYED_TRACKS) ?? "[]",
+      ),
+    ).toEqual(["0001", "0002"]);
+  });
+
+  it("traverses 1..5 -> Prev(4) -> Prev(3) -> Next(4) -> auto-ride(5) -> Next(new 6 from pipeline)", async () => {
+    vi.useFakeTimers();
+
+    const transition4To5 = {
+      id: "tr-4-5",
+      targetTrackId: "0005",
+      audioUrl: "http://storage/tr-4-5.m4a",
+      timing: { handleMs: 250, crossfadeMs: 100, glueMs: 7200, landMs: 0 },
+    };
+
+    const beatsById: Record<string, BeatView> = {
+      "0001": {
+        id: "0001",
+        name: "Beat 1",
+        audioUrl: "http://storage/1.m4a",
+        durationMs: 60000,
+        loopStartMs: 10000,
+        loopEndMs: 50000,
+        bpm: 86,
+        transitions: [],
+      },
+      "0002": {
+        id: "0002",
+        name: "Beat 2",
+        audioUrl: "http://storage/2.m4a",
+        durationMs: 60000,
+        loopStartMs: 10000,
+        loopEndMs: 50000,
+        bpm: 86,
+        transitions: [],
+      },
+      "0003": {
+        id: "0003",
+        name: "Beat 3",
+        audioUrl: "http://storage/3.m4a",
+        durationMs: 60000,
+        loopStartMs: 10000,
+        loopEndMs: 50000,
+        bpm: 86,
+        transitions: [],
+      },
+      "0004": {
+        id: "0004",
+        name: "Beat 4",
+        audioUrl: "http://storage/4.m4a",
+        durationMs: 60000,
+        loopStartMs: 10000,
+        loopEndMs: 50000,
+        bpm: 86,
+        transitions: [transition4To5],
+      },
+      "0005": {
+        id: "0005",
+        name: "Beat 5",
+        audioUrl: "http://storage/5.m4a",
+        durationMs: 60000,
+        loopStartMs: 10000,
+        loopEndMs: 50000,
+        bpm: 86,
+        transitions: [],
+      },
+      "0006": {
+        id: "0006",
+        name: "Beat 6",
+        audioUrl: "http://storage/6.m4a",
+        durationMs: 60000,
+        loopStartMs: 10000,
+        loopEndMs: 50000,
+        bpm: 86,
+        transitions: [],
+      },
+    };
+
+    window.localStorage.setItem(
+      STORAGE_KEYS.PLAYED_TRACKS,
+      JSON.stringify(["0001", "0002", "0003", "0004", "0005"]),
+    );
+    mockPathname = "/beat/0005";
+    mockBeatsApi.getBeat.mockImplementation((id: string) =>
+      Promise.resolve(beatsById[id] ?? beatsById[id.padStart(4, "0")] ?? null),
+    );
+    mockBeatsApi.getNextBeat.mockImplementation(() =>
+      Promise.resolve({
+        beat: beatsById["0006"]!,
+        transition: null,
+        resolveAfterSec: 30,
+      }),
+    );
+
+    render(
+      <AudioPlayerProvider engine={testHarness.engine}>
+        <Consumer />
+      </AudioPlayerProvider>,
+    );
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(screen.getByText("Current: Beat 5")).toBeInTheDocument();
+
+    // Start playing on Beat 5
+    await act(async () => {
+      screen.getByRole("button", { name: "Toggle Play" }).click();
+    });
+    mockBeatsApi.getNextBeat.mockClear();
+
+    // 1. Previous -> Beat 4
+    await act(async () => {
+      screen.getByRole("button", { name: "Previous" }).click();
+    });
+    expect(screen.getByText("Current: Beat 4")).toBeInTheDocument();
+
+    // 2. Previous -> Beat 3
+    await act(async () => {
+      screen.getByRole("button", { name: "Previous" }).click();
+    });
+    expect(screen.getByText("Current: Beat 3")).toBeInTheDocument();
+
+    // 3. Next (skip) from Beat 3 -> deterministically loads Beat 4 without calling getNextBeat
+    await act(async () => {
+      screen.getByRole("button", { name: "Advance" }).click();
+    });
+    expect(screen.getByText("Current: Beat 4")).toBeInTheDocument();
+    expect(mockBeatsApi.getNextBeat).not.toHaveBeenCalled();
+
+    // 4. Let Beat 4 ride -> autoAdvance arms transition4To5 into Beat 5 without calling getNextBeat
+    testHarness.setTime(30);
+    await act(async () => {
+      vi.advanceTimersByTime(250);
+      await Promise.resolve();
+    });
+    expect(mockBeatsApi.getNextBeat).not.toHaveBeenCalled();
+    expect(screen.getByText("Phase: armed")).toBeInTheDocument();
+
+    // Complete transition bridge into Beat 5
+    testHarness.setTime(97.3);
+    await act(async () => {
+      vi.advanceTimersByTime(250);
+      await Promise.resolve();
+    });
+    expect(screen.getByText("Current: Beat 5")).toBeInTheDocument();
+    expect(
+      JSON.parse(
+        window.localStorage.getItem(STORAGE_KEYS.PLAYED_TRACKS) ?? "[]",
+      ),
+    ).toEqual(["0001", "0002", "0003", "0004", "0005"]);
+
+    // 5. Next from Beat 5 (tip of history) -> queries pipeline getNextBeat -> Beat 6
+    await act(async () => {
+      screen.getByRole("button", { name: "Advance" }).click();
+    });
+    expect(mockBeatsApi.getNextBeat).toHaveBeenCalledWith({
+      currentTrackId: "0005",
+      playedTrackIds: ["0001", "0002", "0003", "0004", "0005"],
+      mode: "skip",
+    });
+    expect(screen.getByText("Current: Beat 6")).toBeInTheDocument();
+    expect(
+      JSON.parse(
+        window.localStorage.getItem(STORAGE_KEYS.PLAYED_TRACKS) ?? "[]",
+      ),
+    ).toEqual(["0001", "0002", "0003", "0004", "0005", "0006"]);
+
+    // 6. Browser Back (popstate) to Beat 4 keeps ["0001".."0006"] intact, so Previous -> Beat 3 and Next -> Beat 4 -> Beat 5 are deterministic
+    mockBeatsApi.getNextBeat.mockClear();
+    await act(async () => {
+      window.dispatchEvent(
+        new PopStateEvent("popstate", { state: { beatId: "0004" } }),
+      );
+    });
+    expect(screen.getByText("Current: Beat 4")).toBeInTheDocument();
+    expect(
+      JSON.parse(
+        window.localStorage.getItem(STORAGE_KEYS.PLAYED_TRACKS) ?? "[]",
+      ),
+    ).toEqual(["0001", "0002", "0003", "0004", "0005", "0006"]);
+
+    await act(async () => {
+      screen.getByRole("button", { name: "Previous" }).click();
+    });
+    expect(screen.getByText("Current: Beat 3")).toBeInTheDocument();
+
+    await act(async () => {
+      screen.getByRole("button", { name: "Advance" }).click();
+    });
+    expect(screen.getByText("Current: Beat 4")).toBeInTheDocument();
+
+    await act(async () => {
+      screen.getByRole("button", { name: "Advance" }).click();
+    });
+    expect(screen.getByText("Current: Beat 5")).toBeInTheDocument();
+    expect(mockBeatsApi.getNextBeat).not.toHaveBeenCalled();
+
+    vi.useRealTimers();
   });
 });

@@ -20,17 +20,25 @@ export const viewport: Viewport = {
 };
 
 import { AudioPlayerProvider } from "@/components/audio/AudioPlayerContext";
-import { PersistentPlayerBar } from "@/components/audio/PersistentPlayerBar";
 import { DebugPanelGate } from "@/components/debug/DebugPanelGate";
-import { HeaderNav } from "@/components/navigation/HeaderNav";
+import { AppChrome } from "@/components/layout/AppChrome";
 import { API_ROUTES } from "@/lib/constants";
 import { getServerEnv } from "@/lib/env";
 import { PALETTE } from "@/lib/design-tokens";
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${interTight.variable} h-full antialiased`}>
+    <html
+      lang="en"
+      className={`${interTight.variable} h-full bg-background text-foreground antialiased`}
+      style={{ backgroundColor: PALETTE.sleeve, color: PALETTE.vinyl }}
+    >
       <head>
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `html,body{background-color:${PALETTE.sleeve};color:${PALETTE.vinyl};}`,
+          }}
+        />
         <link
           rel="preload"
           href={API_ROUTES.BEATS_NEXT}
@@ -38,11 +46,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           crossOrigin="anonymous"
         />
       </head>
-      <body className="flex min-h-full flex-col pb-24 font-sans">
+      <body className="flex min-h-full flex-col font-sans">
         <AudioPlayerProvider>
-          <HeaderNav />
-          {children}
-          <PersistentPlayerBar />
+          <AppChrome>{children}</AppChrome>
           {/* Off unless DEBUG_PANEL=true; then it still needs ?debug=1. */}
           {getServerEnv().DEBUG_PANEL ? (
             <Suspense fallback={null}>

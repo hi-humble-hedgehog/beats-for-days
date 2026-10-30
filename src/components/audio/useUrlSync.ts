@@ -3,8 +3,11 @@
 import { useCallback, useEffect, useRef } from "react";
 import { beatsApi } from "@/lib/api";
 import type { AudioEngine } from "@/lib/audio/engine";
-import { resolveRouteIntent, type PlayerAction } from "@/lib/player/decisions";
-import { updatePlayedTrackIds } from "@/lib/player/graph";
+import {
+  advancePlayedHistory,
+  resolveRouteIntent,
+  type PlayerAction,
+} from "@/lib/player/decisions";
 import { savePlayedHistory } from "@/lib/player/history";
 import { formatBeatUrl } from "@/lib/player/url";
 import type { BeatView } from "@/lib/types/beat";
@@ -51,9 +54,11 @@ function useTrackSwitcher(
         }
 
         dispatch({ type: "set_not_found", beatId: null });
-        const nextHistory = updatePlayedTrackIds(
+        const nextHistory = advancePlayedHistory(
           stateRef.current.playedHistory,
+          stateRef.current.current?.id ?? null,
           beat.id,
+          true,
         );
         stateRef.current.current = beat;
         stateRef.current.playedHistory = nextHistory;

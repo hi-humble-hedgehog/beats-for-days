@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { PersistentPlayerBar } from "./PersistentPlayerBar";
 import { AudioPlayerContext } from "./AudioPlayerContext";
@@ -6,7 +6,7 @@ import type { BeatView } from "@/lib/types/beat";
 
 const mockPush = vi.fn();
 vi.mock("next/navigation", () => ({
-  usePathname: () => "/",
+  usePathname: () => "/beats",
   useRouter: () => ({ push: mockPush }),
 }));
 
@@ -164,20 +164,17 @@ describe("PersistentPlayerBar", () => {
     }
   });
 
-  it("starts playback and navigates to beat deck when Play is clicked while stopped on '/'", () => {
-    const mockPlay = vi.fn();
+  it("hides on the full-screen poster routes", () => {
     render(
       <AudioPlayerContext.Provider
         value={{
           current: sampleBeat,
-          hasPausedBeat: true,
           activePathname: "/",
-          isPlaying: false,
+          isPlaying: true,
           secondsRemaining: 4,
           isLoading: false,
           error: null,
           togglePlay: vi.fn(),
-          play: mockPlay,
           advanceTrack: vi.fn(),
         }}
       >
@@ -185,8 +182,8 @@ describe("PersistentPlayerBar", () => {
       </AudioPlayerContext.Provider>,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Play audio" }));
-    expect(mockPlay).toHaveBeenCalledTimes(1);
-    expect(mockPush).toHaveBeenCalledWith("/beat/0001");
+    expect(
+      screen.queryByRole("complementary", { name: "Persistent Audio Player" }),
+    ).not.toBeInTheDocument();
   });
 });

@@ -17,13 +17,13 @@ We enforce **GDPR privacy by design** and **WCAG 2.2 Level AA accessibility** on
 ### 1. GDPR & Privacy by Design
 
 - **No tracking cookies by default:** Never load cookie-based analytics, ad pixels, or fingerprinting scripts without prior opt-in consent.
-- **Cookieless metrics only (no banner needed, listed in `/privacy-policy`):**
+- **Cookieless metrics only (no banner needed, listed in `/privacy`):**
   - **Vercel Web Analytics (`@vercel/analytics`):** Counts pageviews and referrers without cookies or `localStorage`. Short-lived session hashes expire after 24 hours.
   - **Anonymous skip events (`public.track_skip_events`):** Logs only `{ track_id, skipped_at_sec, loop_count }` in Supabase. Never log IP addresses, User-Agents, or user IDs.
 - **Essential browser storage only:** Use `localStorage` or `sessionStorage` only for features the user asked for: volume, mute state, `playedTrackIds` play history, reduced-motion setting, or a user-supplied ElevenLabs API key in `sessionStorage`.
 - **Self-host all static assets:** Bundle fonts at build time with `next/font` and serve icons and audio from our own domain. Never load assets from third-party CDNs in the browser.
 - **No personal data sent to third-party APIs:** Server calls to ElevenLabs, Gemini, or Supabase must never forward visitor IP addresses, cookies, or User-Agent strings.
-- **Legal pages & user rights:** Keep `/privacy-policy`, `/terms-of-service`, and `/about` reachable from every page without stopping audio playback. Support data export and deletion whenever we store personal data (such as waitlist emails).
+- **Legal pages & user rights:** Keep `/privacy` and `/about` reachable from every page without stopping audio playback. Support data export and deletion whenever we store personal data (such as waitlist emails).
 
 ### 2. Accessibility (WCAG 2.2 Level AA)
 

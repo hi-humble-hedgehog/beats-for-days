@@ -1,0 +1,4126 @@
+{
+  "version": "1.0",
+  "tracks": [
+    {
+      "id": "track-01",
+      "name": "Rucker Park Asphalt Crate — Primo MPC60 Flip (DJ Premier Flip)",
+      "bpm": 92,
+      "key": "D minor",
+      "genre": "Funk",
+      "leadInstrument": "Vibraphone",
+      "fileName": "track-01.wav",
+      "durationMs": 57396,
+      "loopStartMs": 10435,
+      "loopEndMs": 52179,
+      "loopDurationMs": 41744
+    },
+    {
+      "id": "track-02",
+      "name": "Smoky Organ Chop",
+      "bpm": 94,
+      "key": "C Dorian",
+      "genre": "Jazz",
+      "leadInstrument": "Organ",
+      "fileName": "track-02.wav",
+      "durationMs": 38281,
+      "loopStartMs": 10212,
+      "loopEndMs": 30638,
+      "loopDurationMs": 20426
+    },
+    {
+      "id": "track-03",
+      "name": "Smoky Whistle Cut",
+      "bpm": 94,
+      "key": "C Dorian",
+      "genre": "Jazz",
+      "leadInstrument": "Tin Whistle",
+      "fileName": "track-03.wav",
+      "durationMs": 51064,
+      "loopStartMs": 10213,
+      "loopEndMs": 45957,
+      "loopDurationMs": 35744
+    },
+    {
+      "id": "track-04",
+      "name": "Smoky Flute & Mallet Cuts",
+      "bpm": 96,
+      "key": "C Dorian",
+      "genre": "Jazz",
+      "leadInstrument": "Flute",
+      "counterInstrument": "Vibraphone",
+      "fileName": "track-04.wav",
+      "durationMs": 50000,
+      "loopStartMs": 10000,
+      "loopEndMs": 45000,
+      "loopDurationMs": 35000
+    },
+    {
+      "id": "track-05",
+      "name": "Spaghetti Showdown Cut",
+      "bpm": 94,
+      "key": "D minor",
+      "genre": "Spaghetti Western",
+      "leadInstrument": "Trumpet",
+      "counterInstrument": "Harmonica",
+      "fileName": "track-05.wav",
+      "durationMs": 51064,
+      "loopStartMs": 5106,
+      "loopEndMs": 45958,
+      "loopDurationMs": 40852
+    },
+    {
+      "id": "track-06",
+      "name": "Smoky Attic Chops",
+      "bpm": 86,
+      "key": "C Dorian",
+      "genre": "Jazz",
+      "leadInstrument": "Flute",
+      "counterInstrument": "Vibraphone",
+      "fileName": "track-06.wav",
+      "durationMs": 55814,
+      "loopStartMs": 11163,
+      "loopEndMs": 50233,
+      "loopDurationMs": 39070
+    },
+    {
+      "id": "track-07",
+      "name": "Soul Brass Cellar",
+      "bpm": 92,
+      "key": "G minor",
+      "genre": "Soul",
+      "leadInstrument": "French Horn",
+      "counterInstrument": "Flute",
+      "fileName": "track-07.wav",
+      "durationMs": 52174,
+      "loopStartMs": 10435,
+      "loopEndMs": 46957,
+      "loopDurationMs": 36522
+    },
+    {
+      "id": "track-08",
+      "name": "Harlem Pressure",
+      "bpm": 100,
+      "key": "G minor",
+      "genre": "Soul",
+      "leadInstrument": "Horns",
+      "counterInstrument": "Piano",
+      "fileName": "track-08.wav",
+      "durationMs": 48000,
+      "loopStartMs": 9600,
+      "loopEndMs": 43200,
+      "loopDurationMs": 33600
+    },
+    {
+      "id": "track-09",
+      "name": "Iron Gut Stabs",
+      "bpm": 98,
+      "key": "G minor",
+      "genre": "Soul",
+      "leadInstrument": "Trumpet",
+      "counterInstrument": "Saxophone",
+      "fileName": "track-09.wav",
+      "durationMs": 50000,
+      "loopStartMs": 9796,
+      "loopEndMs": 44082,
+      "loopDurationMs": 34286
+    },
+    {
+      "id": "track-10",
+      "name": "Cellar Horn Cut",
+      "bpm": 92,
+      "key": "C Dorian",
+      "genre": "Jazz",
+      "leadInstrument": "Trumpet",
+      "counterInstrument": "Rhodes",
+      "fileName": "track-10.wav",
+      "durationMs": 52174,
+      "loopStartMs": 10435,
+      "loopEndMs": 46957,
+      "loopDurationMs": 36522
+    },
+    {
+      "id": "track-11",
+      "name": "Cellar Soul Stabs",
+      "bpm": 86,
+      "key": "C Dorian",
+      "genre": "Soul",
+      "leadInstrument": "Saxophone",
+      "counterInstrument": "Piano",
+      "fileName": "track-11.wav",
+      "durationMs": 55814,
+      "loopStartMs": 11163,
+      "loopEndMs": 50233,
+      "loopDurationMs": 39070
+    },
+    {
+      "id": "track-12",
+      "name": "Soul Horns Chop",
+      "bpm": 100,
+      "key": "F minor",
+      "genre": "Soul",
+      "leadInstrument": "Horns",
+      "fileName": "track-12.wav",
+      "durationMs": 48000,
+      "loopStartMs": 9600,
+      "loopEndMs": 43200,
+      "loopDurationMs": 33600
+    },
+    {
+      "id": "track-13",
+      "name": "Iron Crate Carnage",
+      "bpm": 96,
+      "key": "F minor",
+      "genre": "Soul",
+      "leadInstrument": "Trumpet",
+      "counterInstrument": "Saxophone",
+      "fileName": "track-13.wav",
+      "durationMs": 50000,
+      "loopStartMs": 10000,
+      "loopEndMs": 45000,
+      "loopDurationMs": 35000
+    },
+    {
+      "id": "track-14",
+      "name": "Soul Trumpet Chop",
+      "bpm": 94,
+      "key": "G minor",
+      "genre": "Soul",
+      "leadInstrument": "Trumpet",
+      "counterInstrument": "Saxophone",
+      "fileName": "track-14.wav",
+      "durationMs": 51064,
+      "loopStartMs": 5106,
+      "loopEndMs": 45958,
+      "loopDurationMs": 40852
+    },
+    {
+      "id": "track-15",
+      "name": "Iron Whistle Chop",
+      "bpm": 98,
+      "key": "F minor",
+      "genre": "Jazz",
+      "leadInstrument": "Tin Whistle",
+      "counterInstrument": "Flute",
+      "fileName": "track-15.wav",
+      "durationMs": 48980,
+      "loopStartMs": 9796,
+      "loopEndMs": 44082,
+      "loopDurationMs": 34286
+    },
+    {
+      "id": "track-16",
+      "name": "Cellar Flute Chop",
+      "bpm": 86,
+      "key": "C Dorian",
+      "genre": "Jazz",
+      "leadInstrument": "Flute",
+      "counterInstrument": "Piano",
+      "fileName": "track-16.wav",
+      "durationMs": 55814,
+      "loopStartMs": 11163,
+      "loopEndMs": 50233,
+      "loopDurationMs": 39070
+    },
+    {
+      "id": "track-17",
+      "name": "Cellar Mallet Stabs",
+      "bpm": 86,
+      "key": "C Dorian",
+      "genre": "Jazz",
+      "leadInstrument": "Vibraphone",
+      "counterInstrument": "Saxophone",
+      "fileName": "track-17.wav",
+      "durationMs": 55814,
+      "loopStartMs": 11163,
+      "loopEndMs": 50233,
+      "loopDurationMs": 39070
+    },
+    {
+      "id": "track-18",
+      "name": "70s Punk Rock Garage Crate",
+      "bpm": 88,
+      "key": "E minor",
+      "genre": "Punk",
+      "leadInstrument": "Vibraphone",
+      "fileName": "track-18.wav",
+      "durationMs": 54545,
+      "loopStartMs": 2727,
+      "loopEndMs": 46359,
+      "loopDurationMs": 43632
+    },
+    {
+      "id": "track-19",
+      "name": "Basement Flute Crate — Primo SP-1200 Flip (DJ Premier Flip)",
+      "bpm": 92,
+      "key": "C minor",
+      "genre": "Boom Bap",
+      "leadInstrument": "Flute",
+      "fileName": "track-19.wav",
+      "durationMs": 52174,
+      "loopStartMs": 2609,
+      "loopEndMs": 44353,
+      "loopDurationMs": 41744
+    },
+    {
+      "id": "track-20",
+      "name": "Marching Brass Crate — Primo SP-1200 Flip (DJ Premier Flip)",
+      "bpm": 92,
+      "key": "C minor",
+      "genre": "Boom Bap",
+      "leadInstrument": "Saxophone",
+      "fileName": "track-20.wav",
+      "durationMs": 60145,
+      "loopStartMs": 10374,
+      "loopEndMs": 52118,
+      "loopDurationMs": 41744
+    },
+    {
+      "id": "track-21",
+      "name": "Raw Timber",
+      "bpm": 100,
+      "key": "D minor",
+      "genre": "Jazz",
+      "leadInstrument": "Flute",
+      "fileName": "track-21.wav",
+      "durationMs": 48000,
+      "loopStartMs": 2400,
+      "loopEndMs": 40800,
+      "loopDurationMs": 38400
+    },
+    {
+      "id": "track-22",
+      "name": "Smoky Room Cipher",
+      "bpm": 92,
+      "key": "C Dorian",
+      "genre": "Jazz",
+      "leadInstrument": "Saxophone",
+      "fileName": "track-22.wav",
+      "durationMs": 49565,
+      "loopStartMs": 2609,
+      "loopEndMs": 41744,
+      "loopDurationMs": 39135
+    },
+    {
+      "id": "track-23",
+      "name": "Folk Brass Vault",
+      "bpm": 88,
+      "key": "D minor",
+      "genre": "Folk",
+      "leadInstrument": "Brass Ensemble",
+      "fileName": "track-23.wav",
+      "durationMs": 51818,
+      "loopStartMs": 2727,
+      "loopEndMs": 43632,
+      "loopDurationMs": 40905
+    },
+    {
+      "id": "track-24",
+      "name": "Brass Crate Flip",
+      "bpm": 88,
+      "key": "D minor",
+      "genre": "Funk",
+      "leadInstrument": "French Horn",
+      "fileName": "track-24.wav",
+      "durationMs": 76364,
+      "loopStartMs": 10909,
+      "loopEndMs": 70909,
+      "loopDurationMs": 60000
+    },
+    {
+      "id": "track-25",
+      "name": "Sunday Sanctum Chops",
+      "bpm": 94,
+      "key": "C Dorian",
+      "genre": "Jazz",
+      "leadInstrument": "Horns & Organ",
+      "counterInstrument": "Flute & Vibraphone",
+      "fileName": "track-25.wav",
+      "durationMs": 51064,
+      "loopStartMs": 12766,
+      "loopEndMs": 45958,
+      "loopDurationMs": 33192
+    },
+    {
+      "id": "track-26",
+      "name": "Smoky Flute & Mallet Stabs",
+      "bpm": 84,
+      "key": "C Dorian",
+      "genre": "Jazz",
+      "leadInstrument": "Flute",
+      "counterInstrument": "Vibraphone",
+      "fileName": "track-26.wav",
+      "durationMs": 57143,
+      "loopStartMs": 11429,
+      "loopEndMs": 51429,
+      "loopDurationMs": 40000
+    },
+    {
+      "id": "track-27",
+      "name": "Smoky Crate Cut",
+      "bpm": 96,
+      "key": "G minor",
+      "genre": "Jazz",
+      "leadInstrument": "Saxophone",
+      "counterInstrument": "Vibraphone",
+      "fileName": "track-27.wav",
+      "durationMs": 50000,
+      "loopStartMs": 5000,
+      "loopEndMs": 45000,
+      "loopDurationMs": 40000
+    },
+    {
+      "id": "track-28",
+      "name": "Iron Cellar Horns",
+      "bpm": 94,
+      "key": "G minor",
+      "genre": "Soul",
+      "leadInstrument": "Horns",
+      "counterInstrument": "Piano",
+      "fileName": "track-28.wav",
+      "durationMs": 51064,
+      "loopStartMs": 5106,
+      "loopEndMs": 45958,
+      "loopDurationMs": 40852
+    },
+    {
+      "id": "track-29",
+      "name": "Soul Low-Note Piano Chop",
+      "bpm": 90,
+      "key": "G minor",
+      "genre": "Soul",
+      "leadInstrument": "Piano",
+      "counterInstrument": "Horns",
+      "fileName": "track-29.wav",
+      "durationMs": 53333,
+      "loopStartMs": 5333,
+      "loopEndMs": 48000,
+      "loopDurationMs": 42667
+    },
+    {
+      "id": "track-30",
+      "name": "Cellar Pluck and Stabs",
+      "bpm": 88,
+      "key": "C Dorian",
+      "genre": "Jazz",
+      "leadInstrument": "Piano",
+      "counterInstrument": "Trumpet",
+      "fileName": "track-30.wav",
+      "durationMs": 54545,
+      "loopStartMs": 5455,
+      "loopEndMs": 49091,
+      "loopDurationMs": 43636
+    },
+    {
+      "id": "track-31",
+      "name": "Cellar Soul Stabs",
+      "bpm": 86,
+      "key": "G minor",
+      "genre": "Soul",
+      "leadInstrument": "Rhodes Piano",
+      "counterInstrument": "Low-Note Piano",
+      "fileName": "track-31.wav",
+      "durationMs": 61395,
+      "loopStartMs": 8372,
+      "loopEndMs": 50233,
+      "loopDurationMs": 41861
+    },
+    {
+      "id": "track-32",
+      "name": "Cellar Mallet Cut",
+      "bpm": 94,
+      "key": "C Dorian",
+      "genre": "Jazz",
+      "leadInstrument": "Flute",
+      "counterInstrument": "Vibraphone",
+      "fileName": "track-32.wav",
+      "durationMs": 51064,
+      "loopStartMs": 5106,
+      "loopEndMs": 45958,
+      "loopDurationMs": 40852
+    },
+    {
+      "id": "track-33",
+      "name": "Smoky Cellar Chops",
+      "bpm": 86,
+      "key": "C Dorian",
+      "genre": "Jazz",
+      "leadInstrument": "Flute",
+      "counterInstrument": "Vibraphone",
+      "fileName": "track-33.wav",
+      "durationMs": 55814,
+      "loopStartMs": 11163,
+      "loopEndMs": 50233,
+      "loopDurationMs": 39070
+    },
+    {
+      "id": "track-34",
+      "name": "Cellar Whistle Cut",
+      "bpm": 88,
+      "key": "G minor",
+      "genre": "Jazz",
+      "leadInstrument": "Tin Whistle",
+      "counterInstrument": "Vibraphone",
+      "fileName": "track-34.wav",
+      "durationMs": 54545,
+      "loopStartMs": 10909,
+      "loopEndMs": 49091,
+      "loopDurationMs": 38182
+    },
+    {
+      "id": "track-35",
+      "name": "Cellar Mallet Chop",
+      "bpm": 88,
+      "key": "C Dorian",
+      "genre": "Jazz",
+      "leadInstrument": "Vibraphone",
+      "counterInstrument": "Flute",
+      "fileName": "track-35.wav",
+      "durationMs": 54545,
+      "loopStartMs": 5455,
+      "loopEndMs": 49091,
+      "loopDurationMs": 43636
+    }
+  ],
+  "transitions": [
+    {
+      "id": "track-01-to-track-04",
+      "from": "track-01",
+      "to": "track-04",
+      "fileName": "track-01-to-track-04.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8730.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-01-to-track-07",
+      "from": "track-01",
+      "to": "track-07",
+      "fileName": "track-01-to-track-07.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8746.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-01-to-track-12",
+      "from": "track-01",
+      "to": "track-12",
+      "fileName": "track-01-to-track-12.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8729,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-01-to-track-17",
+      "from": "track-01",
+      "to": "track-17",
+      "fileName": "track-01-to-track-17.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8711.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-01-to-track-19",
+      "from": "track-01",
+      "to": "track-19",
+      "fileName": "track-01-to-track-19.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8746.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-01-to-track-21",
+      "from": "track-01",
+      "to": "track-21",
+      "fileName": "track-01-to-track-21.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8729,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-01-to-track-28",
+      "from": "track-01",
+      "to": "track-28",
+      "fileName": "track-01-to-track-28.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8715.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-01-to-track-31",
+      "from": "track-01",
+      "to": "track-31",
+      "fileName": "track-01-to-track-31.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8710.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-02-to-track-05",
+      "from": "track-02",
+      "to": "track-05",
+      "fileName": "track-02-to-track-05.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8627.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-02-to-track-21",
+      "from": "track-02",
+      "to": "track-21",
+      "fileName": "track-02-to-track-21.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8642,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-02-to-track-22",
+      "from": "track-02",
+      "to": "track-22",
+      "fileName": "track-02-to-track-22.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8658,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-02-to-track-23",
+      "from": "track-02",
+      "to": "track-23",
+      "fileName": "track-02-to-track-23.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8655.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-02-to-track-26",
+      "from": "track-02",
+      "to": "track-26",
+      "fileName": "track-02-to-track-26.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8636.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-02-to-track-27",
+      "from": "track-02",
+      "to": "track-27",
+      "fileName": "track-02-to-track-27.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8640.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-02-to-track-31",
+      "from": "track-02",
+      "to": "track-31",
+      "fileName": "track-02-to-track-31.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8619.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-02-to-track-32",
+      "from": "track-02",
+      "to": "track-32",
+      "fileName": "track-02-to-track-32.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8627.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-03-to-track-04",
+      "from": "track-03",
+      "to": "track-04",
+      "fileName": "track-03-to-track-04.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8124.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-03-to-track-07",
+      "from": "track-03",
+      "to": "track-07",
+      "fileName": "track-03-to-track-07.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8659.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-03-to-track-09",
+      "from": "track-03",
+      "to": "track-09",
+      "fileName": "track-03-to-track-09.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8644.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-03-to-track-10",
+      "from": "track-03",
+      "to": "track-10",
+      "fileName": "track-03-to-track-10.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8142,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-03-to-track-15",
+      "from": "track-03",
+      "to": "track-15",
+      "fileName": "track-03-to-track-15.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8142,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-03-to-track-24",
+      "from": "track-03",
+      "to": "track-24",
+      "fileName": "track-03-to-track-24.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8112.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-03-to-track-30",
+      "from": "track-03",
+      "to": "track-30",
+      "fileName": "track-03-to-track-30.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8659.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-03-to-track-33",
+      "from": "track-03",
+      "to": "track-33",
+      "fileName": "track-03-to-track-33.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8624.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-04-to-track-01",
+      "from": "track-04",
+      "to": "track-01",
+      "fileName": "track-04-to-track-01.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8537.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-04-to-track-09",
+      "from": "track-04",
+      "to": "track-09",
+      "fileName": "track-04-to-track-09.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8000,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-04-to-track-11",
+      "from": "track-04",
+      "to": "track-11",
+      "fileName": "track-04-to-track-11.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7981.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-04-to-track-13",
+      "from": "track-04",
+      "to": "track-13",
+      "fileName": "track-04-to-track-13.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8000,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-04-to-track-14",
+      "from": "track-04",
+      "to": "track-14",
+      "fileName": "track-04-to-track-14.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7986.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-04-to-track-16",
+      "from": "track-04",
+      "to": "track-16",
+      "fileName": "track-04-to-track-16.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7981.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-04-to-track-26",
+      "from": "track-04",
+      "to": "track-26",
+      "fileName": "track-04-to-track-26.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7993.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-04-to-track-29",
+      "from": "track-04",
+      "to": "track-29",
+      "fileName": "track-04-to-track-29.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8014.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-05-to-track-15",
+      "from": "track-05",
+      "to": "track-15",
+      "fileName": "track-05-to-track-15.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8659.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-05-to-track-26",
+      "from": "track-05",
+      "to": "track-26",
+      "fileName": "track-05-to-track-26.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8115.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-05-to-track-27",
+      "from": "track-05",
+      "to": "track-27",
+      "fileName": "track-05-to-track-27.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8123.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-05-to-track-28",
+      "from": "track-05",
+      "to": "track-28",
+      "fileName": "track-05-to-track-28.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8107.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-05-to-track-29",
+      "from": "track-05",
+      "to": "track-29",
+      "fileName": "track-05-to-track-29.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8655.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-05-to-track-30",
+      "from": "track-05",
+      "to": "track-30",
+      "fileName": "track-05-to-track-30.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8138,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-05-to-track-31",
+      "from": "track-05",
+      "to": "track-31",
+      "fileName": "track-05-to-track-31.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8620.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-05-to-track-35",
+      "from": "track-05",
+      "to": "track-35",
+      "fileName": "track-05-to-track-35.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8138,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-06-to-track-10",
+      "from": "track-06",
+      "to": "track-10",
+      "fileName": "track-06-to-track-10.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8623.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-06-to-track-17",
+      "from": "track-06",
+      "to": "track-17",
+      "fileName": "track-06-to-track-17.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9109,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-06-to-track-18",
+      "from": "track-06",
+      "to": "track-18",
+      "fileName": "track-06-to-track-18.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9142.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-06-to-track-21",
+      "from": "track-06",
+      "to": "track-21",
+      "fileName": "track-06-to-track-21.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9127.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-06-to-track-24",
+      "from": "track-06",
+      "to": "track-24",
+      "fileName": "track-06-to-track-24.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8594.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-06-to-track-25",
+      "from": "track-06",
+      "to": "track-25",
+      "fileName": "track-06-to-track-25.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8593,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-06-to-track-32",
+      "from": "track-06",
+      "to": "track-32",
+      "fileName": "track-06-to-track-32.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9113,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-06-to-track-34",
+      "from": "track-06",
+      "to": "track-34",
+      "fileName": "track-06-to-track-34.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8622.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-07-to-track-01",
+      "from": "track-07",
+      "to": "track-01",
+      "fileName": "track-07-to-track-01.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8739.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-07-to-track-08",
+      "from": "track-07",
+      "to": "track-08",
+      "fileName": "track-07-to-track-08.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8723.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-07-to-track-12",
+      "from": "track-07",
+      "to": "track-12",
+      "fileName": "track-07-to-track-12.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8203.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-07-to-track-14",
+      "from": "track-07",
+      "to": "track-14",
+      "fileName": "track-07-to-track-14.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8189,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-07-to-track-15",
+      "from": "track-07",
+      "to": "track-15",
+      "fileName": "track-07-to-track-15.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8221,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-07-to-track-17",
+      "from": "track-07",
+      "to": "track-17",
+      "fileName": "track-07-to-track-17.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8186.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-07-to-track-25",
+      "from": "track-07",
+      "to": "track-25",
+      "fileName": "track-07-to-track-25.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8189,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-07-to-track-26",
+      "from": "track-07",
+      "to": "track-26",
+      "fileName": "track-07-to-track-26.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8194.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-08-to-track-06",
+      "from": "track-08",
+      "to": "track-06",
+      "fileName": "track-08-to-track-06.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7781.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-08-to-track-10",
+      "from": "track-08",
+      "to": "track-10",
+      "fileName": "track-08-to-track-10.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7817.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-08-to-track-12",
+      "from": "track-08",
+      "to": "track-12",
+      "fileName": "track-08-to-track-12.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7801.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-08-to-track-23",
+      "from": "track-08",
+      "to": "track-23",
+      "fileName": "track-08-to-track-23.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8336,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-08-to-track-24",
+      "from": "track-08",
+      "to": "track-24",
+      "fileName": "track-08-to-track-24.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8308,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-08-to-track-26",
+      "from": "track-08",
+      "to": "track-26",
+      "fileName": "track-08-to-track-26.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8316,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-08-to-track-27",
+      "from": "track-08",
+      "to": "track-27",
+      "fileName": "track-08-to-track-27.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7801.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-08-to-track-34",
+      "from": "track-08",
+      "to": "track-34",
+      "fileName": "track-08-to-track-34.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7817.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-09-to-track-02",
+      "from": "track-09",
+      "to": "track-02",
+      "fileName": "track-09-to-track-02.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8560,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-09-to-track-04",
+      "from": "track-09",
+      "to": "track-04",
+      "fileName": "track-09-to-track-04.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8001.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-09-to-track-07",
+      "from": "track-09",
+      "to": "track-07",
+      "fileName": "track-09-to-track-07.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8017.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-09-to-track-12",
+      "from": "track-09",
+      "to": "track-12",
+      "fileName": "track-09-to-track-12.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8520,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-09-to-track-24",
+      "from": "track-09",
+      "to": "track-24",
+      "fileName": "track-09-to-track-24.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7989.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-09-to-track-28",
+      "from": "track-09",
+      "to": "track-28",
+      "fileName": "track-09-to-track-28.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7985.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-09-to-track-29",
+      "from": "track-09",
+      "to": "track-29",
+      "fileName": "track-09-to-track-29.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 10413,
+        "landMs": 0
+      },
+      "recipeVersion": "v7-frankenstein-verse-c2-gemini"
+    },
+    {
+      "id": "track-09-to-track-35",
+      "from": "track-09",
+      "to": "track-35",
+      "fileName": "track-09-to-track-35.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8534.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-10-to-track-03",
+      "from": "track-10",
+      "to": "track-03",
+      "fileName": "track-10-to-track-03.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8189,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-10-to-track-07",
+      "from": "track-10",
+      "to": "track-07",
+      "fileName": "track-10-to-track-07.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8738.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-10-to-track-13",
+      "from": "track-10",
+      "to": "track-13",
+      "fileName": "track-10-to-track-13.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8203.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-10-to-track-16",
+      "from": "track-10",
+      "to": "track-16",
+      "fileName": "track-10-to-track-16.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8705,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-10-to-track-27",
+      "from": "track-10",
+      "to": "track-27",
+      "fileName": "track-10-to-track-27.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8203.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-10-to-track-28",
+      "from": "track-10",
+      "to": "track-28",
+      "fileName": "track-10-to-track-28.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8190.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-10-to-track-33",
+      "from": "track-10",
+      "to": "track-33",
+      "fileName": "track-10-to-track-33.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8703.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-10-to-track-34",
+      "from": "track-10",
+      "to": "track-34",
+      "fileName": "track-10-to-track-34.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8219.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-11-to-track-03",
+      "from": "track-11",
+      "to": "track-03",
+      "fileName": "track-11-to-track-03.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8593,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-11-to-track-12",
+      "from": "track-11",
+      "to": "track-12",
+      "fileName": "track-11-to-track-12.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8607.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-11-to-track-16",
+      "from": "track-11",
+      "to": "track-16",
+      "fileName": "track-11-to-track-16.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8590.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-11-to-track-23",
+      "from": "track-11",
+      "to": "track-23",
+      "fileName": "track-11-to-track-23.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9142.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-11-to-track-24",
+      "from": "track-11",
+      "to": "track-24",
+      "fileName": "track-11-to-track-24.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8595.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-11-to-track-32",
+      "from": "track-11",
+      "to": "track-32",
+      "fileName": "track-11-to-track-32.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9111.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-11-to-track-33",
+      "from": "track-11",
+      "to": "track-33",
+      "fileName": "track-11-to-track-33.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8587.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-11-to-track-35",
+      "from": "track-11",
+      "to": "track-35",
+      "fileName": "track-11-to-track-35.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8621,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-12-to-track-05",
+      "from": "track-12",
+      "to": "track-05",
+      "fileName": "track-12-to-track-05.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7786.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-12-to-track-08",
+      "from": "track-12",
+      "to": "track-08",
+      "fileName": "track-12-to-track-08.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7802.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-12-to-track-10",
+      "from": "track-12",
+      "to": "track-10",
+      "fileName": "track-12-to-track-10.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8338.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-12-to-track-13",
+      "from": "track-12",
+      "to": "track-13",
+      "fileName": "track-12-to-track-13.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7800,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-12-to-track-15",
+      "from": "track-12",
+      "to": "track-15",
+      "fileName": "track-12-to-track-15.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7818.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-12-to-track-24",
+      "from": "track-12",
+      "to": "track-24",
+      "fileName": "track-12-to-track-24.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7789.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-12-to-track-32",
+      "from": "track-12",
+      "to": "track-32",
+      "fileName": "track-12-to-track-32.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8305.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-12-to-track-33",
+      "from": "track-12",
+      "to": "track-33",
+      "fileName": "track-12-to-track-33.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7780,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-13-to-track-15",
+      "from": "track-13",
+      "to": "track-15",
+      "fileName": "track-13-to-track-15.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8020,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-13-to-track-16",
+      "from": "track-13",
+      "to": "track-16",
+      "fileName": "track-13-to-track-16.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7980,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-13-to-track-21",
+      "from": "track-13",
+      "to": "track-21",
+      "fileName": "track-13-to-track-21.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8518.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-13-to-track-22",
+      "from": "track-13",
+      "to": "track-22",
+      "fileName": "track-13-to-track-22.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8538.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-13-to-track-23",
+      "from": "track-13",
+      "to": "track-23",
+      "fileName": "track-13-to-track-23.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8537.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-13-to-track-25",
+      "from": "track-13",
+      "to": "track-25",
+      "fileName": "track-13-to-track-25.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7985.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-13-to-track-28",
+      "from": "track-13",
+      "to": "track-28",
+      "fileName": "track-13-to-track-28.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7986.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-13-to-track-34",
+      "from": "track-13",
+      "to": "track-34",
+      "fileName": "track-13-to-track-34.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8016,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-14-to-track-08",
+      "from": "track-14",
+      "to": "track-08",
+      "fileName": "track-14-to-track-08.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8126,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-14-to-track-10",
+      "from": "track-14",
+      "to": "track-10",
+      "fileName": "track-14-to-track-10.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8138,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-14-to-track-11",
+      "from": "track-14",
+      "to": "track-11",
+      "fileName": "track-14-to-track-11.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8106,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-14-to-track-13",
+      "from": "track-14",
+      "to": "track-13",
+      "fileName": "track-14-to-track-13.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8123.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-14-to-track-16",
+      "from": "track-14",
+      "to": "track-16",
+      "fileName": "track-14-to-track-16.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8103.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-14-to-track-17",
+      "from": "track-14",
+      "to": "track-17",
+      "fileName": "track-14-to-track-17.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8103.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-14-to-track-28",
+      "from": "track-14",
+      "to": "track-28",
+      "fileName": "track-14-to-track-28.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8106,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-14-to-track-33",
+      "from": "track-14",
+      "to": "track-33",
+      "fileName": "track-14-to-track-33.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8100.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-15-to-track-07",
+      "from": "track-15",
+      "to": "track-07",
+      "fileName": "track-15-to-track-07.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7895.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-15-to-track-11",
+      "from": "track-15",
+      "to": "track-11",
+      "fileName": "track-15-to-track-11.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7863.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-15-to-track-17",
+      "from": "track-15",
+      "to": "track-17",
+      "fileName": "track-15-to-track-17.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7860.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-15-to-track-23",
+      "from": "track-15",
+      "to": "track-23",
+      "fileName": "track-15-to-track-23.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8414,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-15-to-track-25",
+      "from": "track-15",
+      "to": "track-25",
+      "fileName": "track-15-to-track-25.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7864.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-15-to-track-27",
+      "from": "track-15",
+      "to": "track-27",
+      "fileName": "track-15-to-track-27.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8399.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-15-to-track-30",
+      "from": "track-15",
+      "to": "track-30",
+      "fileName": "track-15-to-track-30.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7892.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-15-to-track-32",
+      "from": "track-15",
+      "to": "track-32",
+      "fileName": "track-15-to-track-32.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7863.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-16-to-track-02",
+      "from": "track-16",
+      "to": "track-02",
+      "fileName": "track-16-to-track-02.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9166.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-16-to-track-03",
+      "from": "track-16",
+      "to": "track-03",
+      "fileName": "track-16-to-track-03.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8591.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-16-to-track-04",
+      "from": "track-16",
+      "to": "track-04",
+      "fileName": "track-16-to-track-04.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8607.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-16-to-track-05",
+      "from": "track-16",
+      "to": "track-05",
+      "fileName": "track-16-to-track-05.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8594.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-16-to-track-06",
+      "from": "track-16",
+      "to": "track-06",
+      "fileName": "track-16-to-track-06.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8593,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-16-to-track-08",
+      "from": "track-16",
+      "to": "track-08",
+      "fileName": "track-16-to-track-08.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8607.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-16-to-track-17",
+      "from": "track-16",
+      "to": "track-17",
+      "fileName": "track-16-to-track-17.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7397.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v22-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-16-to-track-34",
+      "from": "track-16",
+      "to": "track-34",
+      "fileName": "track-16-to-track-34.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8623.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-17-to-track-07",
+      "from": "track-17",
+      "to": "track-07",
+      "fileName": "track-17-to-track-07.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8625,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-17-to-track-09",
+      "from": "track-17",
+      "to": "track-09",
+      "fileName": "track-17-to-track-09.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8607.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-17-to-track-18",
+      "from": "track-17",
+      "to": "track-18",
+      "fileName": "track-17-to-track-18.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8622.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-17-to-track-20",
+      "from": "track-17",
+      "to": "track-20",
+      "fileName": "track-17-to-track-20.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9146.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-17-to-track-22",
+      "from": "track-17",
+      "to": "track-22",
+      "fileName": "track-17-to-track-22.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9143.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-17-to-track-26",
+      "from": "track-17",
+      "to": "track-26",
+      "fileName": "track-17-to-track-26.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8602.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-17-to-track-30",
+      "from": "track-17",
+      "to": "track-30",
+      "fileName": "track-17-to-track-30.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8622.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-17-to-track-34",
+      "from": "track-17",
+      "to": "track-34",
+      "fileName": "track-17-to-track-34.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9143.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-18-to-track-01",
+      "from": "track-18",
+      "to": "track-01",
+      "fileName": "track-18-to-track-01.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8999,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-18-to-track-09",
+      "from": "track-18",
+      "to": "track-09",
+      "fileName": "track-18-to-track-09.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8983,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-18-to-track-13",
+      "from": "track-18",
+      "to": "track-13",
+      "fileName": "track-18-to-track-13.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8981.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-18-to-track-14",
+      "from": "track-18",
+      "to": "track-14",
+      "fileName": "track-18-to-track-14.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8448.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-18-to-track-21",
+      "from": "track-18",
+      "to": "track-21",
+      "fileName": "track-18-to-track-21.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8983,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-18-to-track-22",
+      "from": "track-18",
+      "to": "track-22",
+      "fileName": "track-18-to-track-22.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8999,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-18-to-track-30",
+      "from": "track-18",
+      "to": "track-30",
+      "fileName": "track-18-to-track-30.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8996.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-18-to-track-31",
+      "from": "track-18",
+      "to": "track-31",
+      "fileName": "track-18-to-track-31.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8963,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-19-to-track-06",
+      "from": "track-19",
+      "to": "track-06",
+      "fileName": "track-19-to-track-06.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8710.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-19-to-track-11",
+      "from": "track-19",
+      "to": "track-11",
+      "fileName": "track-19-to-track-11.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8710.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-19-to-track-17",
+      "from": "track-19",
+      "to": "track-17",
+      "fileName": "track-19-to-track-17.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8193,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-19-to-track-20",
+      "from": "track-19",
+      "to": "track-20",
+      "fileName": "track-19-to-track-20.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8747.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-19-to-track-21",
+      "from": "track-19",
+      "to": "track-21",
+      "fileName": "track-19-to-track-21.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8729,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-19-to-track-25",
+      "from": "track-19",
+      "to": "track-25",
+      "fileName": "track-19-to-track-25.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8717,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-19-to-track-27",
+      "from": "track-19",
+      "to": "track-27",
+      "fileName": "track-19-to-track-27.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8731.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-19-to-track-31",
+      "from": "track-19",
+      "to": "track-31",
+      "fileName": "track-19-to-track-31.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8710.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-20-to-track-02",
+      "from": "track-20",
+      "to": "track-02",
+      "fileName": "track-20-to-track-02.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8769,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-20-to-track-14",
+      "from": "track-20",
+      "to": "track-14",
+      "fileName": "track-20-to-track-14.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8715.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-20-to-track-16",
+      "from": "track-20",
+      "to": "track-16",
+      "fileName": "track-20-to-track-16.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8189,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-20-to-track-18",
+      "from": "track-20",
+      "to": "track-18",
+      "fileName": "track-20-to-track-18.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8745,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-20-to-track-21",
+      "from": "track-20",
+      "to": "track-21",
+      "fileName": "track-20-to-track-21.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8729,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-20-to-track-22",
+      "from": "track-20",
+      "to": "track-22",
+      "fileName": "track-20-to-track-22.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8745,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-20-to-track-26",
+      "from": "track-20",
+      "to": "track-26",
+      "fileName": "track-20-to-track-26.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8722.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-20-to-track-31",
+      "from": "track-20",
+      "to": "track-31",
+      "fileName": "track-20-to-track-31.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8710.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-21-to-track-02",
+      "from": "track-21",
+      "to": "track-02",
+      "fileName": "track-21-to-track-02.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8357.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-21-to-track-12",
+      "from": "track-21",
+      "to": "track-12",
+      "fileName": "track-21-to-track-12.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7801.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-21-to-track-18",
+      "from": "track-21",
+      "to": "track-18",
+      "fileName": "track-21-to-track-18.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8334.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-21-to-track-19",
+      "from": "track-21",
+      "to": "track-19",
+      "fileName": "track-21-to-track-19.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8336,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-21-to-track-20",
+      "from": "track-21",
+      "to": "track-20",
+      "fileName": "track-21-to-track-20.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8336,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-21-to-track-23",
+      "from": "track-21",
+      "to": "track-23",
+      "fileName": "track-21-to-track-23.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8336,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-21-to-track-31",
+      "from": "track-21",
+      "to": "track-31",
+      "fileName": "track-21-to-track-31.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8300,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-21-to-track-32",
+      "from": "track-21",
+      "to": "track-32",
+      "fileName": "track-21-to-track-32.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8306.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-22-to-track-01",
+      "from": "track-22",
+      "to": "track-01",
+      "fileName": "track-22-to-track-01.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8747.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-22-to-track-13",
+      "from": "track-22",
+      "to": "track-13",
+      "fileName": "track-22-to-track-13.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8729,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-22-to-track-14",
+      "from": "track-22",
+      "to": "track-14",
+      "fileName": "track-22-to-track-14.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8715.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-22-to-track-18",
+      "from": "track-22",
+      "to": "track-18",
+      "fileName": "track-22-to-track-18.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8746.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-22-to-track-20",
+      "from": "track-22",
+      "to": "track-20",
+      "fileName": "track-22-to-track-20.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8746.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-22-to-track-23",
+      "from": "track-22",
+      "to": "track-23",
+      "fileName": "track-22-to-track-23.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8745,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-22-to-track-24",
+      "from": "track-22",
+      "to": "track-24",
+      "fileName": "track-22-to-track-24.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8718.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-22-to-track-35",
+      "from": "track-22",
+      "to": "track-35",
+      "fileName": "track-22-to-track-35.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8745,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-23-to-track-03",
+      "from": "track-23",
+      "to": "track-03",
+      "fileName": "track-23-to-track-03.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8968.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-23-to-track-05",
+      "from": "track-23",
+      "to": "track-05",
+      "fileName": "track-23-to-track-05.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8968.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-23-to-track-10",
+      "from": "track-23",
+      "to": "track-10",
+      "fileName": "track-23-to-track-10.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9000.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-23-to-track-18",
+      "from": "track-23",
+      "to": "track-18",
+      "fileName": "track-23-to-track-18.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8997.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-23-to-track-19",
+      "from": "track-23",
+      "to": "track-19",
+      "fileName": "track-23-to-track-19.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8999,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-23-to-track-20",
+      "from": "track-23",
+      "to": "track-20",
+      "fileName": "track-23-to-track-20.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8999,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-23-to-track-22",
+      "from": "track-23",
+      "to": "track-22",
+      "fileName": "track-23-to-track-22.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8999,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-23-to-track-33",
+      "from": "track-23",
+      "to": "track-33",
+      "fileName": "track-23-to-track-33.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8963,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-24-to-track-07",
+      "from": "track-24",
+      "to": "track-07",
+      "fileName": "track-24-to-track-07.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8468.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-24-to-track-08",
+      "from": "track-24",
+      "to": "track-08",
+      "fileName": "track-24-to-track-08.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8972.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-24-to-track-25",
+      "from": "track-24",
+      "to": "track-25",
+      "fileName": "track-24-to-track-25.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8435,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-24-to-track-26",
+      "from": "track-24",
+      "to": "track-26",
+      "fileName": "track-24-to-track-26.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8444.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-24-to-track-30",
+      "from": "track-24",
+      "to": "track-30",
+      "fileName": "track-24-to-track-30.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8464.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-24-to-track-31",
+      "from": "track-24",
+      "to": "track-31",
+      "fileName": "track-24-to-track-31.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8951,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-24-to-track-33",
+      "from": "track-24",
+      "to": "track-33",
+      "fileName": "track-24-to-track-33.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8431,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-24-to-track-35",
+      "from": "track-24",
+      "to": "track-35",
+      "fileName": "track-24-to-track-35.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8464.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-25-to-track-04",
+      "from": "track-25",
+      "to": "track-04",
+      "fileName": "track-25-to-track-04.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8124.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-25-to-track-09",
+      "from": "track-25",
+      "to": "track-09",
+      "fileName": "track-25-to-track-09.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8122,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-25-to-track-12",
+      "from": "track-25",
+      "to": "track-12",
+      "fileName": "track-25-to-track-12.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8120.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-25-to-track-14",
+      "from": "track-25",
+      "to": "track-14",
+      "fileName": "track-25-to-track-14.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8107.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-25-to-track-15",
+      "from": "track-25",
+      "to": "track-15",
+      "fileName": "track-25-to-track-15.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8142,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-25-to-track-16",
+      "from": "track-25",
+      "to": "track-16",
+      "fileName": "track-25-to-track-16.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8103.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-25-to-track-19",
+      "from": "track-25",
+      "to": "track-19",
+      "fileName": "track-25-to-track-19.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8659.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-25-to-track-30",
+      "from": "track-25",
+      "to": "track-30",
+      "fileName": "track-25-to-track-30.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8136.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-26-to-track-01",
+      "from": "track-26",
+      "to": "track-01",
+      "fileName": "track-26-to-track-01.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9267.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-26-to-track-03",
+      "from": "track-26",
+      "to": "track-03",
+      "fileName": "track-26-to-track-03.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9238,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-26-to-track-05",
+      "from": "track-26",
+      "to": "track-05",
+      "fileName": "track-26-to-track-05.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8716.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-26-to-track-09",
+      "from": "track-26",
+      "to": "track-09",
+      "fileName": "track-26-to-track-09.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9254,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-26-to-track-11",
+      "from": "track-26",
+      "to": "track-11",
+      "fileName": "track-26-to-track-11.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8710,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-26-to-track-14",
+      "from": "track-26",
+      "to": "track-14",
+      "fileName": "track-26-to-track-14.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8718,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-26-to-track-25",
+      "from": "track-26",
+      "to": "track-25",
+      "fileName": "track-26-to-track-25.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8714,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-26-to-track-29",
+      "from": "track-26",
+      "to": "track-29",
+      "fileName": "track-26-to-track-29.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8743.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-27-to-track-01",
+      "from": "track-27",
+      "to": "track-01",
+      "fileName": "track-27-to-track-01.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8537.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-27-to-track-05",
+      "from": "track-27",
+      "to": "track-05",
+      "fileName": "track-27-to-track-05.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7986.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-27-to-track-06",
+      "from": "track-27",
+      "to": "track-06",
+      "fileName": "track-27-to-track-06.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8508,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-27-to-track-08",
+      "from": "track-27",
+      "to": "track-08",
+      "fileName": "track-27-to-track-08.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7998.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-27-to-track-14",
+      "from": "track-27",
+      "to": "track-14",
+      "fileName": "track-27-to-track-14.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8505.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-27-to-track-17",
+      "from": "track-27",
+      "to": "track-17",
+      "fileName": "track-27-to-track-17.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7978.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-27-to-track-19",
+      "from": "track-27",
+      "to": "track-19",
+      "fileName": "track-27-to-track-19.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8538.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-27-to-track-29",
+      "from": "track-27",
+      "to": "track-29",
+      "fileName": "track-27-to-track-29.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8012,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-28-to-track-01",
+      "from": "track-28",
+      "to": "track-01",
+      "fileName": "track-28-to-track-01.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8659.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-28-to-track-03",
+      "from": "track-28",
+      "to": "track-03",
+      "fileName": "track-28-to-track-03.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8107.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-28-to-track-05",
+      "from": "track-28",
+      "to": "track-05",
+      "fileName": "track-28-to-track-05.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8108.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-28-to-track-06",
+      "from": "track-28",
+      "to": "track-06",
+      "fileName": "track-28-to-track-06.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8104.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-28-to-track-08",
+      "from": "track-28",
+      "to": "track-08",
+      "fileName": "track-28-to-track-08.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8643.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-28-to-track-19",
+      "from": "track-28",
+      "to": "track-19",
+      "fileName": "track-28-to-track-19.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8659.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-28-to-track-21",
+      "from": "track-28",
+      "to": "track-21",
+      "fileName": "track-28-to-track-21.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8123.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-28-to-track-24",
+      "from": "track-28",
+      "to": "track-24",
+      "fileName": "track-28-to-track-24.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8111.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-29-to-track-02",
+      "from": "track-29",
+      "to": "track-02",
+      "fileName": "track-29-to-track-02.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8879.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-29-to-track-04",
+      "from": "track-29",
+      "to": "track-04",
+      "fileName": "track-29-to-track-04.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8321,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-29-to-track-06",
+      "from": "track-29",
+      "to": "track-06",
+      "fileName": "track-29-to-track-06.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8303.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-29-to-track-09",
+      "from": "track-29",
+      "to": "track-09",
+      "fileName": "track-29-to-track-09.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8322.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-29-to-track-25",
+      "from": "track-29",
+      "to": "track-25",
+      "fileName": "track-29-to-track-25.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8306.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-29-to-track-28",
+      "from": "track-29",
+      "to": "track-28",
+      "fileName": "track-29-to-track-28.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8306.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-29-to-track-33",
+      "from": "track-29",
+      "to": "track-33",
+      "fileName": "track-29-to-track-33.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8821,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-29-to-track-35",
+      "from": "track-29",
+      "to": "track-35",
+      "fileName": "track-29-to-track-35.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8335.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-30-to-track-02",
+      "from": "track-30",
+      "to": "track-02",
+      "fileName": "track-30-to-track-02.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9031,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-30-to-track-11",
+      "from": "track-30",
+      "to": "track-11",
+      "fileName": "track-30-to-track-11.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8449.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-30-to-track-12",
+      "from": "track-30",
+      "to": "track-12",
+      "fileName": "track-30-to-track-12.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8471,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-30-to-track-15",
+      "from": "track-30",
+      "to": "track-15",
+      "fileName": "track-30-to-track-15.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8487,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-30-to-track-22",
+      "from": "track-30",
+      "to": "track-22",
+      "fileName": "track-30-to-track-22.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9005.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-30-to-track-29",
+      "from": "track-30",
+      "to": "track-29",
+      "fileName": "track-30-to-track-29.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8483,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-30-to-track-32",
+      "from": "track-30",
+      "to": "track-32",
+      "fileName": "track-30-to-track-32.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8976.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-30-to-track-35",
+      "from": "track-30",
+      "to": "track-35",
+      "fileName": "track-30-to-track-35.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8484.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-31-to-track-02",
+      "from": "track-31",
+      "to": "track-02",
+      "fileName": "track-31-to-track-02.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9165,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-31-to-track-04",
+      "from": "track-31",
+      "to": "track-04",
+      "fileName": "track-31-to-track-04.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9127.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-31-to-track-06",
+      "from": "track-31",
+      "to": "track-06",
+      "fileName": "track-31-to-track-06.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9109,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-31-to-track-10",
+      "from": "track-31",
+      "to": "track-10",
+      "fileName": "track-31-to-track-10.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9143.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-31-to-track-19",
+      "from": "track-31",
+      "to": "track-19",
+      "fileName": "track-31-to-track-19.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9143.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-31-to-track-22",
+      "from": "track-31",
+      "to": "track-22",
+      "fileName": "track-31-to-track-22.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9143.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-31-to-track-23",
+      "from": "track-31",
+      "to": "track-23",
+      "fileName": "track-31-to-track-23.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9142.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-31-to-track-28",
+      "from": "track-31",
+      "to": "track-28",
+      "fileName": "track-31-to-track-28.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9113,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-32-to-track-05",
+      "from": "track-32",
+      "to": "track-05",
+      "fileName": "track-32-to-track-05.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8106,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-32-to-track-08",
+      "from": "track-32",
+      "to": "track-08",
+      "fileName": "track-32-to-track-08.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8643.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-32-to-track-11",
+      "from": "track-32",
+      "to": "track-11",
+      "fileName": "track-32-to-track-11.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8102,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-32-to-track-13",
+      "from": "track-32",
+      "to": "track-13",
+      "fileName": "track-32-to-track-13.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8122,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-32-to-track-20",
+      "from": "track-32",
+      "to": "track-20",
+      "fileName": "track-32-to-track-20.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8659.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-32-to-track-27",
+      "from": "track-32",
+      "to": "track-27",
+      "fileName": "track-32-to-track-27.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8120.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-32-to-track-29",
+      "from": "track-32",
+      "to": "track-29",
+      "fileName": "track-32-to-track-29.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8135.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-32-to-track-34",
+      "from": "track-32",
+      "to": "track-34",
+      "fileName": "track-32-to-track-34.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8138,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-33-to-track-03",
+      "from": "track-33",
+      "to": "track-03",
+      "fileName": "track-33-to-track-03.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8593,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-33-to-track-10",
+      "from": "track-33",
+      "to": "track-10",
+      "fileName": "track-33-to-track-10.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8625,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-33-to-track-13",
+      "from": "track-33",
+      "to": "track-13",
+      "fileName": "track-33-to-track-13.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9125,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-33-to-track-16",
+      "from": "track-33",
+      "to": "track-16",
+      "fileName": "track-33-to-track-16.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8587.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-33-to-track-18",
+      "from": "track-33",
+      "to": "track-18",
+      "fileName": "track-33-to-track-18.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9142.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-33-to-track-19",
+      "from": "track-33",
+      "to": "track-19",
+      "fileName": "track-33-to-track-19.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9143.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-33-to-track-20",
+      "from": "track-33",
+      "to": "track-20",
+      "fileName": "track-33-to-track-20.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9143.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-33-to-track-27",
+      "from": "track-33",
+      "to": "track-27",
+      "fileName": "track-33-to-track-27.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9127.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-34-to-track-02",
+      "from": "track-34",
+      "to": "track-02",
+      "fileName": "track-34-to-track-02.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9028.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-34-to-track-03",
+      "from": "track-34",
+      "to": "track-03",
+      "fileName": "track-34-to-track-03.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8455,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-34-to-track-15",
+      "from": "track-34",
+      "to": "track-15",
+      "fileName": "track-34-to-track-15.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8485.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-34-to-track-18",
+      "from": "track-34",
+      "to": "track-18",
+      "fileName": "track-34-to-track-18.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8484.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-34-to-track-29",
+      "from": "track-34",
+      "to": "track-29",
+      "fileName": "track-34-to-track-29.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8483,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-34-to-track-30",
+      "from": "track-34",
+      "to": "track-30",
+      "fileName": "track-34-to-track-30.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8483,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-34-to-track-32",
+      "from": "track-34",
+      "to": "track-32",
+      "fileName": "track-34-to-track-32.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8455,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-34-to-track-35",
+      "from": "track-34",
+      "to": "track-35",
+      "fileName": "track-34-to-track-35.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 7157.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v22-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-35-to-track-01",
+      "from": "track-35",
+      "to": "track-01",
+      "fileName": "track-35-to-track-01.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9007,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-35-to-track-04",
+      "from": "track-35",
+      "to": "track-04",
+      "fileName": "track-35-to-track-04.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8468.3,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-35-to-track-06",
+      "from": "track-35",
+      "to": "track-06",
+      "fileName": "track-35-to-track-06.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8449.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-35-to-track-07",
+      "from": "track-35",
+      "to": "track-07",
+      "fileName": "track-35-to-track-07.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9007,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-35-to-track-09",
+      "from": "track-35",
+      "to": "track-09",
+      "fileName": "track-35-to-track-09.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8469.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v25-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-35-to-track-11",
+      "from": "track-35",
+      "to": "track-11",
+      "fileName": "track-35-to-track-11.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8451,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-35-to-track-20",
+      "from": "track-35",
+      "to": "track-20",
+      "fileName": "track-35-to-track-20.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 9005.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v27-frankenstein-verse-c4-gemini"
+    },
+    {
+      "id": "track-35-to-track-34",
+      "from": "track-35",
+      "to": "track-34",
+      "fileName": "track-35-to-track-34.wav",
+      "timing": {
+        "handleMs": 250,
+        "crossfadeMs": 100,
+        "glueMs": 8485.7,
+        "landMs": 0
+      },
+      "recipeVersion": "v26-frankenstein-verse-c4-gemini"
+    }
+  ]
+}

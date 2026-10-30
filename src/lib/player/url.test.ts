@@ -20,16 +20,18 @@ describe("isBeatPage", () => {
 
   it("returns false for non-beat pages", () => {
     expect(isBeatPage("/about")).toBe(false);
-    expect(isBeatPage("/terms-of-service")).toBe(false);
-    expect(isBeatPage("/privacy-policy")).toBe(false);
+    expect(isBeatPage("/privacy")).toBe(false);
     expect(isBeatPage("/generate")).toBe(false);
   });
 });
 
 describe("formatBeatUrl", () => {
-  it("formats integer and numeric strings as 4-digit zero-padded beat paths", () => {
-    expect(formatBeatUrl(1)).toBe("/beat/0001");
-    expect(formatBeatUrl("42")).toBe("/beat/0042");
+  it("formats integers, numeric strings, and track prefixes as 2-digit zero-padded beat paths", () => {
+    expect(formatBeatUrl(1)).toBe("/beat/01");
+    expect(formatBeatUrl("1")).toBe("/beat/01");
+    expect(formatBeatUrl("track-01")).toBe("/beat/01");
+    expect(formatBeatUrl("track-1")).toBe("/beat/01");
+    expect(formatBeatUrl("42")).toBe("/beat/42");
     expect(formatBeatUrl(1500)).toBe("/beat/1500");
   });
 
@@ -50,14 +52,40 @@ describe("formatBeatUrl", () => {
 
 describe("syncBeatUrl", () => {
   it("calls pushState when on a beat page", () => {
-    const mockHistory = { pushState: vi.fn() };
-    const synced = syncBeatUrl("/beat/0001", "0002", mockHistory);
+    const mockHistory = { pushState: vi.fn(), replaceState: vi.fn() };
+    const synced = syncBeatUrl("/beat/01", "02", mockHistory);
 
     expect(synced).toBe(true);
     expect(mockHistory.pushState).toHaveBeenCalledWith(
-      { beatId: "0002" },
+      { beatId: "02" },
       "",
-      "/beat/0002",
+      "/beat/02",
+    );
+    expect(mockHistory.replaceState).not.toHaveBeenCalled();
+  });
+
+  it("calls replaceState instead of pushState when replace is true", () => {
+    const mockHistory = { pushState: vi.fn(), replaceState: vi.fn() };
+    const synced = syncBeatUrl("/beat/02", "01", mockHistory, true);
+
+    expect(synced).toBe(true);
+    expect(mockHistory.replaceState).toHaveBeenCalledWith(
+      { beatId: "01" },
+      "",
+      "/beat/01",
+    );
+    expect(mockHistory.pushState).not.toHaveBeenCalled();
+  });
+
+  it("falls back to pushState when replace is true but historyTarget lacks replaceState", () => {
+    const mockHistory = { pushState: vi.fn() };
+    const synced = syncBeatUrl("/beat/02", "01", mockHistory, true);
+
+    expect(synced).toBe(true);
+    expect(mockHistory.pushState).toHaveBeenCalledWith(
+      { beatId: "01" },
+      "",
+      "/beat/01",
     );
   });
 
@@ -67,13 +95,9 @@ describe("syncBeatUrl", () => {
     try {
       // @ts-expect-error test-only mock of window
       globalThis.window = { history: { pushState: mockPush } };
-      const synced = syncBeatUrl("/beat/0001", "0002");
+      const synced = syncBeatUrl("/beat/01", "02");
       expect(synced).toBe(true);
-      expect(mockPush).toHaveBeenCalledWith(
-        { beatId: "0002" },
-        "",
-        "/beat/0002",
-      );
+      expect(mockPush).toHaveBeenCalledWith({ beatId: "02" }, "", "/beat/02");
     } finally {
       globalThis.window = originalWindow;
     }
@@ -84,7 +108,7 @@ describe("syncBeatUrl", () => {
     try {
       // @ts-expect-error test-only removal of window
       delete globalThis.window;
-      const synced = syncBeatUrl("/beat/0001", "0002");
+      const synced = syncBeatUrl("/beat/01", "02");
       expect(synced).toBe(true);
     } finally {
       globalThis.window = originalWindow;
@@ -93,7 +117,7 @@ describe("syncBeatUrl", () => {
 
   it("does not call pushState when on an informational route", () => {
     const mockHistory = { pushState: vi.fn() };
-    const synced = syncBeatUrl("/about", "0002", mockHistory);
+    const synced = syncBeatUrl("/about", "02", mockHistory);
 
     expect(synced).toBe(false);
     expect(mockHistory.pushState).not.toHaveBeenCalled();
@@ -101,7 +125,7 @@ describe("syncBeatUrl", () => {
 
   it("does not call pushState when already on the target beat URL", () => {
     const mockHistory = { pushState: vi.fn() };
-    const synced = syncBeatUrl("/beat/0002", "0002", mockHistory);
+    const synced = syncBeatUrl("/beat/02", "02", mockHistory);
 
     expect(synced).toBe(false);
     expect(mockHistory.pushState).not.toHaveBeenCalled();
@@ -113,9 +137,9 @@ describe("syncBeatUrl", () => {
     try {
       globalThis.window = {
         history: { pushState: mockPush },
-        location: { pathname: "/beat/0002" },
+        location: { pathname: "/beat/02" },
       } as unknown as Window & typeof globalThis;
-      const synced = syncBeatUrl("/beat/0001", "0002");
+      const synced = syncBeatUrl("/beat/01", "02");
       expect(synced).toBe(false);
       expect(mockPush).not.toHaveBeenCalled();
     } finally {
