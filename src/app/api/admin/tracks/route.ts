@@ -7,8 +7,6 @@ import {
 } from "@/lib/admin";
 import { getSupabaseAdminClient } from "@/lib/supabase";
 
-export const dynamic = "force-dynamic";
-
 function isLocalDev(): boolean {
   return process.env.NODE_ENV !== "production";
 }
