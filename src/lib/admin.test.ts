@@ -1,13 +1,87 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   createAdminTrack,
+  createTrackSchema,
   fetchAdminTracks,
   fetchAdminTrackTransitions,
+  resolveAdminAudioUrl,
   updateAdminTrack,
+  updateTrackSchema,
   uploadTrackAudio,
 } from "./admin";
 
 describe("admin lib", () => {
+  describe("schemas", () => {
+    it("validates createTrackSchema correctly", () => {
+      const valid = createTrackSchema.safeParse({
+        id: "track-01",
+        name: "01",
+        index: 1,
+        bpm: 90,
+        key: "C minor",
+        genre: "Boom Bap",
+        duration_ms: 60000,
+        loop_start_ms: 1000,
+        loop_end_ms: 50000,
+      });
+      expect(valid.success).toBe(true);
+
+      const invalidId = createTrackSchema.safeParse({
+        id: "invalid id with spaces!",
+        name: "01",
+        bpm: 90,
+        key: "C minor",
+        genre: "Boom Bap",
+        duration_ms: 60000,
+        loop_start_ms: 1000,
+        loop_end_ms: 50000,
+      });
+      expect(invalidId.success).toBe(false);
+    });
+
+    it("validates updateTrackSchema correctly", () => {
+      const valid = updateTrackSchema.safeParse({
+        bpm: 95,
+        is_active: false,
+        name: "Updated",
+      });
+      expect(valid.success).toBe(true);
+    });
+  });
+
+  describe("resolveAdminAudioUrl", () => {
+    it("returns empty string when audioPath is missing", () => {
+      const client = {} as never;
+      expect(resolveAdminAudioUrl(client, undefined)).toBe("");
+      expect(resolveAdminAudioUrl(client, "")).toBe("");
+    });
+
+    it("returns local audio url prefixed with /audio/ if not already starting with /", () => {
+      const client = {} as never;
+      expect(resolveAdminAudioUrl(client, "tracks/01.m4a", true)).toBe(
+        "/audio/tracks/01.m4a",
+      );
+      expect(resolveAdminAudioUrl(client, "/tracks/01.m4a", true)).toBe(
+        "/tracks/01.m4a",
+      );
+    });
+
+    it("returns public url from storage when useLocalAudio is false", () => {
+      const client = {
+        storage: {
+          from: vi.fn().mockReturnValue({
+            getPublicUrl: vi.fn().mockReturnValue({
+              data: { publicUrl: "https://supabase.co/audio/tracks/01.m4a" },
+            }),
+          }),
+        },
+      };
+      expect(
+        resolveAdminAudioUrl(client as never, "tracks/01.m4a", false),
+      ).toBe("https://supabase.co/audio/tracks/01.m4a");
+    });
+  });
+
   it("fetchAdminTracks queries all tracks ordered by index and name", async () => {
     const mockOrder2 = vi.fn().mockResolvedValue({
       data: [{ id: "track-1", name: "01", index: 1, is_active: true }],
@@ -92,6 +166,91 @@ describe("admin lib", () => {
     expect(result.is_active).toBe(false);
     expect(mockUpdate).toHaveBeenCalledWith({ is_active: false });
     expect(mockEq).toHaveBeenCalledWith("id", "track-1");
+  });
+
+  it("updateAdminTrack recomputes loop_duration_ms and formats index name", async () => {
+    const mockSingle = vi.fn().mockResolvedValue({
+      data: { id: "track-1", name: "05", loop_duration_ms: 40000 },
+      error: null,
+    });
+    const mockSelect = vi.fn().mockReturnValue({ single: mockSingle });
+    const mockEq = vi.fn().mockReturnValue({ select: mockSelect });
+    const mockUpdate = vi.fn().mockReturnValue({ eq: mockEq });
+    const mockClient = {
+      from: vi.fn().mockReturnValue({ update: mockUpdate }),
+    };
+
+    await updateAdminTrack(mockClient as never, "track-1", {
+      index: 5,
+      loop_start_ms: 10000,
+      loop_end_ms: 50000,
+    });
+
+    expect(mockUpdate).toHaveBeenCalledWith({
+      index: 5,
+      name: "05",
+      loop_start_ms: 10000,
+      loop_end_ms: 50000,
+      loop_duration_ms: 40000,
+    });
+  });
+
+  it("updateAdminTrack throws on update error", async () => {
+    const mockSingle = vi.fn().mockResolvedValue({
+      data: null,
+      error: { message: "Update failed" },
+    });
+    const mockClient = {
+      from: vi.fn().mockReturnValue({
+        update: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            select: vi.fn().mockReturnValue({ single: mockSingle }),
+          }),
+        }),
+      }),
+    };
+
+    await expect(
+      updateAdminTrack(mockClient as never, "track-1", { is_active: true }),
+    ).rejects.toThrow("Failed to update track track-1: Update failed");
+  });
+
+  it("createAdminTrack formats name from index and throws on insert error", async () => {
+    const newTrack = {
+      id: "track-05",
+      name: "",
+      index: 5,
+      bpm: 90,
+      key: "C minor",
+      genre: "Boom Bap",
+      duration_ms: 60000,
+      loop_start_ms: 10000,
+      loop_end_ms: 50000,
+      audio_path: "tracks/track-05.m4a",
+    };
+
+    const mockInsert = vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        single: vi.fn().mockResolvedValue({
+          data: null,
+          error: { message: "Duplicate key" },
+        }),
+      }),
+    });
+    const mockClient = {
+      from: vi.fn().mockReturnValue({ insert: mockInsert }),
+    };
+
+    await expect(
+      createAdminTrack(mockClient as never, newTrack),
+    ).rejects.toThrow("Failed to create track track-05: Duplicate key");
+
+    expect(mockInsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "05",
+        loop_duration_ms: 40000,
+      }),
+    );
   });
 
   it("createAdminTrack inserts new track row", async () => {

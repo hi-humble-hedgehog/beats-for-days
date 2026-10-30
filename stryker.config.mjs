@@ -20,6 +20,7 @@ const config = {
   mutate: [
     "src/**/*.ts",
     "scripts/**/*.ts",
+    "!src/components/**",
     "!**/*.test.ts",
     "!**/*.d.ts",
     "!scripts/**/cli.ts",
