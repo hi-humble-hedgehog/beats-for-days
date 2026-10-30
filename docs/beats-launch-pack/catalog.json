@@ -113,16 +113,16 @@
     {
       "id": "track-09",
       "name": "Iron Gut Stabs",
-      "bpm": 96,
+      "bpm": 98,
       "key": "G minor",
       "genre": "Soul",
       "leadInstrument": "Trumpet",
       "counterInstrument": "Saxophone",
       "fileName": "track-09.wav",
       "durationMs": 50000,
-      "loopStartMs": 10000,
-      "loopEndMs": 45000,
-      "loopDurationMs": 35000
+      "loopStartMs": 9796,
+      "loopEndMs": 44082,
+      "loopDurationMs": 34286
     },
     {
       "id": "track-10",
