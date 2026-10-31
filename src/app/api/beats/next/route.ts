@@ -44,7 +44,7 @@ export async function POST(request: Request) {
 
   return NextResponse.json({
     ...result,
-    resolveAfterSec: getServerEnv().NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS,
+    resolveAfterSec: getServerEnv().AUTO_TRANSITION_RESOLVE_SECONDS,
   });
 }
 
@@ -65,6 +65,6 @@ export async function GET(_request?: Request) {
 
   return NextResponse.json({
     ...result,
-    resolveAfterSec: getServerEnv().NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS,
+    resolveAfterSec: getServerEnv().AUTO_TRANSITION_RESOLVE_SECONDS,
   });
 }

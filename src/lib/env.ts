@@ -17,11 +17,8 @@ const serverEnvSchema = z
       .trim()
       .transform((val) => (val === "" ? undefined : val))
       .optional(),
-    NEXT_PUBLIC_SUPABASE_URL: z
-      .string()
-      .url()
-      .default("http://127.0.0.1:54521"),
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: z
+    SUPABASE_URL: z.string().url().default("http://127.0.0.1:54521"),
+    SUPABASE_ANON_KEY: z
       .string()
       .default("sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH"),
     SUPABASE_SERVICE_ROLE_KEY: z
@@ -33,7 +30,7 @@ const serverEnvSchema = z
       .enum(["true", "false"])
       .default("false")
       .transform((val) => val === "true"),
-    NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS: z
+    AUTO_TRANSITION_RESOLVE_SECONDS: z
       .string()
       .default("30")
       .transform((val, ctx) => {
@@ -58,12 +55,11 @@ const serverEnvSchema = z
     return {
       ALLOW_LIVE_AI_CALLS: env.ALLOW_LIVE_AI_CALLS,
       ELEVENLABS_API_KEY: env.ELEVENLABS_API_KEY,
-      NEXT_PUBLIC_SUPABASE_URL: env.NEXT_PUBLIC_SUPABASE_URL,
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      SUPABASE_URL: env.SUPABASE_URL,
+      SUPABASE_ANON_KEY: env.SUPABASE_ANON_KEY,
       SUPABASE_SERVICE_ROLE_KEY: env.SUPABASE_SERVICE_ROLE_KEY,
       USE_LOCAL_AUDIO: useLocalAudio,
-      NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS:
-        env.NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS,
+      AUTO_TRANSITION_RESOLVE_SECONDS: env.AUTO_TRANSITION_RESOLVE_SECONDS,
       DEBUG_PANEL: env.DEBUG_PANEL,
     };
   })
