@@ -204,12 +204,17 @@ export async function seedDatabase(
 }
 
 function resolveSupabaseUrl(): string {
-  return process.env.NEXT_PUBLIC_SUPABASE_URL || "http://127.0.0.1:54521";
+  return (
+    process.env.SUPABASE_URL ||
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    "http://127.0.0.1:54521"
+  );
 }
 
 function resolveSupabaseKey(): string {
   return (
     process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_ANON_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     "sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz"
   );
@@ -218,7 +223,7 @@ function resolveSupabaseKey(): string {
 function warnIfMissingServiceRoleKey(): void {
   if (
     !process.env.SUPABASE_SERVICE_ROLE_KEY &&
-    process.env.NEXT_PUBLIC_SUPABASE_URL
+    (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL)
   ) {
     console.warn(
       "Notice: SUPABASE_SERVICE_ROLE_KEY is not set. Storage uploads with anon key may fail unless RLS upload policies are configured.",
