@@ -164,6 +164,7 @@ export class AudioEngine {
   async armTransition(
     nextBeat: BeatView,
     transition: TransitionView,
+    options?: { minPass?: number },
   ): Promise<void> {
     const ctx = this.getContext();
     await this.transitions.arm({
@@ -184,6 +185,7 @@ export class AudioEngine {
       },
       onHandoffSuccess: (h) => this.handleHandoff(h),
       onTrackHandoff: this.onTrackHandoff,
+      minPass: options?.minPass,
     });
   }
 
