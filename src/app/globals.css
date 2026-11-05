@@ -115,3 +115,73 @@
     opacity: 1;
   }
 }
+
+/*
+ * Tactile printed surface (docs/decisions/0017-tactile-printed-surface.md).
+ * Ink colour is each element's own text colour (vinyl / stamp / pencil);
+ * the paper is --sleeve plus a seamless relief tile.
+ */
+:root {
+  --paper-base: var(--sleeve);
+  --paper-tile: url("/textures/paper-tile-512.jpg");
+  --paper-tile-size: 512px;
+  /* Strength of the paper relief on the bare stock (0–1). */
+  --paper-tooth: 0.18;
+}
+
+@layer components {
+  /*
+   * Paper substrate. The relief lives on a negative-z pseudo-element inside an
+   * isolated group, so `.printed-ink` children multiply onto paper + relief.
+   * `overlay` is near-invisible on a bright base, so we use `hard-light` at
+   * reduced opacity (tile is centred at 50% gray: mean luminance holds).
+   */
+  .paper-surface {
+    position: relative;
+    isolation: isolate;
+    background-color: var(--paper-base);
+  }
+
+  .paper-surface::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: var(--paper-tile);
+    background-repeat: repeat;
+    background-size: var(--paper-tile-size) var(--paper-tile-size);
+    background-position: 0 0;
+    mix-blend-mode: hard-light;
+    opacity: var(--paper-tooth);
+  }
+
+  /*
+   * Printed ink plate. Apply to headings / plate wrappers, not per character.
+   * The filter re-runs whenever the element repaints, so keep it off
+   * continuously animated content.
+   */
+  .printed-ink {
+    filter: url(#printed-ink-filter);
+    mix-blend-mode: multiply;
+  }
+
+  /* < 14px copy: displacement hurts legibility; subtle ink spread only. */
+  .printed-ink-sm {
+    mix-blend-mode: multiply;
+    text-shadow: 0 0 0.45px currentColor;
+  }
+}
+
+@media (forced-colors: active) {
+  .paper-surface::before {
+    display: none;
+  }
+
+  .printed-ink,
+  .printed-ink-sm {
+    filter: none;
+    mix-blend-mode: normal;
+    text-shadow: none;
+  }
+}

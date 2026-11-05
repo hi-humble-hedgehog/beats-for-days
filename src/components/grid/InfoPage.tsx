@@ -24,7 +24,7 @@ export function InfoPage({ section, title, children }: InfoPageProps) {
       3. Controls: header and footer links; page-specific children (forms/buttons)
       4. Contrast: --foreground/--primary/--muted-foreground on --sleeve
     */
-    <div className="flex min-h-dvh flex-col bg-background px-4 py-4 text-foreground md:px-8 md:py-8">
+    <div className="paper-surface flex min-h-dvh flex-col px-4 py-4 text-foreground md:px-8 md:py-8">
       <header className="grid grid-cols-6 items-start gap-x-3 border-b-2 border-foreground pb-4 md:grid-cols-12 md:gap-x-4">
         <Link
           href={ROUTES.HOME}
@@ -57,7 +57,7 @@ export function InfoPage({ section, title, children }: InfoPageProps) {
             <p className="mb-3 text-sm font-bold tracking-widest text-primary uppercase">
               Beats for Days / {section}
             </p>
-            <h1 className="text-5xl leading-[0.85] font-bold tracking-[-0.07em] text-balance md:text-8xl">
+            <h1 className="printed-ink text-5xl leading-[0.85] font-bold tracking-[-0.07em] text-balance md:text-8xl">
               {title}
             </h1>
             <div className="mt-8 max-w-2xl space-y-6 text-lg leading-relaxed md:text-xl">

@@ -54,12 +54,12 @@ function PosterHeader({ geometry }: { geometry: Geometry }) {
       className="absolute top-4 left-4 z-20 flex flex-col gap-3 md:top-8 md:left-8"
       style={{ left: geometry.margin, top: geometry.margin }}
     >
-      <h1 className="text-3xl leading-[0.85] font-bold tracking-tighter md:text-5xl">
+      <h1 className="printed-ink text-3xl leading-[0.85] font-bold tracking-tighter md:text-5xl">
         Beats
         <br />
         for Days
       </h1>
-      <p className="hidden text-sm leading-snug font-medium md:block">
+      <p className="printed-ink-sm hidden text-sm leading-snug font-medium md:block">
         Infinite instrumental series
         <br />
         <span className="text-muted-foreground">
@@ -222,11 +222,12 @@ export function PosterPlayer({
     <PosterContext.Provider value={{ geometry, number, returnHref }}>
       <div
         ref={mainRef}
-        className="relative h-dvh min-h-[600px] overflow-hidden bg-background"
+        className="paper-surface relative h-dvh min-h-[600px] overflow-hidden"
       >
         <PosterHeader geometry={geometry} />
         <main className="absolute inset-0">
-          <div className="animate-canvas-fade-in pointer-events-none absolute inset-0">
+          {/* Option A trial: ink the canvases with the same CSS filter. */}
+          <div className="animate-canvas-fade-in printed-ink pointer-events-none absolute inset-0">
             <SpectrumBars geometry={geometry} />
             <VinylVisualizer geometry={geometry} />
           </div>

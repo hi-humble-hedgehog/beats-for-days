@@ -22,6 +22,7 @@ export const viewport: Viewport = {
 import { AudioPlayerProvider } from "@/components/audio/AudioPlayerContext";
 import { DebugPanelGate } from "@/components/debug/DebugPanelGate";
 import { AppChrome } from "@/components/layout/AppChrome";
+import { PrintedInkFilter } from "@/components/ui/PrintedInkFilter";
 import { API_ROUTES } from "@/lib/constants";
 import { getServerEnv } from "@/lib/env";
 import { PALETTE } from "@/lib/design-tokens";
@@ -47,6 +48,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
       </head>
       <body className="flex min-h-full flex-col font-sans">
+        <PrintedInkFilter />
         <AudioPlayerProvider>
           <AppChrome>{children}</AppChrome>
           {/* Off unless DEBUG_PANEL=true; then it still needs ?debug=1. */}
