@@ -28,6 +28,7 @@ export function PosterTrackNumber({ fallbackBeatId }: PosterTrackNumberProps) {
 
   return (
     <p
+      role="status"
       className="w-full text-right text-[clamp(6.5rem,15vw,13.714rem)] leading-[0.78] font-bold tracking-[-0.07em] tabular-nums"
       style={{ fontSize, minHeight: "0.78em" }}
       aria-label={

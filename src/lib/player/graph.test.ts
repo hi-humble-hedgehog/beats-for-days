@@ -411,15 +411,58 @@ describe("resolveNextBeat", () => {
     expect(result?.transition).toBeNull();
   });
 
-  it("deterministically returns first track on cold start even when pickRandom returns a non-zero index", () => {
+  it("returns a zero-repeat walk candidate on cold start", () => {
     const result = resolveNextBeat({
       playedTrackIds: [],
       allTracks: [trackA, trackB, trackC],
       mode: "skip",
-      pickRandom: () => 2,
+      pickRandom: () => 0,
     });
 
     expect(result?.beat.id).toBe("0001");
+  });
+
+  it("randomly selects among eligible zero-repeat walk candidates on cold start", () => {
+    const candidate1 = {
+      ...trackB,
+      id: "cand-1",
+      transitions: [
+        {
+          id: "t-1",
+          targetTrackId: "cand-2",
+          audioUrl: "/1",
+          timing: defaultTiming,
+        },
+      ],
+    };
+    const candidate2 = {
+      ...trackC,
+      id: "cand-2",
+      transitions: [
+        {
+          id: "t-2",
+          targetTrackId: "cand-1",
+          audioUrl: "/2",
+          timing: defaultTiming,
+        },
+      ],
+    };
+
+    const res1 = resolveNextBeat({
+      playedTrackIds: [],
+      allTracks: [candidate1, candidate2],
+      mode: "skip",
+      pickRandom: () => 0,
+    });
+    const res2 = resolveNextBeat({
+      playedTrackIds: [],
+      allTracks: [candidate1, candidate2],
+      mode: "skip",
+      pickRandom: () => 1,
+    });
+
+    expect(res1?.beat.id).toBe("cand-1");
+    expect(res2?.beat.id).toBe("cand-2");
   });
 
   it("resolves next track with matching transition in auto mode", () => {
