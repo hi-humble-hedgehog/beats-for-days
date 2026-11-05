@@ -98,7 +98,9 @@ jobs:
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v3
         with:
-          version: latest
+          # Pinned: CLI v3 drops the [inbucket] config section. Bump this
+          # together with a supabase/config.toml migration.
+          version: 2.84.2
 
       - name: Start local Supabase
         run: supabase start
