@@ -16,18 +16,18 @@ interface AdminDashboardProps {
 
 function AdminHeader() {
   return (
-    <header className="flex flex-col gap-2 border-b-2 border-foreground pb-4 md:flex-row md:items-center md:justify-between">
+    <header className="gap-2 border-foreground pb-4 md:flex-row md:items-center md:justify-between flex flex-col border-b-2">
       <div>
-        <span className="text-[10px] font-bold tracking-widest text-primary uppercase">
+        <span className="font-bold tracking-widest text-primary text-[10px] uppercase">
           LOCAL DEV ONLY (ADR 0016)
         </span>
-        <h1 className="text-xl font-bold tracking-tight uppercase md:text-2xl">
+        <h1 className="text-xl font-bold tracking-tight md:text-2xl uppercase">
           CATALOG MANAGEMENT
         </h1>
       </div>
       <Link
         href={ROUTES.HOME}
-        className="inline-flex min-h-9 items-center border border-foreground/40 px-4 text-xs font-bold uppercase transition-colors hover:border-foreground hover:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+        className="min-h-9 border-foreground/40 px-4 text-xs font-bold hover:border-foreground hover:bg-foreground/10 focus-visible:ring-primary inline-flex items-center border uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none"
       >
         Return to Player ✕
       </Link>
@@ -68,13 +68,13 @@ export function AdminDashboard({ initialTracks }: AdminDashboardProps) {
     tracks.length > 0 ? Math.max(...tracks.map((t) => t.index ?? 0)) + 1 : 1;
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-8 p-6 md:p-12">
+    <main className="max-w-5xl gap-8 p-6 md:p-12 mx-auto flex min-h-screen w-full flex-col">
       <AdminHeader />
 
       {errorMessage && (
         <div
           role="alert"
-          className="border border-primary bg-primary/10 p-4 text-xs font-bold text-primary uppercase"
+          className="border-primary bg-primary/10 p-4 text-xs font-bold text-primary border uppercase"
         >
           {errorMessage}
         </div>
@@ -85,12 +85,12 @@ export function AdminDashboard({ initialTracks }: AdminDashboardProps) {
         suggestedIndex={suggestedIndex}
       />
 
-      <section aria-labelledby="tracks-heading" className="flex flex-col gap-4">
+      <section aria-labelledby="tracks-heading" className="gap-4 flex flex-col">
         <div className="flex items-center justify-between">
           <h2 id="tracks-heading" className="text-sm font-bold uppercase">
             Existing Tracks ({tracks.length})
           </h2>
-          <span className="font-mono text-[11px] text-muted-foreground uppercase">
+          <span className="font-mono text-muted-foreground text-[11px] uppercase">
             {activeCount} Active • {disabledCount} Disabled
           </span>
         </div>

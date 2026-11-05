@@ -46,13 +46,13 @@ function BeatPlayer({
   const loopDur = (track.loop_duration_ms / 1000).toFixed(2);
 
   return (
-    <div className="flex flex-col gap-3 border border-foreground/30 bg-foreground/5 p-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
+    <div className="gap-3 border-foreground/30 bg-foreground/5 p-4 flex flex-col border">
+      <div className="gap-2 flex flex-wrap items-center justify-between">
         <button
           type="button"
           onClick={onPlayBeat}
           aria-label={isBeatPlaying ? "Pause beat" : "Play beat"}
-          className="min-h-9 border border-primary bg-primary/20 px-4 font-bold text-foreground transition-colors hover:bg-primary/30 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+          className="min-h-9 border-primary bg-primary/20 px-4 font-bold text-foreground hover:bg-primary/30 focus-visible:ring-primary border transition-colors focus-visible:ring-2 focus-visible:outline-none"
         >
           {isBeatPlaying ? "PAUSE BEAT" : "PLAY BEAT"}
         </button>
@@ -60,7 +60,7 @@ function BeatPlayer({
           type="button"
           onClick={onToggleLoop}
           aria-pressed={isLooping}
-          className={`min-h-9 border px-3 font-mono text-xs font-bold transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none ${
+          className={`min-h-9 px-3 font-mono text-xs font-bold focus-visible:ring-primary border transition-colors focus-visible:ring-2 focus-visible:outline-none ${
             isLooping
               ? "border-primary bg-primary text-background"
               : "border-foreground/30 text-muted-foreground hover:text-foreground"
@@ -81,10 +81,10 @@ function BeatPlayer({
         value={currentTime}
         onChange={(e) => onSeek(Number(e.target.value))}
         aria-label="Beat playback position"
-        className="w-full accent-primary"
+        className="accent-primary w-full"
       />
 
-      <div className="flex flex-wrap gap-x-4 gap-y-1 font-mono text-[11px] text-muted-foreground">
+      <div className="gap-x-4 gap-y-1 font-mono text-muted-foreground flex flex-wrap text-[11px]">
         <span>
           Loop: {loopStart}s → {loopEnd}s
         </span>
@@ -112,8 +112,8 @@ function AuditionHeader({
   onClose,
 }: AuditionHeaderProps) {
   return (
-    <div className="flex items-center justify-between border-b border-foreground/30 pb-3">
-      <div className="flex items-baseline gap-2">
+    <div className="border-foreground/30 pb-3 flex items-center justify-between border-b">
+      <div className="gap-2 flex items-baseline">
         <h2 id="audition-dialog-title" className="text-sm font-bold uppercase">
           Audition Beat: #{trackLabel}
         </h2>
@@ -125,7 +125,7 @@ function AuditionHeader({
         type="button"
         onClick={onClose}
         aria-label="Close audition dialog"
-        className="inline-flex min-h-6 min-w-6 items-center justify-center text-xs font-bold text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+        className="min-h-6 min-w-6 text-xs font-bold text-muted-foreground hover:text-foreground focus-visible:ring-primary inline-flex items-center justify-center transition-colors focus-visible:ring-2 focus-visible:outline-none"
       >
         ✕
       </button>
@@ -178,12 +178,12 @@ export function AdminAuditionModal({
   const trackLabel = formatAdminTrackLabel(track);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/60 p-4 backdrop-blur-xs">
+    <div className="inset-0 bg-foreground/60 p-4 backdrop-blur-xs fixed z-50 flex items-center justify-center">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="audition-dialog-title"
-        className="flex max-h-[90vh] w-full max-w-2xl flex-col gap-4 overflow-y-auto border-2 border-foreground bg-background p-6 shadow-2xl"
+        className="max-w-2xl gap-4 border-foreground bg-background p-6 shadow-2xl flex max-h-[90vh] w-full flex-col overflow-y-auto border-2"
       >
         <AuditionHeader
           trackLabel={trackLabel}

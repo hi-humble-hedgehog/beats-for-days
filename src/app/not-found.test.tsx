@@ -2,6 +2,7 @@ import { useState } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AudioPlayerContext } from "@/components/audio/AudioPlayerContext";
+import { AppChrome } from "@/components/layout/AppChrome";
 import { beatsApi } from "@/lib/api";
 import NotFound from "./not-found";
 
@@ -40,7 +41,7 @@ describe("NotFound page", () => {
     );
 
     expect(
-      screen.getByRole("heading", { level: 1, name: /404 — Beat Not Found/i }),
+      screen.getByRole("heading", { level: 2, name: /404 — Beat Not Found/i }),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -68,6 +69,7 @@ describe("NotFound page", () => {
               transitions: [],
             },
             hasPausedBeat: true,
+            notFoundBeatId: "missing",
             isPlaying,
             secondsRemaining: 10,
             isLoading: false,
@@ -82,22 +84,22 @@ describe("NotFound page", () => {
           }}
         >
           <span data-testid="playing-state">{isPlaying ? "yes" : "no"}</span>
-          <NotFound />
+          <AppChrome>
+            <NotFound />
+          </AppChrome>
         </AudioPlayerContext.Provider>
       );
     }
 
     render(<StatefulHarness />);
 
-    fireEvent.click(
-      screen.getByRole("button", { name: /Start Radio Stream/i }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Play" }));
     expect(screen.getByTestId("playing-state")).toHaveTextContent("yes");
     expect(mockPause).not.toHaveBeenCalled();
     expect(mockPush).toHaveBeenCalledWith("/beat/02");
   });
 
-  it("fetches next beat and navigates when clicking Start Radio Stream without a paused beat", async () => {
+  it("fetches next beat and navigates when clicking Play without a paused beat", async () => {
     const nextBeat = {
       id: "0003",
       name: "Soul Trumpet",
@@ -131,13 +133,13 @@ describe("NotFound page", () => {
           advanceTrack: vi.fn(),
         }}
       >
-        <NotFound />
+        <AppChrome>
+          <NotFound />
+        </AppChrome>
       </AudioPlayerContext.Provider>,
     );
 
-    fireEvent.click(
-      screen.getByRole("button", { name: /Start Radio Stream/i }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Play" }));
 
     await waitFor(() => {
       expect(beatsApi.getNextBeat).toHaveBeenCalledWith({

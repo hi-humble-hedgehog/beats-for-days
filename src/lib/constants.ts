@@ -17,7 +17,6 @@ export const STARTER_BEAT_ID = "01";
 
 export const ROUTES = {
   HOME: "/",
-  BEATS: "/beats",
   BEAT: "/beat",
   GENERATE: "/generate",
   ABOUT: "/about",

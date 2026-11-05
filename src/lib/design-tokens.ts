@@ -46,8 +46,8 @@ export const FONT_STACK =
   "var(--font-inter-tight), 'Helvetica Neue', Helvetica, Arial, sans-serif" as const;
 
 export const TYPOGRAPHY = {
-  posterDisplay: "font-bold tracking-[-0.07em] leading-[0.78] tabular-nums",
-  heading: "text-3xl md:text-5xl font-bold tracking-tighter leading-[0.85]",
-  label: "text-xs font-bold uppercase tracking-widest",
+  posterDisplay: "trackNumber",
+  heading: "title",
+  label: "heading",
   numeric: "tabular-nums",
 } as const;

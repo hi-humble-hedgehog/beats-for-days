@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { renderVinylFrame, type VinylPalette } from "@/lib/grid/canvas-draw";
 import type { Geometry } from "@/lib/grid/poster-geometry";
+import styles from "./Grid.module.css";
 
 const useIsomorphicLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
@@ -65,10 +66,6 @@ export function VinylVisualizer({ geometry }: VinylVisualizerProps) {
   }, [geometry]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 size-full"
-      aria-hidden="true"
-    />
+    <canvas ref={canvasRef} className={styles.canvas} aria-hidden="true" />
   );
 }

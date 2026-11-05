@@ -21,10 +21,10 @@ function TransitionItem({
   const glueSec = (transition.timing.glueMs / 1000).toFixed(1);
 
   return (
-    <div className="flex items-center justify-between border border-foreground/20 bg-foreground/5 p-2 font-mono text-xs">
-      <div className="flex items-center gap-2">
+    <div className="border-foreground/20 bg-foreground/5 p-2 font-mono text-xs flex items-center justify-between border">
+      <div className="gap-2 flex items-center">
         <span className="font-bold text-foreground">{badge}</span>
-        <span className="text-[11px] text-muted-foreground">
+        <span className="text-muted-foreground text-[11px]">
           glue: {glueSec}s · {transition.timing.crossfadeMs}ms
         </span>
       </div>
@@ -32,7 +32,7 @@ function TransitionItem({
         type="button"
         onClick={() => onPlay(transition)}
         aria-label={`${isCurrentPlaying ? "Pause" : "Play"} transition ${badge}`}
-        className="min-h-7 border border-foreground/40 px-2 font-bold text-foreground transition-colors hover:border-foreground hover:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+        className="min-h-7 border-foreground/40 px-2 font-bold text-foreground hover:border-foreground hover:bg-foreground/10 focus-visible:ring-primary border transition-colors focus-visible:ring-2 focus-visible:outline-none"
       >
         {isCurrentPlaying ? "PAUSE" : "PLAY"}
       </button>
@@ -60,12 +60,12 @@ export function TransitionsColumns({
   onPlay,
 }: TransitionsColumnsProps) {
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-      <div className="flex flex-col gap-2">
+    <div className="gap-4 md:grid-cols-2 grid grid-cols-1">
+      <div className="gap-2 flex flex-col">
         <h3 className="font-mono text-xs font-bold text-foreground uppercase">
           Outgoing Transitions ({outTransitions.length})
         </h3>
-        <div className="flex flex-col gap-1.5">
+        <div className="gap-1.5 flex flex-col">
           {outTransitions.map((t) => (
             <TransitionItem
               key={t.id}
@@ -79,11 +79,11 @@ export function TransitionsColumns({
         </div>
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="gap-2 flex flex-col">
         <h3 className="font-mono text-xs font-bold text-foreground uppercase">
           Incoming Transitions ({inTransitions.length})
         </h3>
-        <div className="flex flex-col gap-1.5">
+        <div className="gap-1.5 flex flex-col">
           {inTransitions.map((t) => (
             <TransitionItem
               key={t.id}

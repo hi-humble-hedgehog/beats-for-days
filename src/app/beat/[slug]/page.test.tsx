@@ -187,7 +187,7 @@ describe("BeatDeck", () => {
     );
 
     expect(
-      screen.getByRole("heading", { level: 1, name: /404 — Beat Not Found/i }),
+      screen.getByRole("heading", { level: 2, name: /404 — Beat Not Found/i }),
     ).toBeInTheDocument();
   });
 });

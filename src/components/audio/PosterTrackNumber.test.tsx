@@ -44,6 +44,7 @@ describe("PosterTrackNumber", () => {
 
     const numberElement = screen.getByLabelText("Now playing beat number 03");
     expect(numberElement).toBeInTheDocument();
+    expect(numberElement).toHaveClass("trackNumber");
     expect(numberElement).toHaveTextContent("#03");
     expect(numberElement).toHaveStyle({
       fontSize: `${sampleGeometry.numberSize}px`,
@@ -122,7 +123,7 @@ describe("PosterTrackNumber", () => {
     );
 
     const trackContainer = screen.getByLabelText("Now playing beat number 01");
-    const animatedSpan = trackContainer.querySelector(".animate-track-number");
+    const animatedSpan = trackContainer.querySelector(".animated");
     expect(animatedSpan).toBeInTheDocument();
     expect(animatedSpan).toHaveTextContent("#01");
   });

@@ -3,6 +3,7 @@
 import { useAudioPlayer } from "./AudioPlayerContext";
 import { usePosterContext } from "./PosterContext";
 import { formatBeatNumber } from "@/lib/grid/format";
+import styles from "./PosterTrackNumber.module.css";
 
 type PosterTrackNumberProps = {
   fallbackBeatId?: string;
@@ -28,7 +29,7 @@ export function PosterTrackNumber({ fallbackBeatId }: PosterTrackNumberProps) {
 
   return (
     <p
-      className="w-full text-right text-[clamp(6.5rem,15vw,13.714rem)] leading-[0.78] font-bold tracking-[-0.07em] tabular-nums"
+      className={styles.trackNumber}
       style={{ fontSize, minHeight: "0.78em" }}
       aria-label={
         hasBeat ? `Now playing beat number ${number}` : "Loading beat"
@@ -36,13 +37,13 @@ export function PosterTrackNumber({ fallbackBeatId }: PosterTrackNumberProps) {
       aria-busy={!hasBeat}
     >
       {hasBeat ? (
-        <span key={number} className="animate-track-number inline-block">
-          <span className="text-primary">#</span>
+        <span key={number} className={styles.animated}>
+          <span className={styles.accent}>#</span>
           {number}
         </span>
       ) : (
-        <span className="invisible select-none" aria-hidden="true">
-          <span className="text-primary">#</span>
+        <span className={styles.placeholder} aria-hidden="true">
+          <span className={styles.accent}>#</span>
           00
         </span>
       )}

@@ -36,7 +36,7 @@ export function AdminUploadForm({
   return (
     <section
       aria-labelledby="upload-heading"
-      className="border border-foreground/30 p-6"
+      className="border-foreground/30 p-6 border"
     >
       <h2 id="upload-heading" className="text-sm font-bold uppercase">
         Upload New Beat (.m4a)
@@ -54,7 +54,7 @@ export function AdminUploadForm({
         onSubmit={(e) => {
           void upload.handleSubmit(e);
         }}
-        className="mt-4 flex flex-col gap-4 text-xs uppercase"
+        className="mt-4 gap-4 text-xs flex flex-col uppercase"
       >
         <UploadFileInput onChange={upload.handleFileChange} />
         <IdentityInputs

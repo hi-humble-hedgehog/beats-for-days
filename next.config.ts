@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
+  experimental: {
+    inlineCss: true,
+  },
   async redirects() {
     return [
       {
@@ -25,7 +28,7 @@ const nextConfig: NextConfig = {
   },
   turbopack: {
     rules: {
-      "*.css": {
+      "admin.css": {
         loaders: ["@tailwindcss/turbopack"],
         as: "*.css",
       },
