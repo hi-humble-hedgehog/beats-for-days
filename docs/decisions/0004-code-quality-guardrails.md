@@ -1,6 +1,6 @@
 # 0004. Code quality guardrails
 
-- **Status:** Accepted
+- **Status:** Accepted (hook placement amended by [0017](0017-staged-quality-gate.md))
 - **Date:** 2026-10-22
 
 ## Context

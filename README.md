@@ -107,8 +107,9 @@ pnpm dev                     # http://localhost:3000
 ### Quality gate
 
 ```bash
-pnpm verify          # typecheck · lint · a11y lint · format · boundaries · knip · tests · CRAP · E2E + axe-core
-pnpm test:mutation   # Stryker mutation testing (incremental)
+pnpm check           # per task: typecheck · lint · a11y lint · tests for changed files
+pnpm verify          # push gate: typecheck · lint · a11y lint · format · boundaries · knip · tests · CRAP
+pnpm verify:full     # same as CI: verify · E2E + axe-core · Stryker mutation testing
 ```
 
 See [`docs/guides/workflow.md`](docs/guides/workflow.md) and [`docs/guides/testing.md`](docs/guides/testing.md).

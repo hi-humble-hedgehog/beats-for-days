@@ -12,29 +12,33 @@ plus a separate headless streaming worker for 24/7 YouTube. Architecture:
 
 ## Commands
 
-| Task                            | Command                                    |
-| ------------------------------- | ------------------------------------------ |
-| Dev server                      | `pnpm dev`                                 |
-| Unit/component tests            | `pnpm test` (watch: `pnpm test:watch`)     |
-| End-to-end browser tests        | `pnpm test:e2e` (UI: `pnpm test:e2e:ui`)   |
-| Static a11y & contrast lint     | `pnpm lint:a11y`                           |
-| Runtime a11y audit report       | `pnpm audit:a11y`                          |
-| **Full gate (run before done)** | `pnpm verify`                              |
-| CRAP report only                | `pnpm test:crap`                           |
-| Mutation testing                | `pnpm test:mutation` (incremental, slower) |
-| Architecture boundaries         | `pnpm deps:check`                          |
-| Dead code / unused deps         | `pnpm knip`                                |
-| Convert WAV starter assets      | `pnpm audio:convert`                       |
-| Seed database & storage         | `pnpm db:seed`                             |
-| Autofix lint + format           | `pnpm lint:fix && pnpm format`             |
+| Task                                | Command                                    |
+| ----------------------------------- | ------------------------------------------ |
+| Dev server                          | `pnpm dev`                                 |
+| Unit/component tests                | `pnpm test` (watch: `pnpm test:watch`)     |
+| End-to-end browser tests            | `pnpm test:e2e` (UI: `pnpm test:e2e:ui`)   |
+| Static a11y & contrast lint         | `pnpm lint:a11y`                           |
+| Runtime a11y audit report           | `pnpm audit:a11y`                          |
+| **Task check (run before done)**    | `pnpm check`                               |
+| Push gate (runs on `git push`)      | `pnpm verify`                              |
+| Full gate as in CI (E2E + mutation) | `pnpm verify:full`                         |
+| CRAP report only                    | `pnpm test:crap`                           |
+| Mutation testing                    | `pnpm test:mutation` (incremental, slower) |
+| Architecture boundaries             | `pnpm deps:check`                          |
+| Dead code / unused deps             | `pnpm knip`                                |
+| Convert WAV starter assets          | `pnpm audio:convert`                       |
+| Seed database & storage             | `pnpm db:seed`                             |
+| Autofix lint + format               | `pnpm lint:fix && pnpm format`             |
 
 Use **pnpm** only. Never edit `pnpm-lock.yaml` by hand.
 
 ## Definition of done
 
-1. `pnpm verify` passes (typecheck, lint, a11y lint, format, boundaries, knip, tests, CRAP ≤ 30, E2E + axe-core).
+Checks are staged so the slow ones run once, not after every task ([ADR 0017](docs/decisions/0017-staged-quality-gate.md)).
+
+1. **Per task:** `pnpm check` passes (typecheck, lint, a11y lint, tests for changed files). Don't run `pnpm verify`, E2E or mutation testing between tasks; the push hook and CI run them.
 2. Write a failing test first (TDD) before writing the fix or feature.
-3. New or changed logic has tests that **fail if the logic breaks**. Run `pnpm test:mutation` for logic-heavy changes and kill surviving mutants (see the `quality-gate` skill).
+3. New or changed logic has tests that **fail if the logic breaks**. Assert exact outputs. Mutation testing runs in CI on the PR; kill surviving mutants in changed files before merge (see the `quality-gate` skill).
 4. **Write an ADR when needed:** Add an ADR in `docs/decisions/` for architecture boundary changes, paid external services, or core subsystem choices. Skip ADRs for routine helpers or small utilities.
 5. No unapproved `eslint-disable` or `@ts-ignore` comments. Split the function instead. If you must suppress a rule, add a comment explaining why.
 6. **Zero live AI calls:** Never call live generative APIs (Gemini, ElevenLabs) without explicit human approval in the prompt. Tests and local dev must use mocks or stubs.
@@ -64,6 +68,11 @@ Use **pnpm** only. Never edit `pnpm-lock.yaml` by hand.
 - **Accessibility (WCAG 2.2 AA):** Annotate foreground/background tokens in [`src/app/globals.css`](src/app/globals.css) with computed `/* Contrast: X.X:1 vs --bg (level) */` assertions verified by `pnpm lint:a11y`. Use semantic HTML (`<main>`, `<nav>`, `<button>`, `<input type="range">`), visible `:focus-visible` states, and keyboard navigation. Give audio controls clear ARIA labels and `aria-live="polite"` announcements. Honour `prefers-reduced-motion: reduce` and never flash > 3 times/sec. Query components with `getByRole` in tests.
 - **Commits:** Conventional Commits (`feat(audio): …`, `fix: …`, `docs: …`).
 - **Branching:** Never commit directly to `main`. Use task branches (`feat/*`, `fix/*`, `refactor/*`, `chore/*`).
+- **Open a draft PR early:** CI is the only place E2E, axe-core and mutation testing run ([ADR 0017](docs/decisions/0017-staged-quality-gate.md)). After the first commit on a branch, push it and open a draft PR:
+  1. `git push -u origin HEAD` (the pre-push hook runs `pnpm verify`).
+  2. `gh pr create --draft --fill --title "<conventional title>"`, unless the branch already has a PR (`gh pr view`).
+  3. Read failing CI jobs with `gh pr checks` and `gh run view --log-failed`. Fix them in follow-up commits.
+  4. Mark the PR ready (`gh pr ready`) only when CI is green and the PR template checklist is done. Ask the human before marking ready or merging.
 - Don't bypass git hooks (`--no-verify`, `LEFTHOOK=0`) unless the user asks.
 - Prefer small, focused changes. Don't add dependencies without a clear need; knip will flag unused ones.
 
