@@ -1,6 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { STORAGE_KEYS } from "@/lib/constants";
-import { loadPlayedHistory, savePlayedHistory } from "./history";
+import {
+  loadInitialBeatId,
+  loadPlayedHistory,
+  saveInitialBeatId,
+  savePlayedHistory,
+} from "./history";
 
 describe("history storage helpers in node environment (no window)", () => {
   it("loadPlayedHistory returns empty array when window is undefined", () => {
@@ -9,6 +14,14 @@ describe("history storage helpers in node environment (no window)", () => {
 
   it("savePlayedHistory does not throw when window is undefined", () => {
     expect(() => savePlayedHistory(["0001"])).not.toThrow();
+  });
+
+  it("loadInitialBeatId returns null when window is undefined", () => {
+    expect(loadInitialBeatId()).toBeNull();
+  });
+
+  it("saveInitialBeatId does not throw when window is undefined", () => {
+    expect(() => saveInitialBeatId("0001")).not.toThrow();
   });
 });
 
@@ -73,5 +86,16 @@ describe("history storage helpers with window.localStorage", () => {
       {},
     ]);
     expect(loadPlayedHistory()).toEqual(["0001", "0002"]);
+  });
+
+  it("saveInitialBeatId persists beat ID and loadInitialBeatId retrieves it", () => {
+    expect(loadInitialBeatId()).toBeNull();
+    saveInitialBeatId("track-04");
+    expect(loadInitialBeatId()).toBe("track-04");
+  });
+
+  it("loadInitialBeatId returns null when key is empty or whitespace", () => {
+    mockStore[STORAGE_KEYS.INITIAL_BEAT] = "   ";
+    expect(loadInitialBeatId()).toBeNull();
   });
 });
