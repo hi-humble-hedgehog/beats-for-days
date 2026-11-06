@@ -14,22 +14,24 @@ and its consequences. Format: lightweight [MADR](https://adr.github.io/madr/).
 
 ## Index
 
-| #                                                       | Title                                     | Status   |
-| ------------------------------------------------------- | ----------------------------------------- | -------- |
-| [0001](0001-record-architecture-decisions.md)           | Record architecture decisions             | Accepted |
-| [0002](0002-nextjs-pnpm-foundation.md)                  | Next.js App Router + pnpm foundation      | Accepted |
-| [0003](0003-testing-strategy.md)                        | Testing strategy: Vitest, CRAP & mutation | Accepted |
-| [0004](0004-code-quality-guardrails.md)                 | Code quality guardrails                   | Accepted |
-| [0005](0005-agent-guidelines.md)                        | Agent guidelines & feedback loops         | Accepted |
-| [0006](0006-strict-ai-token-guardrails.md)              | Strict AI token guardrails & cost control | Accepted |
-| [0007](0007-git-branching-pr-workflow.md)               | Git branching and PR workflow             | Accepted |
-| [0008](0008-gdpr-and-wcag-accessibility-compliance.md)  | GDPR and WCAG accessibility               | Accepted |
-| [0009](0009-beat-generation-access-and-queue-policy.md) | Beat generation access policy             | Accepted |
-| [0010](0010-history-based-next-track-api.md)            | History-based next-track API              | Accepted |
-| [0011](0011-local-static-audio-asset-delivery.md)       | Local static audio asset delivery         | Accepted |
-| [0012](0012-playwright-e2e-user-flow-testing.md)        | Playwright e2e user-flow testing          | Accepted |
-| [0013](0013-url-as-source-of-truth-for-beat-routes.md)  | URL as source of truth for beats          | Accepted |
-| [0014](0014-swiss-geometric-grid-engine.md)             | Two-part Swiss poster and editorial grid  | Accepted |
-| [0015](0015-gsap-poster-geometry-transitions.md)        | GSAP poster geometry transitions          | Accepted |
-| [0016](0016-local-only-admin-catalog-management.md)     | Local-only admin catalog management       | Accepted |
-| [0017](0017-staged-quality-gate.md)                     | Stage the quality gate by cost            | Accepted |
+| #                                                                  | Title                                     | Status   |
+| ------------------------------------------------------------------ | ----------------------------------------- | -------- |
+| [0001](0001-record-architecture-decisions.md)                      | Record architecture decisions             | Accepted |
+| [0002](0002-nextjs-pnpm-foundation.md)                             | Next.js App Router + pnpm foundation      | Accepted |
+| [0003](0003-testing-strategy.md)                                   | Testing strategy: Vitest, CRAP & mutation | Accepted |
+| [0004](0004-code-quality-guardrails.md)                            | Code quality guardrails                   | Accepted |
+| [0005](0005-agent-guidelines.md)                                   | Agent guidelines & feedback loops         | Accepted |
+| [0006](0006-strict-ai-token-guardrails.md)                         | Strict AI token guardrails & cost control | Accepted |
+| [0007](0007-git-branching-pr-workflow.md)                          | Git branching and PR workflow             | Accepted |
+| [0008](0008-gdpr-and-wcag-accessibility-compliance.md)             | GDPR and WCAG accessibility               | Accepted |
+| [0009](0009-beat-generation-access-and-queue-policy.md)            | Beat generation access policy             | Accepted |
+| [0010](0010-history-based-next-track-api.md)                       | History-based next-track API              | Accepted |
+| [0011](0011-local-static-audio-asset-delivery.md)                  | Local static audio asset delivery         | Accepted |
+| [0012](0012-playwright-e2e-user-flow-testing.md)                   | Playwright e2e user-flow testing          | Accepted |
+| [0013](0013-url-as-source-of-truth-for-beat-routes.md)             | URL as source of truth for beats          | Accepted |
+| [0014](0014-swiss-geometric-grid-engine.md)                        | Two-part Swiss poster and editorial grid  | Accepted |
+| [0015](0015-gsap-poster-geometry-transitions.md)                   | GSAP poster geometry transitions          | Accepted |
+| [0016](0016-local-only-admin-catalog-management.md)                | Local-only admin catalog management       | Accepted |
+| [0017](0017-staged-quality-gate.md)                                | Stage the quality gate by cost            | Accepted |
+| [0018](0018-unify-poster-player-shell-and-isolate-admin-player.md) | Unify poster shell & isolate admin player | Accepted |
+| [0019](0019-inline-semantic-css-and-isolate-admin-tailwind.md)     | Inline semantic CSS & isolate admin CSS   | Accepted |

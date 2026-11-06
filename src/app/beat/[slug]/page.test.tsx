@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import BeatPage from "./page";
-import { BeatDeck } from "./BeatDeck";
+import { BeatNumber } from "@/components/audio/BeatNumber";
 import { AppChrome } from "@/components/layout/AppChrome";
 
 const mockUseParams = vi.fn();
@@ -71,7 +71,7 @@ describe("BeatPage (Server Component)", () => {
     expect(mockNotFound).toHaveBeenCalledTimes(1);
   });
 
-  it("renders BeatDeck with the server-fetched initialBeat when fetchBeatViewById resolves a beat", async () => {
+  it("renders BeatNumber with the server-fetched initialBeat when fetchBeatViewById resolves a beat", async () => {
     const serverBeat = {
       id: "0001",
       name: "Brooklyn Sunset",
@@ -103,7 +103,7 @@ describe("BeatPage (Server Component)", () => {
   });
 });
 
-describe("BeatDeck", () => {
+describe("BeatNumber integration in AppChrome", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPlayerState = {
@@ -130,7 +130,7 @@ describe("BeatDeck", () => {
     mockUsePathname.mockReturnValue("/beat/0002");
     render(
       <AppChrome>
-        <BeatDeck />
+        <BeatNumber fallbackBeatId="0002" />
       </AppChrome>,
     );
     expect(
@@ -149,7 +149,7 @@ describe("BeatDeck", () => {
 
     render(
       <AppChrome>
-        <BeatDeck />
+        <BeatNumber fallbackBeatId="0001" />
       </AppChrome>,
     );
 
@@ -167,7 +167,7 @@ describe("BeatDeck", () => {
 
     render(
       <AppChrome>
-        <BeatDeck />
+        <BeatNumber fallbackBeatId="0001" />
       </AppChrome>,
     );
     expect(
@@ -182,12 +182,12 @@ describe("BeatDeck", () => {
 
     render(
       <AppChrome>
-        <BeatDeck />
+        <BeatNumber fallbackBeatId="9999" />
       </AppChrome>,
     );
 
     expect(
-      screen.getByRole("heading", { level: 1, name: /404 — Beat Not Found/i }),
+      screen.getByRole("heading", { level: 2, name: /404 — Beat Not Found/i }),
     ).toBeInTheDocument();
   });
 });

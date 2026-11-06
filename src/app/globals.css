@@ -1,5 +1,3 @@
-@import "tailwindcss";
-
 /*
   Palette drawn from 90s white-label promo pressings:
   sleeve paper, vinyl black, rubber-stamp red, pencil grey.
@@ -29,89 +27,88 @@
   --border: var(--vinyl); /* Contrast: 15.3:1 vs --sleeve (UI) */
   --input: var(--vinyl); /* Contrast: 15.3:1 vs --sleeve (UI) */
   --ring: var(--stamp); /* Contrast: 4.7:1 vs --sleeve (UI) */
+  --border-subtle: oklch(0.1913 0 0 / 0.3);
   --radius: 0rem;
-}
-
-@theme inline {
   --font-sans:
     var(--font-inter-tight), "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --color-sleeve: var(--sleeve);
-  --color-vinyl: var(--vinyl);
-  --color-stamp: var(--stamp);
-  --color-pencil: var(--pencil);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --radius-sm: var(--radius);
-  --radius-md: var(--radius);
-  --radius-lg: var(--radius);
-  --radius-xl: var(--radius);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 @layer base {
-  * {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
     border-color: var(--border);
   }
+
   html,
   body {
     background-color: var(--background);
     color: var(--foreground);
     font-family: var(--font-sans);
     font-size-adjust: from-font;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  canvas,
+  svg {
+    display: block;
   }
 }
 
-@keyframes track-number-in {
-  from {
-    opacity: 0;
-    transform: translateY(0.5rem);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.site-root {
+  height: 100%;
+  background-color: var(--background);
+  color: var(--foreground);
 }
 
-.animate-track-number {
-  animation: track-number-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+.site-body {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  font-family: var(--font-sans);
 }
 
-@keyframes canvas-fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
 
-.animate-canvas-fade-in {
-  opacity: 0;
-  animation: canvas-fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-track-number {
-    animation: none;
-    transform: none;
-  }
-  .animate-canvas-fade-in {
-    animation: none;
-    opacity: 1;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

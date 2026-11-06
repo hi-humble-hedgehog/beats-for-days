@@ -15,6 +15,11 @@ export default defineConfig({
     },
   },
   test: {
+    css: {
+      modules: {
+        classNameStrategy: "non-scoped",
+      },
+    },
     projects: [
       {
         extends: true,

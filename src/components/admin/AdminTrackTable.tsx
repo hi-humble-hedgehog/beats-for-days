@@ -51,7 +51,7 @@ function SortableHeader({
         type="button"
         onClick={() => onSort(field)}
         aria-label={`Sort by ${label}${isActive ? ` (${direction})` : ""}`}
-        className="group inline-flex items-center gap-1.5 font-bold text-foreground transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+        className="group gap-1.5 font-bold text-foreground hover:text-primary focus-visible:ring-primary inline-flex items-center transition-colors focus-visible:ring-2 focus-visible:outline-none"
       >
         <span>{label}</span>
         <span
@@ -81,12 +81,12 @@ function TrackRowActions({
   onEdit,
 }: TrackRowActionsProps) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="gap-2 flex items-center">
       <button
         type="button"
         aria-label={`Audition Track ${trackLabel}`}
         onClick={onAudition}
-        className="min-h-8 border border-primary/60 bg-primary/10 px-2.5 py-1 font-bold text-foreground transition-colors hover:border-primary hover:bg-primary/20 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+        className="min-h-8 border-primary/60 bg-primary/10 px-2.5 py-1 font-bold text-foreground hover:border-primary hover:bg-primary/20 focus-visible:ring-primary border transition-colors focus-visible:ring-2 focus-visible:outline-none"
       >
         AUDITION
       </button>
@@ -94,7 +94,7 @@ function TrackRowActions({
         type="button"
         aria-label={`Edit Track ${trackLabel}`}
         onClick={onEdit}
-        className="min-h-8 border border-foreground/40 px-3 py-1 font-bold text-foreground transition-colors hover:border-foreground hover:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+        className="min-h-8 border-foreground/40 px-3 py-1 font-bold text-foreground hover:border-foreground hover:bg-foreground/10 focus-visible:ring-primary border transition-colors focus-visible:ring-2 focus-visible:outline-none"
       >
         EDIT
       </button>
@@ -113,7 +113,7 @@ function TrackTableRow({
 
   return (
     <tr
-      className={`transition-colors hover:bg-foreground/5 ${
+      className={`hover:bg-foreground/5 transition-colors ${
         !track.is_active ? "bg-foreground/[0.02] opacity-60" : ""
       }`}
     >
@@ -124,7 +124,7 @@ function TrackTableRow({
           aria-checked={track.is_active}
           aria-label={`Toggle Track ${trackLabel} active status`}
           onClick={() => onToggleActive(track.id, !track.is_active)}
-          className={`inline-flex min-h-6 min-w-16 items-center justify-center border px-2 py-1 text-[10px] font-bold tracking-wider transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none ${
+          className={`min-h-6 min-w-16 px-2 py-1 font-bold tracking-wider focus-visible:ring-primary inline-flex items-center justify-center border text-[10px] transition-colors focus-visible:ring-2 focus-visible:outline-none ${
             track.is_active
               ? "border-foreground bg-foreground text-background"
               : "border-muted-foreground text-muted-foreground"
@@ -135,29 +135,29 @@ function TrackTableRow({
       </td>
       <td className="p-3 font-mono">
         <div className="text-sm font-bold text-foreground">#{trackLabel}</div>
-        <div className="text-[10px] text-muted-foreground">
+        <div className="text-muted-foreground text-[10px]">
           Index: {track.index ?? trackLabel}
         </div>
       </td>
       <td className="p-3">
         <div className="text-foreground">{track.bpm} BPM</div>
-        <div className="text-[10px] text-muted-foreground">
+        <div className="text-muted-foreground text-[10px]">
           {track.key} • {track.genre}
         </div>
       </td>
-      <td className="p-3 font-mono text-[11px] text-foreground">
+      <td className="p-3 font-mono text-foreground text-[11px]">
         {(track.loop_start_ms / 1000).toFixed(2)}s -{" "}
         {(track.loop_end_ms / 1000).toFixed(2)}s
-        <div className="font-sans text-[10px] text-muted-foreground">
+        <div className="font-sans text-muted-foreground text-[10px]">
           Total: {(track.duration_ms / 1000).toFixed(1)}s
         </div>
       </td>
-      <td className="p-3 font-mono text-[11px] text-foreground">
+      <td className="p-3 font-mono text-foreground text-[11px]">
         <time dateTime={track.created_at}>
           {formatAdminDate(track.created_at)}
         </time>
       </td>
-      <td className="p-3 font-mono text-[11px] text-foreground">
+      <td className="p-3 font-mono text-foreground text-[11px]">
         <time dateTime={effectiveUpdatedAt}>
           {formatAdminDate(effectiveUpdatedAt)}
         </time>
@@ -185,7 +185,7 @@ function TrackTableHead({
   onSort,
 }: TrackTableHeadProps) {
   return (
-    <thead className="border-b border-foreground/30 bg-foreground/5 text-muted-foreground">
+    <thead className="border-foreground/30 bg-foreground/5 text-foreground border-b">
       <tr>
         <SortableHeader
           label="Status"
@@ -259,7 +259,7 @@ export function AdminTrackTable({
 
   if (tracks.length === 0) {
     return (
-      <p className="border border-foreground/20 p-6 text-sm text-muted-foreground uppercase">
+      <p className="border-foreground/20 p-6 text-sm text-muted-foreground border uppercase">
         No tracks found in the catalog.
       </p>
     );
@@ -270,16 +270,16 @@ export function AdminTrackTable({
       role="region"
       aria-label="Audio Tracks Table"
       tabIndex={0}
-      className="overflow-x-auto border border-foreground/30 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+      className="border-foreground/30 focus-visible:ring-primary overflow-x-auto border focus-visible:ring-2 focus-visible:outline-none"
     >
-      <table className="w-full border-collapse text-left text-xs uppercase">
+      <table className="text-xs w-full border-collapse text-left uppercase">
         <caption className="sr-only">Catalog audio tracks list</caption>
         <TrackTableHead
           sortField={sortField}
           sortDirection={sortDirection}
           onSort={handleSort}
         />
-        <tbody className="divide-y divide-foreground/20">
+        <tbody className="divide-foreground/20 divide-y">
           {sortedTracks.map((track) => (
             <TrackTableRow
               key={track.id}

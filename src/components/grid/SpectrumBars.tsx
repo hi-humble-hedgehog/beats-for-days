@@ -7,6 +7,7 @@ import {
   markerTilts,
 } from "@/lib/grid/canvas-draw";
 import { visibleSpans, type Geometry } from "@/lib/grid/poster-geometry";
+import styles from "./Grid.module.css";
 
 const useIsomorphicLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
@@ -141,10 +142,6 @@ export function SpectrumBars({ geometry }: SpectrumBarsProps) {
   }, [geometry]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 size-full"
-      aria-hidden="true"
-    />
+    <canvas ref={canvasRef} className={styles.canvas} aria-hidden="true" />
   );
 }

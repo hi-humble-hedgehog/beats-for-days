@@ -19,8 +19,8 @@ export function IdentityInputs({
   onNameChange,
 }: IdentityInputsProps) {
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-      <div className="flex flex-col gap-1">
+    <div className="gap-4 md:grid-cols-3 grid grid-cols-1">
+      <div className="gap-1 flex flex-col">
         <label htmlFor="upload-index" className="font-bold text-foreground">
           Track # (Index)
         </label>
@@ -31,10 +31,10 @@ export function IdentityInputs({
           required
           value={index}
           onChange={(e) => onIndexChange(Number(e.target.value))}
-          className="min-h-9 border border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+          className="min-h-9 border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-primary border focus-visible:ring-2 focus-visible:outline-none"
         />
       </div>
-      <div className="flex flex-col gap-1">
+      <div className="gap-1 flex flex-col">
         <label htmlFor="upload-id" className="font-bold text-foreground">
           Track ID
         </label>
@@ -45,10 +45,10 @@ export function IdentityInputs({
           placeholder="e.g. track-37"
           value={id}
           onChange={(e) => onIdChange(e.target.value)}
-          className="min-h-9 border border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+          className="min-h-9 border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-primary border focus-visible:ring-2 focus-visible:outline-none"
         />
       </div>
-      <div className="flex flex-col gap-1">
+      <div className="gap-1 flex flex-col">
         <label htmlFor="upload-name" className="font-bold text-foreground">
           Track Name
         </label>
@@ -59,7 +59,7 @@ export function IdentityInputs({
           placeholder="e.g. 37"
           value={name}
           onChange={(e) => onNameChange(e.target.value)}
-          className="min-h-9 border border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+          className="min-h-9 border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-primary border focus-visible:ring-2 focus-visible:outline-none"
         />
       </div>
     </div>
@@ -85,8 +85,8 @@ export function MusicalInputs({
   onGenreChange,
 }: MusicalInputsProps) {
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-      <div className="flex flex-col gap-1">
+    <div className="gap-4 md:grid-cols-3 grid grid-cols-1">
+      <div className="gap-1 flex flex-col">
         <label htmlFor="upload-bpm" className="font-bold text-foreground">
           BPM
         </label>
@@ -98,10 +98,10 @@ export function MusicalInputs({
           required
           value={bpm}
           onChange={(e) => onBpmChange(Number(e.target.value))}
-          className="min-h-9 border border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+          className="min-h-9 border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-primary border focus-visible:ring-2 focus-visible:outline-none"
         />
       </div>
-      <div className="flex flex-col gap-1">
+      <div className="gap-1 flex flex-col">
         <label htmlFor="upload-key" className="font-bold text-foreground">
           Key
         </label>
@@ -111,10 +111,10 @@ export function MusicalInputs({
           required
           value={keySig}
           onChange={(e) => onKeyChange(e.target.value)}
-          className="min-h-9 border border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+          className="min-h-9 border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-primary border focus-visible:ring-2 focus-visible:outline-none"
         />
       </div>
-      <div className="flex flex-col gap-1">
+      <div className="gap-1 flex flex-col">
         <label htmlFor="upload-genre" className="font-bold text-foreground">
           Genre
         </label>
@@ -124,7 +124,7 @@ export function MusicalInputs({
           required
           value={genre}
           onChange={(e) => onGenreChange(e.target.value)}
-          className="min-h-9 border border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+          className="min-h-9 border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-primary border focus-visible:ring-2 focus-visible:outline-none"
         />
       </div>
     </div>
@@ -150,8 +150,8 @@ export function TimingInputs({
   onLoopEndChange,
 }: TimingInputsProps) {
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-      <div className="flex flex-col gap-1">
+    <div className="gap-4 md:grid-cols-3 grid grid-cols-1">
+      <div className="gap-1 flex flex-col">
         <label htmlFor="upload-duration" className="font-bold text-foreground">
           Duration (ms)
         </label>
@@ -162,10 +162,10 @@ export function TimingInputs({
           required
           value={durationMs}
           onChange={(e) => onDurationChange(Number(e.target.value))}
-          className="min-h-9 border border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+          className="min-h-9 border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-primary border focus-visible:ring-2 focus-visible:outline-none"
         />
       </div>
-      <div className="flex flex-col gap-1">
+      <div className="gap-1 flex flex-col">
         <label
           htmlFor="upload-loop-start"
           className="font-bold text-foreground"
@@ -179,10 +179,10 @@ export function TimingInputs({
           required
           value={loopStartMs}
           onChange={(e) => onLoopStartChange(Number(e.target.value))}
-          className="min-h-9 border border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+          className="min-h-9 border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-primary border focus-visible:ring-2 focus-visible:outline-none"
         />
       </div>
-      <div className="flex flex-col gap-1">
+      <div className="gap-1 flex flex-col">
         <label htmlFor="upload-loop-end" className="font-bold text-foreground">
           Loop End (ms)
         </label>
@@ -193,7 +193,7 @@ export function TimingInputs({
           required
           value={loopEndMs}
           onChange={(e) => onLoopEndChange(Number(e.target.value))}
-          className="min-h-9 border border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+          className="min-h-9 border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-primary border focus-visible:ring-2 focus-visible:outline-none"
         />
       </div>
     </div>
@@ -207,7 +207,7 @@ export function UploadFileInput({
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
   return (
-    <div className="flex flex-col gap-1">
+    <div className="gap-1 flex flex-col">
       <label htmlFor="upload-audio" className="font-bold text-foreground">
         Audio File (.m4a)
       </label>
@@ -217,7 +217,7 @@ export function UploadFileInput({
         accept=".m4a,audio/mp4,audio/x-m4a"
         required
         onChange={onChange}
-        className="file:mr-4 file:border file:border-foreground file:bg-background file:px-4 file:py-1 file:font-mono file:text-xs file:font-bold file:text-foreground file:uppercase hover:file:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+        className="file:mr-4 file:border-foreground file:bg-background file:px-4 file:py-1 file:font-mono file:text-xs file:font-bold file:text-foreground hover:file:bg-foreground/10 focus-visible:ring-primary file:border file:uppercase focus-visible:ring-2 focus-visible:outline-none"
       />
     </div>
   );
@@ -230,7 +230,7 @@ export function UploadSubmitButton({ isUploading }: { isUploading: boolean }) {
       <button
         type="submit"
         disabled={isUploading}
-        className="min-h-10 border border-foreground bg-foreground px-6 font-bold tracking-wider text-background transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none disabled:opacity-50"
+        className="min-h-10 border-foreground bg-foreground px-6 font-bold tracking-wider text-background focus-visible:ring-primary border transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50"
       >
         {isUploading ? "Uploading..." : "Upload & Register Beat"}
       </button>

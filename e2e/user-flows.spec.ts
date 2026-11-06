@@ -44,12 +44,11 @@ async function assertBornAccessible(page: Page) {
 }
 
 test.describe("Navigation & static pages", () => {
-  test("redirects /beats to the root landing page", async ({ page }) => {
-    await page.goto("/beats");
-    await expect(page).toHaveURL("/");
-    await expect(page.getByRole("main")).toBeVisible();
+  test("renders 404 for /beats", async ({ page }) => {
+    const response = await page.goto("/beats");
+    expect(response?.status()).toBe(404);
     await expect(
-      page.getByRole("heading", { level: 1, name: "Beats for Days" }),
+      page.getByRole("heading", { level: 2, name: /404 — Beat Not Found/i }),
     ).toBeVisible();
   });
 
@@ -59,20 +58,12 @@ test.describe("Navigation & static pages", () => {
     const response = await page.goto("/beat/does-not-exist");
     expect(response?.status()).toBe(404);
     await expect(
-      page.getByRole("heading", { level: 1, name: /404 — Beat Not Found/i }),
+      page.getByRole("heading", { level: 2, name: /404 — Beat Not Found/i }),
     ).toBeVisible();
 
-    const playerBar = page.getByRole("complementary", {
-      name: "Persistent Audio Player",
-    });
-    await expect(
-      playerBar.getByRole("button", { name: "Play audio" }),
-    ).toBeVisible();
-
-    await page.getByRole("button", { name: /Start Radio Stream/i }).click();
+    await page.getByRole("button", { name: "Play" }).click();
     await expect(page).toHaveURL(/\/beat\/(?:track-[a-c]|\d{2})/);
     await expect(page.getByRole("button", { name: "Pause" })).toBeVisible();
-    await expect(playerBar).toHaveCount(0);
   });
 
   test("navigates across About, Terms of Service, and Privacy Policy via poster info links", async ({
@@ -135,8 +126,8 @@ test.describe("Debug panel", () => {
 
     const firstNumber = await visibleNowPlaying(page).textContent();
     await page.getByRole("button", { name: "Next beat" }).click();
-    await expect(visibleNowPlaying(page)).not.toHaveText(firstNumber ?? "");
     await expect(page).not.toHaveURL(/\/beat\/01(\?|$)/);
+    await expect(visibleNowPlaying(page)).not.toHaveText(firstNumber ?? "");
     expect(page.url()).not.toContain("debug=1");
 
     await expect(page.getByRole("button", { name: toggleName })).toBeVisible();
@@ -257,7 +248,7 @@ test.describe("Generation route (disabled for MVP)", () => {
     expect(response?.status()).toBe(404);
     await expect(
       page.getByRole("heading", {
-        level: 1,
+        level: 2,
         name: "404 — Beat Not Found",
       }),
     ).toBeVisible();

@@ -1,0 +1,40 @@
+.trackNumber {
+  width: 100%;
+  text-align: right;
+  font-size: clamp(6.5rem, 2rem + 13vw, 13.714rem);
+  line-height: 0.78;
+  font-weight: 700;
+  letter-spacing: -0.07em;
+  font-variant-numeric: tabular-nums;
+}
+
+.animated {
+  display: inline-block;
+  animation: track-number-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.placeholder {
+  visibility: hidden;
+  user-select: none;
+}
+
+.accent {
+  color: var(--primary);
+}
+
+@keyframes track-number-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

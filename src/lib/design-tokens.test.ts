@@ -69,26 +69,16 @@ describe("design tokens", () => {
       expect(FONT_STACK).toContain("Helvetica Neue");
     });
 
-    it("provides the giant poster display typography classes", () => {
-      expect(TYPOGRAPHY.posterDisplay).toContain("font-bold");
-      expect(TYPOGRAPHY.posterDisplay).toContain("tracking-[-0.07em]");
-      expect(TYPOGRAPHY.posterDisplay).toContain("leading-[0.78]");
-      expect(TYPOGRAPHY.posterDisplay).toContain("tabular-nums");
+    it("provides the giant poster display module class key", () => {
+      expect(TYPOGRAPHY.posterDisplay).toBe("trackNumber");
     });
 
-    it("provides headings typography classes", () => {
-      expect(TYPOGRAPHY.heading).toContain("text-3xl");
-      expect(TYPOGRAPHY.heading).toContain("md:text-5xl");
-      expect(TYPOGRAPHY.heading).toContain("font-bold");
-      expect(TYPOGRAPHY.heading).toContain("tracking-tighter");
-      expect(TYPOGRAPHY.heading).toContain("leading-[0.85]");
+    it("provides the poster heading module class key", () => {
+      expect(TYPOGRAPHY.heading).toBe("title");
     });
 
-    it("provides Swiss micro-typography label classes", () => {
-      expect(TYPOGRAPHY.label).toContain("text-xs");
-      expect(TYPOGRAPHY.label).toContain("font-bold");
-      expect(TYPOGRAPHY.label).toContain("uppercase");
-      expect(TYPOGRAPHY.label).toContain("tracking-widest");
+    it("provides the Swiss micro-typography label module class key", () => {
+      expect(TYPOGRAPHY.label).toBe("heading");
     });
 
     it("provides alignment-stable tabular numerals class", () => {

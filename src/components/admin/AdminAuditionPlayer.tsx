@@ -50,12 +50,12 @@ export function DeckStatusCard({
   return (
     <div
       aria-live="polite"
-      className="flex flex-col gap-2 border border-foreground/30 bg-foreground/5 p-3"
+      className="gap-2 border-foreground/30 bg-foreground/5 p-3 flex flex-col border"
     >
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
+      <div className="gap-2 flex flex-wrap items-center justify-between">
+        <div className="gap-2 flex items-center">
           <span
-            className={`border px-2 py-0.5 font-mono text-[10px] font-bold uppercase ${PHASE_STYLES[phase]}`}
+            className={`px-2 py-0.5 font-mono font-bold border text-[10px] uppercase ${PHASE_STYLES[phase]}`}
           >
             {phaseLabel}
           </span>
@@ -69,19 +69,19 @@ export function DeckStatusCard({
       </div>
 
       {phase === "bridge" && bridgeDurationSec > 0 && (
-        <div className="flex flex-col gap-1 pt-1">
-          <div className="flex justify-between font-mono text-[10px] text-muted-foreground">
+        <div className="gap-1 pt-1 flex flex-col">
+          <div className="font-mono text-muted-foreground flex justify-between text-[10px]">
             <span>Radio transition speech & chops</span>
             <span>
               {bridgeElapsedSec.toFixed(1)}s / {bridgeDurationSec.toFixed(1)}s
             </span>
           </div>
-          <div className="h-1.5 w-full overflow-hidden bg-foreground/20">
+          <div className="h-1.5 bg-foreground/20 w-full overflow-hidden">
             <div
               style={{
                 width: `${Math.min(100, (bridgeElapsedSec / bridgeDurationSec) * 100)}%`,
               }}
-              className="h-full bg-primary transition-all duration-100"
+              className="bg-primary h-full transition-all duration-100"
             />
           </div>
         </div>
@@ -110,8 +110,8 @@ export function AuditionToolbar({
   };
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-foreground/20 pb-3 font-mono text-xs">
-      <label className="flex cursor-pointer items-center gap-2 font-bold text-foreground">
+    <div className="gap-3 border-foreground/20 pb-3 font-mono text-xs flex flex-wrap items-center justify-between border-b">
+      <label className="gap-2 font-bold text-foreground flex cursor-pointer items-center">
         <input
           type="checkbox"
           checked={startNearHandover}
@@ -121,7 +121,7 @@ export function AuditionToolbar({
         <span>Start 8s before exit on test</span>
       </label>
 
-      <div className="flex items-center gap-2">
+      <div className="gap-2 flex items-center">
         <label htmlFor="automix-select" className="text-muted-foreground">
           Auto-mix:
         </label>
@@ -129,7 +129,7 @@ export function AuditionToolbar({
           id="automix-select"
           value={String(autoMix)}
           onChange={handleSelect}
-          className="border border-foreground/30 bg-background px-2 py-1 text-xs text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+          className="border-foreground/30 bg-background px-2 py-1 text-xs text-foreground focus-visible:ring-primary border focus-visible:ring-2 focus-visible:outline-none"
         >
           <option value="off">Off (mix manually)</option>
           <option value="1">After 1 loop pass</option>
@@ -177,14 +177,14 @@ export function BeatPlayer({
   const loopDur = (track.loop_duration_ms / 1000).toFixed(2);
 
   return (
-    <div className="flex flex-col gap-3 border border-foreground/30 bg-foreground/5 p-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-2">
+    <div className="gap-3 border-foreground/30 bg-foreground/5 p-4 flex flex-col border">
+      <div className="gap-2 flex flex-wrap items-center justify-between">
+        <div className="gap-2 flex flex-wrap items-center">
           <button
             type="button"
             onClick={onPlayBeat}
             aria-label={isBeatPlaying ? "Pause beat" : "Play beat"}
-            className="min-h-9 border border-primary bg-primary/20 px-4 font-bold text-foreground transition-colors hover:bg-primary/30 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+            className="min-h-9 border-primary bg-primary/20 px-4 font-bold text-foreground hover:bg-primary/30 focus-visible:ring-primary border transition-colors focus-visible:ring-2 focus-visible:outline-none"
           >
             {isBeatPlaying ? "PAUSE BEAT" : "PLAY BEAT"}
           </button>
@@ -192,7 +192,7 @@ export function BeatPlayer({
             type="button"
             onClick={onJumpBeforeExit}
             aria-label="Jump 8s before exit"
-            className="min-h-9 border border-foreground/40 px-3 font-mono text-xs font-bold text-foreground transition-colors hover:border-foreground hover:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+            className="min-h-9 border-foreground/40 px-3 font-mono text-xs font-bold text-foreground hover:border-foreground hover:bg-foreground/10 focus-visible:ring-primary border transition-colors focus-visible:ring-2 focus-visible:outline-none"
           >
             JUMP 8s BEFORE EXIT
           </button>
@@ -201,7 +201,7 @@ export function BeatPlayer({
               type="button"
               onClick={onMixAtNextExit}
               aria-label="Mix at next loop end"
-              className="min-h-9 border border-foreground/40 px-3 font-mono text-xs font-bold text-foreground transition-colors hover:border-foreground hover:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+              className="min-h-9 border-foreground/40 px-3 font-mono text-xs font-bold text-foreground hover:border-foreground hover:bg-foreground/10 focus-visible:ring-primary border transition-colors focus-visible:ring-2 focus-visible:outline-none"
             >
               MIX AT NEXT EXIT
             </button>
@@ -212,7 +212,7 @@ export function BeatPlayer({
           type="button"
           onClick={onToggleLoop}
           aria-pressed={isLooping}
-          className={`min-h-9 border px-3 font-mono text-xs font-bold transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none ${
+          className={`min-h-9 px-3 font-mono text-xs font-bold focus-visible:ring-primary border transition-colors focus-visible:ring-2 focus-visible:outline-none ${
             isLooping
               ? "border-primary bg-primary text-background"
               : "border-foreground/30 text-muted-foreground hover:text-foreground"
@@ -230,7 +230,7 @@ export function BeatPlayer({
         onSeek={onSeek}
       />
 
-      <div className="flex flex-wrap gap-x-4 gap-y-1 font-mono text-[11px] text-muted-foreground">
+      <div className="gap-x-4 gap-y-1 font-mono text-muted-foreground flex flex-wrap text-[11px]">
         <span>
           Loop: {loopStart}s → {loopEnd}s
         </span>
