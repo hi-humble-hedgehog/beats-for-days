@@ -92,7 +92,7 @@ Full layout and layering rules: [`docs/architecture/overview.md`](docs/architect
 - Node.js 22.12+ (see `.nvmrc`)
 - [pnpm](https://pnpm.io) (version pinned in `package.json`)
 - [Docker Desktop](https://docs.docker.com/desktop/) or OrbStack (for local Supabase database and audio storage)
-- [Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started) (`brew install supabase/tap/supabase`)
+- [Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started) (`brew install supabase/tap/supabase`, v3 or newer)
 - Optional: ElevenLabs API credentials (only required when `ALLOW_LIVE_AI_CALLS=true`)
 - Optional: `brew install gitleaks` for local secret scanning
 
