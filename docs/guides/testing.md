@@ -64,6 +64,10 @@ Stryker changes your code in small ways (flips `<` to `<=`, empties strings,
 removes calls…) and re-runs the tests. A **surviving mutant** means no test
 noticed the change, which means that behaviour is unprotected.
 
+**When it runs:** CI runs mutation testing on every PR. You don't need to run
+it between tasks. Before merge, open the `mutation-report` artifact from CI
+(or run it locally) and fix survivors in the files you changed.
+
 For each survivor:
 
 1. **Missing assertion?** Add or tighten a test (most common).
@@ -86,4 +90,4 @@ pnpm audit:a11y           # generate full Born-Accessible HTML/JSON audit in rep
 pnpm exec playwright show-report reports/playwright
 ```
 
-Playwright tests live in `e2e/*.spec.ts` and run against `http://localhost:3000` backed by the live local Next.js API routes and local Supabase stack (`supabase start`). Every route is also checked with `@axe-core/playwright` (`wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa`, `best-practice`), `placeholder-only-label` detection, and 320px viewport reflow. `pnpm verify` runs both `pnpm lint:a11y` and `pnpm test:e2e` automatically before every push ([ADR 0012](../decisions/0012-playwright-e2e-user-flow-testing.md)).
+Playwright tests live in `e2e/*.spec.ts` and run against `http://localhost:3000` backed by the live local Next.js API routes and local Supabase stack (`supabase start`). Every route is also checked with `@axe-core/playwright` (`wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa`, `best-practice`), `placeholder-only-label` detection, and 320px viewport reflow. `pnpm lint:a11y` runs in `pnpm check` and in `pnpm verify` before every push. `pnpm test:e2e` runs in CI on every PR and locally with `pnpm verify:full`. Run it yourself when you change UI, routes or API flows ([ADR 0012](../decisions/0012-playwright-e2e-user-flow-testing.md), [ADR 0017](../decisions/0017-staged-quality-gate.md)).

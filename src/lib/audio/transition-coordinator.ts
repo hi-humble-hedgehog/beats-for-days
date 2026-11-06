@@ -30,6 +30,7 @@ export interface ArmTransitionOptions {
   onPhaseChange: (phase: PlaybackPhase) => void;
   onHandoffSuccess: (handoff: ReturnType<typeof resolveHandoffState>) => void;
   onTrackHandoff?: (nextBeat: BeatView) => void;
+  minPass?: number;
 }
 
 /**
@@ -123,6 +124,7 @@ export class TransitionCoordinator {
       audioCtxNow: ctx.currentTime,
       segmentStartTime,
       initialOffsetSec,
+      minPass: options.minPass,
     });
 
     const { armed, delayMs } = buildArmedTransitionState(

@@ -1,5 +1,6 @@
 import { LIMITS } from "@/lib/constants";
 import type { BeatView, TransitionView } from "@/lib/types/beat";
+import { getZeroRepeatWalkCandidates } from "./walk";
 
 /**
  * Moves `currentTrackId` to the end of the play history list without duplicates.
@@ -212,8 +213,13 @@ function findSkipCandidate(
     (t) => !playedSet.has(t.id) && t.id !== currentTrackId,
   );
   if (unheard.length > 0) {
-    if (playedSet.size === 0 && !currentTrackId && unheard[0]) {
-      return unheard[0];
+    if (playedSet.size === 0 && !currentTrackId) {
+      const candidates = getZeroRepeatWalkCandidates(allTracks);
+      return (
+        candidates[pickRandom(candidates.length)] ??
+        candidates[0] ??
+        unheard[0]!
+      );
     }
     const picked = pickByWarnsdorffDegree(
       unheard,

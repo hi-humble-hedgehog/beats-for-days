@@ -1,4 +1,4 @@
-# 0017. Unify public routes inside the poster player and isolate admin player
+# 0018. Unify public routes inside the poster player and isolate admin player
 
 - **Status:** Accepted
 - **Date:** 2026-11-05

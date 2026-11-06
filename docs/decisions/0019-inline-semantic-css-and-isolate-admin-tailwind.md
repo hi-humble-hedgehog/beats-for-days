@@ -1,4 +1,4 @@
-# 0018. Inline semantic CSS for the main app and isolate Tailwind to admin
+# 0019. Inline semantic CSS for the main app and isolate Tailwind to admin
 
 - **Status:** Accepted
 - **Date:** 2026-11-05

@@ -149,6 +149,62 @@ describe("useTrackAudition", () => {
     expect(result.current.activeClipId).toBe(transition.id);
   });
 
+  it("jumps to 8 seconds before loop exit", async () => {
+    const { result } = renderHook(() => useTrackAudition(sampleTrack));
+
+    await act(async () => {
+      result.current.jumpBeforeExit(8);
+    });
+
+    // loop_end_ms is 55000 -> 55s. 55 - 8 = 47s
+    expect(result.current.currentTime).toBe(47);
+  });
+
+  it("toggles audition mode between blend and bridge", async () => {
+    const { result } = renderHook(() => useTrackAudition(sampleTrack));
+
+    expect(result.current.auditionMode).toBe("blend");
+
+    act(() => {
+      result.current.setAuditionMode("bridge");
+    });
+    expect(result.current.auditionMode).toBe("bridge");
+
+    act(() => {
+      result.current.setAuditionMode("blend");
+    });
+    expect(result.current.auditionMode).toBe("blend");
+  });
+
+  it("updates autoMix setting", async () => {
+    const { result } = renderHook(() => useTrackAudition(sampleTrack));
+
+    expect(result.current.autoMix).toBe("off");
+
+    act(() => {
+      result.current.setAutoMix(2);
+    });
+    expect(result.current.autoMix).toBe(2);
+  });
+
+  it("supports testTransition in bridge mode", async () => {
+    const { result } = renderHook(() => useTrackAudition(sampleTrack));
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const transition = mockTransitions.outTransitions[0];
+    if (!transition) throw new Error("Expected transition");
+
+    await act(async () => {
+      result.current.testTransition(transition, "bridge");
+    });
+
+    expect(mockAudio.src).toContain(transition.audio_url);
+    expect(result.current.activeClipId).toBe(transition.id);
+  });
+
   it("stops playback when unmounted after playing", async () => {
     const { result, unmount } = renderHook(() => useTrackAudition(sampleTrack));
 

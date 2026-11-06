@@ -8,7 +8,8 @@
 
 ## Checklist
 
-- [ ] `pnpm verify` passes locally
+- [ ] `pnpm verify` passes locally (the pre-push hook runs it)
+- [ ] CI E2E + axe-core job is green (or `pnpm test:e2e` passes locally for UI/route changes)
 - [ ] New logic lives in `.ts` modules with tests (components stay thin)
 - [ ] No CRAP offenders, and no new surviving mutants in changed code (see CI artifacts)
 - [ ] Architecture decisions recorded in `docs/decisions/` (if any were made)

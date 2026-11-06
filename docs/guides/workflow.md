@@ -19,13 +19,20 @@ pnpm dev
 
 ## Inner loop
 
+Run fast checks while you work. Leave the slow checks to the push hook and CI ([ADR 0017](../decisions/0017-staged-quality-gate.md)).
+
 ```bash
 pnpm test:watch         # fast feedback while coding
-pnpm lint:a11y          # static OKLCH/hex contrast & semantic control lint
-pnpm test:e2e           # end-to-end browser + axe-core + 320px reflow tests
-pnpm verify             # full local gate before pushing / declaring done
-pnpm test:mutation      # after logic-heavy changes
+pnpm check              # before calling a task done: typecheck · lint · a11y lint · tests for changed files
+pnpm verify             # push gate (runs on git push): adds format · boundaries · knip · all tests + CRAP
+pnpm verify:full        # same as CI: verify + E2E/axe-core + mutation testing
+pnpm test:e2e           # on demand, when you change UI, routes or API flows
+pnpm test:mutation      # on demand, or when CI reports surviving mutants
 ```
+
+- `pnpm check` runs Vitest with `--changed`, so it only runs tests related to uncommitted files.
+- E2E needs Docker and local Supabase. That is why it is not in a git hook.
+- **Open a draft PR early.** CI only runs E2E and mutation testing on pull requests.
 
 ### Playback debug panel
 
@@ -48,6 +55,17 @@ The debug panel shows the active beat, route, history state and played ids. It n
    - `refactor/<scope>`
    - `chore/<task>`
 2. **Pull Requests:**
+   - **Open a draft PR right after the first push.** CI is the only place E2E, axe-core and mutation testing run ([ADR 0017](../decisions/0017-staged-quality-gate.md)). A draft PR gives you that feedback while you keep working.
+
+     ```bash
+     git push -u origin HEAD                    # pre-push runs pnpm verify
+     gh pr create --draft --fill --title "feat(audio): …"
+     gh pr checks                               # see CI status
+     gh run view --log-failed                   # read a failing job's log
+     gh pr ready                                # when CI is green and the checklist is done
+     ```
+
+   - Agents follow the same steps (see `AGENTS.md`). They ask a human before marking a PR ready or merging.
    - PR title must follow Conventional Commits (e.g., `feat(audio): implement gapless bar looping`). Enforced in CI.
    - PR size target: ≤ 400 changed production lines (excluding tests, `docs/`, and lockfile). CI warns if exceeded.
    - Merge strategy: **Squash and merge** with conventional title to maintain linear history on `main`.
@@ -57,14 +75,17 @@ The debug panel shows the active beat, route, history state and played ids. It n
 
 ```mermaid
 flowchart LR
-    commit["git commit"] --> pc["pre-commit (~5s): gitleaks · eslint --fix · prettier · typecheck"]
+    task["Task done"] --> chk["pnpm check: typecheck · lint · a11y lint · changed tests"]
+    commit["git commit"] --> pc["pre-commit (~5s): gitleaks · eslint --fix · prettier (staged files)"]
     commit --> cm["commit-msg: commitlint"]
-    push["git push"] --> pp["pre-push: full verify (tests, CRAP, a11y, E2E, boundaries, knip)"]
-    pr["Pull request"] --> ci["CI: full quality gate (verify + build) · mutation · gitleaks"]
+    push["git push"] --> pp["pre-push: verify (typecheck, lint, format, boundaries, knip, tests + CRAP)"]
+    pr["Pull request"] --> ci["CI: verify + build · E2E + axe-core · mutation · gitleaks"]
 ```
 
 Hooks only touch staged files where possible. Emergency bypass:
 `LEFTHOOK=0 git commit …` (CI still enforces everything).
+
+The agent Stop hook also runs typecheck and ESLint on changed files at the end of each agent turn ([ADR 0005](../decisions/0005-agent-guidelines.md)).
 
 ## Commits
 
@@ -77,8 +98,9 @@ Hooks only touch staged files where possible. Emergency bypass:
 
 [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml):
 
-- **Quality gate**: typecheck, lint, format, boundaries, knip, tests + CRAP,
-  build. Uploads coverage + `crap.json`.
+- **Quality gate**: typecheck, lint, a11y lint, format, boundaries, knip,
+  tests + CRAP, build, then E2E + axe-core against local Supabase. Uploads
+  coverage, `crap.json` and the Playwright report.
 - **Mutation testing**: Stryker incremental, baseline cached per branch
   (falls back to `main`). Uploads the HTML report.
 - **Secret scan**: gitleaks over full history.
