@@ -1,6 +1,6 @@
 # 0012. Use Playwright, Born-Accessible UI, and OKLCH tokens for E2E & accessibility verification
 
-- **Status:** Accepted
+- **Status:** Accepted (point 6 amended by [0017](0017-staged-quality-gate.md): E2E runs in CI, not pre-push)
 - **Date:** 2026-10-25
 
 ## Context
