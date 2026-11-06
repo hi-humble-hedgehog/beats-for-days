@@ -57,6 +57,31 @@
   @media (min-width: 768px) {
     font-size: 0.875rem;
   }
+
+  & a {
+    color: var(--foreground);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    transition: color 150ms ease;
+
+    &:hover {
+      color: var(--primary);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--ring);
+      outline-offset: 2px;
+    }
+  }
+
+  & strong {
+    font-weight: 600;
+    color: var(--foreground);
+  }
+
+  & .muted {
+    color: var(--muted-foreground);
+  }
 }
 
 .muted {

@@ -7,5 +7,19 @@ export const metadata = {
 };
 
 export default function AboutPage() {
-  return <PosterInfoSlot section="about" />;
+  return (
+    <PosterInfoSlot title="About Beats for Days">
+      <p>
+        Beats for Days is an infinite generative 90s boom bap radio experience.
+        Every beat is 1 minute long, perfectly loopable, and woven together with
+        custom AI transitions inspired by golden-era vinyl sampling and 1950s
+        radio station handoffs.
+      </p>
+      <p className="muted">
+        Instead of fixed repeating playlists, tracks connect in a continuous
+        directed graph. AI transitions blend seamlessly from one beat to the
+        next, ensuring fresh combinations that evolve over time.
+      </p>
+    </PosterInfoSlot>
+  );
 }

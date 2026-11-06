@@ -8,15 +8,18 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("PosterInfoSlot", () => {
-  it("renders about copy and return link when section is about", () => {
-    render(<PosterInfoSlot section="about" returnHref="/beat/0001" />);
+  it("renders heading, return link, and children content", () => {
+    render(
+      <PosterInfoSlot title="About Beats for Days" returnHref="/beat/0001">
+        <p>Infinite generative 90s boom bap radio experience.</p>
+      </PosterInfoSlot>,
+    );
 
     const heading = screen.getByRole("heading", {
       level: 2,
       name: "About Beats for Days",
     });
     expect(heading).toBeInTheDocument();
-    expect(heading).toHaveClass("heading");
     expect(
       screen.getByText(/infinite generative 90s boom bap radio experience/i),
     ).toBeInTheDocument();
@@ -25,8 +28,16 @@ describe("PosterInfoSlot", () => {
     ).toHaveAttribute("href", "/beat/0001");
   });
 
-  it("renders privacy copy, tracking info, and contact link when section is privacy", () => {
-    render(<PosterInfoSlot section="privacy" returnHref="/" />);
+  it("renders privacy children with contact link and default return href", () => {
+    render(
+      <PosterInfoSlot title="Privacy & Data" returnHref="/">
+        <p>stream run by Rick van Mook</p>
+        <p>
+          <span>Tracking:</span>
+          <a href="mailto:rick@beatsfordays.ai">rick@beatsfordays.ai</a>
+        </p>
+      </PosterInfoSlot>,
+    );
 
     expect(
       screen.getByRole("heading", { level: 2, name: "Privacy & Data" }),
@@ -43,8 +54,12 @@ describe("PosterInfoSlot", () => {
     ).toHaveAttribute("href", "/");
   });
 
-  it("renders 404 copy and return link when section is not-found", () => {
-    render(<PosterInfoSlot section="not-found" returnHref="/" />);
+  it("renders 404 children content", () => {
+    render(
+      <PosterInfoSlot title="404 — Beat Not Found" returnHref="/">
+        <p>That beat is not in the crate.</p>
+      </PosterInfoSlot>,
+    );
 
     expect(
       screen.getByRole("heading", { level: 2, name: "404 — Beat Not Found" }),

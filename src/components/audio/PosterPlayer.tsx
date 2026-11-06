@@ -14,7 +14,7 @@ import { extractBeatIdFromPathname, formatBeatUrl } from "@/lib/player/url";
 import type { AudioPlayerState } from "@/lib/types/audio";
 import { useAudioPlayer } from "./AudioPlayerContext";
 import { PosterContext } from "./PosterContext";
-import { PosterInfoSlot, type PosterInfoSection } from "./PosterInfoSlot";
+import type { PosterInfoSection } from "./PosterInfoSlot";
 import { PosterTrackNumber } from "./PosterTrackNumber";
 import { TransportControls } from "./TransportControls";
 import { useStartPlayback } from "./useStartPlayback";
@@ -106,8 +106,6 @@ function PosterTransport(opts: {
       <div className={`${styles.slot} ${geometry.mobile ? "" : styles.narrow}`}>
         {children ? (
           children
-        ) : activeSection ? (
-          <PosterInfoSlot section={activeSection} returnHref={returnHref} />
         ) : (
           <PosterTrackNumber fallbackBeatId={fallbackBeatId} />
         )}
