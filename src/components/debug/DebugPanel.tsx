@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useAudioPlayer } from "@/components/audio/AudioPlayerContext";
 import { STORAGE_KEYS } from "@/lib/constants";
+import styles from "./DebugPanel.module.css";
 
 function DebugDetails({
   currentBeatLabel,
@@ -28,42 +29,40 @@ function DebugDetails({
     historyList.length > 0 ? historyList.join(" → ") : "(empty)";
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className={styles.details}>
       <div>
-        <span className="font-bold text-muted-foreground">Active Beat: </span>
-        <span className="text-foreground">{currentBeatLabel}</span>
+        <span className={styles.label}>Active Beat: </span>
+        <span className={styles.value}>{currentBeatLabel}</span>
       </div>
 
       <div>
-        <span className="font-bold text-muted-foreground">Route: </span>
-        <span className="text-foreground">{pathname}</span>
+        <span className={styles.label}>Route: </span>
+        <span className={styles.value}>{pathname}</span>
       </div>
 
       <div>
-        <span className="font-bold text-muted-foreground">History State: </span>
-        <code className="break-all text-primary">{historyState}</code>
+        <span className={styles.label}>History State: </span>
+        <code className={styles.code}>{historyState}</code>
       </div>
 
       <div>
-        <span className="font-bold text-muted-foreground">
-          History Stack Length:{" "}
-        </span>
-        <span className="text-foreground">{historyLength}</span>
+        <span className={styles.label}>History Stack Length: </span>
+        <span className={styles.value}>{historyLength}</span>
       </div>
 
       <div>
-        <span className="font-bold text-muted-foreground">Engine Phase: </span>
-        <span className="text-foreground">
+        <span className={styles.label}>Engine Phase: </span>
+        <span className={styles.value}>
           {phase ?? "idle"} ({secondsRemaining}s remaining, pos:{" "}
           {Math.round(positionSec ?? 0)}s)
         </span>
       </div>
 
-      <div className="border-t border-border pt-2">
-        <span className="font-bold text-muted-foreground">
+      <div className={styles.history}>
+        <span className={styles.label}>
           Played History ({historyList.length}):
         </span>
-        <p className="mt-1 break-words text-foreground">{formattedHistory}</p>
+        <p className={styles.historyText}>{formattedHistory}</p>
       </div>
     </div>
   );
@@ -102,17 +101,15 @@ function DebugContent({
       id="history-debug-panel"
       role="region"
       aria-label="Playback and history state"
-      className="fixed right-4 bottom-24 z-50 flex max-h-[80vh] w-80 flex-col gap-3 overflow-y-auto border border-border bg-background/95 p-4 font-mono text-xs shadow-2xl backdrop-blur sm:w-96"
+      className={styles.panel}
     >
-      <div className="flex items-center justify-between border-b border-border pb-2">
-        <span className="font-bold tracking-wider text-foreground uppercase">
-          History State Debug
-        </span>
+      <div className={styles.header}>
+        <span className={styles.title}>History State Debug</span>
         <button
           type="button"
           onClick={onClose}
           aria-label="Close debug panel"
-          className="border border-border px-2 py-0.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+          className={styles.close}
         >
           ✕
         </button>
@@ -174,7 +171,7 @@ export function DebugPanel() {
         aria-expanded={isOpen}
         aria-controls="history-debug-panel"
         aria-label="Toggle history debug panel"
-        className="fixed right-4 bottom-14 z-50 border border-border bg-background/90 px-3 py-1.5 text-xs font-bold tracking-wider text-muted-foreground uppercase shadow backdrop-blur transition hover:bg-muted hover:text-foreground"
+        className={styles.toggle}
       >
         {isOpen ? "Hide Debug" : "History Debug"}
       </button>

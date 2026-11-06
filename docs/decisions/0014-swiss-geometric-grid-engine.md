@@ -25,7 +25,7 @@ We will ship two grids that share tokens, not one morphing engine:
    - Thin canvas and SVG views in `src/components/grid/` draw the result.
    - Persistent layout shell in `AppChrome`: the poster canvas and transport
      stay mounted across all poster routes (`/`, `/beat/*`, `/about`, `/privacy`).
-     Only the track number (`PosterTrackNumber`) and page editorial content
+     Only the track number (`BeatNumber`) and page editorial content
      (`PosterInfoSlot`) are swapped as children, eliminating route-change canvas
      flashes.
 

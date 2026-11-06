@@ -127,4 +127,28 @@ describe("AdminAuditionModal", () => {
     expect(await screen.findByText("-> #09")).toBeInTheDocument();
     expect(screen.getByText("#03 ->")).toBeInTheDocument();
   });
+
+  it("renders jump 8s before exit button and timeline slider", () => {
+    render(<AdminAuditionModal track={sampleTrack} onClose={vi.fn()} />);
+    expect(
+      screen.getByRole("button", { name: /jump 8s before exit/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("slider", { name: /timeline/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("renders blend and bridge audition buttons for transitions", async () => {
+    render(<AdminAuditionModal track={sampleTrack} onClose={vi.fn()} />);
+    expect(
+      await screen.findByRole("button", {
+        name: /test blend transition to #09/i,
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: /audition bridge only to #09/i,
+      }),
+    ).toBeInTheDocument();
+  });
 });

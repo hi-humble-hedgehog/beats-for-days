@@ -5,6 +5,7 @@ import {
   gutterMid,
   type Geometry,
 } from "@/lib/grid/poster-geometry";
+import styles from "./Grid.module.css";
 
 const RAYS = Array.from({ length: 32 }, (_, i) => i);
 
@@ -226,7 +227,7 @@ function ModuleRays({ geometry: g }: { geometry: Geometry }) {
 export function GridOverlay({ geometry: g }: { geometry: Geometry }) {
   return (
     <svg
-      className="pointer-events-none absolute inset-0 z-40 size-full text-primary"
+      className={styles.overlay}
       viewBox={`0 0 ${g.w} ${g.h}`}
       aria-hidden="true"
     >

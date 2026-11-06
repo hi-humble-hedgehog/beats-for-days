@@ -4,7 +4,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useLayoutEffect,
   useReducer,
   useRef,
@@ -12,7 +11,6 @@ import {
   type ReactNode,
 } from "react";
 import { usePathname } from "next/navigation";
-import { beatsApi } from "@/lib/api";
 import { AudioEngine } from "@/lib/audio/engine";
 import {
   advancePlayedHistory,
@@ -29,6 +27,7 @@ import {
 import type { AudioPlayerState } from "@/lib/types/audio";
 import type { BeatView } from "@/lib/types/beat";
 import { useEngineHandoff, useEngineSync } from "./useEngineSync";
+import { useInitialBeat, type PlayerStateRef } from "./useInitialBeat";
 import { useTrackAdvancer } from "./useTrackAdvancer";
 import {
   usePlaybackCommands,
@@ -37,74 +36,6 @@ import {
 import { useUrlSync } from "./useUrlSync";
 
 export const AudioPlayerContext = createContext<AudioPlayerState | null>(null);
-
-interface PlayerStateRef {
-  current: BeatView | null;
-  pathname: string;
-  playedHistory: string[];
-}
-
-function fetchInitialBeatData(
-  initialBeatId: string | null | undefined,
-  currentId: string | undefined,
-  playedTrackIds: string[],
-): Promise<{
-  hydrated?: boolean;
-  beat?: BeatView | null;
-  resolveAfterSec?: number;
-}> {
-  if (initialBeatId) {
-    if (currentId === initialBeatId) return Promise.resolve({ hydrated: true });
-    return beatsApi.getBeat(initialBeatId).then((beat) => ({ beat }));
-  }
-  return beatsApi.getNextBeat({ playedTrackIds, mode: "skip" });
-}
-
-function useInitialBeat(
-  initialHistory: string[],
-  initialBeatId: string | null | undefined,
-  dispatch: React.Dispatch<PlayerAction>,
-  stateRef: React.MutableRefObject<PlayerStateRef>,
-) {
-  const [current, setCurrent] = useState<BeatView | null>(null);
-  const [resolveAfterSec, setResolveAfterSec] = useState<number>(30);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const historyRef = useRef(initialHistory);
-
-  useEffect(() => {
-    let active = true;
-    fetchInitialBeatData(
-      initialBeatId,
-      stateRef.current.current?.id,
-      historyRef.current,
-    )
-      .then((res) => {
-        if (!active || res.hydrated) return;
-        if (!res.beat) {
-          dispatch({ type: "set_not_found", beatId: initialBeatId ?? null });
-          return;
-        }
-        setCurrent(res.beat);
-        if (res.resolveAfterSec) setResolveAfterSec(res.resolveAfterSec);
-      })
-      .catch((err: unknown) => {
-        if (!active) return;
-        dispatch({
-          type: "set_error",
-          error: err instanceof Error ? err.message : "Failed to load beats",
-        });
-      })
-      .finally(() => {
-        if (active) setIsLoading(false);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [dispatch, initialBeatId, stateRef]);
-
-  return { current, setCurrent, resolveAfterSec, isLoading };
-}
 
 export interface AudioPlayerProviderProps {
   children: ReactNode;

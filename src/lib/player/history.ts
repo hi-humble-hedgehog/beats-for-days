@@ -34,3 +34,30 @@ export function savePlayedHistory(history: string[]): void {
     // Ignore storage quota errors and SSR environments without window
   }
 }
+
+/**
+ * Loads the assigned initial beat ID from browser local storage.
+ * Returns null when absent, whitespace, or during server-side rendering.
+ */
+export function loadInitialBeatId(): string | null {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEYS.INITIAL_BEAT);
+    return raw && typeof raw === "string" && raw.trim().length > 0
+      ? raw.trim()
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Persists the assigned initial beat ID to browser local storage.
+ * Ensures page refreshes do not roll a new random track before playback starts.
+ */
+export function saveInitialBeatId(beatId: string): void {
+  try {
+    window.localStorage.setItem(STORAGE_KEYS.INITIAL_BEAT, beatId);
+  } catch {
+    // Ignore storage quota errors and SSR environments without window
+  }
+}

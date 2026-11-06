@@ -41,11 +41,11 @@ function EditIdentityInputs({
 
   return (
     <>
-      <div className="flex flex-col gap-1">
+      <div className="gap-1 flex flex-col">
         <label htmlFor="edit-index" className="font-bold text-foreground">
           Track # (Order Index)
         </label>
-        <div className="flex items-center gap-3">
+        <div className="gap-3 flex items-center">
           <input
             id="edit-index"
             type="number"
@@ -53,15 +53,15 @@ function EditIdentityInputs({
             required
             value={index}
             onChange={(e) => onIndexChange(Math.max(1, Number(e.target.value)))}
-            className="min-h-9 w-32 border border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+            className="min-h-9 w-32 border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-primary border focus-visible:ring-2 focus-visible:outline-none"
           />
           <span className="font-mono text-xs font-bold text-muted-foreground">
             Label / Slug: #{label}
           </span>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="flex flex-col gap-1">
+      <div className="gap-4 grid grid-cols-2">
+        <div className="gap-1 flex flex-col">
           <label htmlFor="edit-bpm" className="font-bold text-foreground">
             BPM
           </label>
@@ -73,10 +73,10 @@ function EditIdentityInputs({
             required
             value={bpm}
             onChange={(e) => onBpmChange(Number(e.target.value))}
-            className="min-h-9 border border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+            className="min-h-9 border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-primary border focus-visible:ring-2 focus-visible:outline-none"
           />
         </div>
-        <div className="flex flex-col gap-1">
+        <div className="gap-1 flex flex-col">
           <label htmlFor="edit-key" className="font-bold text-foreground">
             Key
           </label>
@@ -86,11 +86,11 @@ function EditIdentityInputs({
             required
             value={keySig}
             onChange={(e) => onKeyChange(e.target.value)}
-            className="min-h-9 border border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+            className="min-h-9 border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-primary border focus-visible:ring-2 focus-visible:outline-none"
           />
         </div>
       </div>
-      <div className="flex flex-col gap-1">
+      <div className="gap-1 flex flex-col">
         <label htmlFor="edit-genre" className="font-bold text-foreground">
           Genre
         </label>
@@ -100,7 +100,7 @@ function EditIdentityInputs({
           required
           value={genre}
           onChange={(e) => onGenreChange(e.target.value)}
-          className="min-h-9 border border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+          className="min-h-9 border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-primary border focus-visible:ring-2 focus-visible:outline-none"
         />
       </div>
     </>
@@ -121,8 +121,8 @@ function EditTimingInputs({
   onLoopEndChange,
 }: EditTimingProps) {
   return (
-    <div className="grid grid-cols-2 gap-4">
-      <div className="flex flex-col gap-1">
+    <div className="gap-4 grid grid-cols-2">
+      <div className="gap-1 flex flex-col">
         <label htmlFor="edit-loop-start" className="font-bold text-foreground">
           Loop Start (ms)
         </label>
@@ -133,10 +133,10 @@ function EditTimingInputs({
           required
           value={loopStartMs}
           onChange={(e) => onLoopStartChange(Number(e.target.value))}
-          className="min-h-9 border border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+          className="min-h-9 border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-primary border focus-visible:ring-2 focus-visible:outline-none"
         />
       </div>
-      <div className="flex flex-col gap-1">
+      <div className="gap-1 flex flex-col">
         <label htmlFor="edit-loop-end" className="font-bold text-foreground">
           Loop End (ms)
         </label>
@@ -147,7 +147,7 @@ function EditTimingInputs({
           required
           value={loopEndMs}
           onChange={(e) => onLoopEndChange(Number(e.target.value))}
-          className="min-h-9 border border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+          className="min-h-9 border-foreground/40 bg-background px-3 py-1 font-mono text-foreground focus-visible:ring-primary border focus-visible:ring-2 focus-visible:outline-none"
         />
       </div>
     </div>
@@ -194,7 +194,7 @@ function AdminEditForm({ track, onClose, onSave }: AdminEditFormProps) {
       onSubmit={(e) => {
         void handleSubmit(e);
       }}
-      className="mt-4 flex flex-col gap-4 text-xs uppercase"
+      className="mt-4 gap-4 text-xs flex flex-col uppercase"
     >
       <EditIdentityInputs
         index={index}
@@ -213,18 +213,18 @@ function AdminEditForm({ track, onClose, onSave }: AdminEditFormProps) {
         onLoopEndChange={setLoopEndMs}
       />
 
-      <div className="mt-4 flex items-center justify-end gap-3 border-t border-foreground/20 pt-4">
+      <div className="mt-4 gap-3 border-foreground/20 pt-4 flex items-center justify-end border-t">
         <button
           type="button"
           onClick={onClose}
-          className="min-h-9 border border-foreground/30 px-4 font-bold text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+          className="min-h-9 border-foreground/30 px-4 font-bold text-muted-foreground hover:text-foreground focus-visible:ring-primary border transition-colors focus-visible:ring-2 focus-visible:outline-none"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
-          className="min-h-9 border border-foreground bg-foreground px-5 font-bold text-background transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none disabled:opacity-50"
+          className="min-h-9 border-foreground bg-foreground px-5 font-bold text-background focus-visible:ring-primary border transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50"
         >
           {isSubmitting ? "Saving..." : "Save Changes"}
         </button>
@@ -263,14 +263,14 @@ export function AdminEditModal({
   const trackLabel = formatAdminTrackLabel(track);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/60 p-4 backdrop-blur-xs">
+    <div className="inset-0 bg-foreground/60 p-4 backdrop-blur-xs fixed z-50 flex items-center justify-center">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="edit-dialog-title"
-        className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-y-auto border-2 border-foreground bg-background p-6 shadow-2xl"
+        className="max-w-lg border-foreground bg-background p-6 shadow-2xl flex max-h-[90vh] w-full flex-col overflow-y-auto border-2"
       >
-        <div className="flex items-center justify-between border-b border-foreground/30 pb-3">
+        <div className="border-foreground/30 pb-3 flex items-center justify-between border-b">
           <h2 id="edit-dialog-title" className="text-sm font-bold uppercase">
             Edit Track: #{trackLabel}
           </h2>
@@ -278,7 +278,7 @@ export function AdminEditModal({
             type="button"
             onClick={onClose}
             aria-label="Close edit dialog"
-            className="inline-flex min-h-6 min-w-6 items-center justify-center text-xs font-bold text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+            className="min-h-6 min-w-6 text-xs font-bold text-muted-foreground hover:text-foreground focus-visible:ring-primary inline-flex items-center justify-center transition-colors focus-visible:ring-2 focus-visible:outline-none"
           >
             ✕
           </button>
