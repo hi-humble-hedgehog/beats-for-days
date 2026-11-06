@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
+import { BeatNumber } from "@/components/audio/BeatNumber";
 import { fetchBeatViewById } from "@/lib/tracks";
-import { BeatDeck } from "./BeatDeck";
 
 export const instant = false;
 
@@ -15,5 +15,5 @@ export default async function BeatPage({
     notFound();
   }
 
-  return <BeatDeck initialBeat={beat} />;
+  return <BeatNumber initialBeat={beat} fallbackBeatId={slug} />;
 }

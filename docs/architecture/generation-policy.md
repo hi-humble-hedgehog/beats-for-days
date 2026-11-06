@@ -122,8 +122,7 @@ Tracks and transitions form a **directed graph** (`public.tracks` + `public.tran
 
 ### 4-Digit `/beat/####` URLs & 1-Minute Loops
 
-- Each beat gets the next 4-digit ID in creation order (`/beat/0001`, `/beat/0002`, …, `/beat/1500`, formatted with `String(beatNumber).padStart(4, "0")`).
-- Visiting `/beats` on a cold request redirects to `/`; in-app header navigation links directly to the active beat (`/beat/####`).
+- Each beat gets the next 4-digit ID in creation order (`/beat/0001`, `/beat/0002`, …, `/beat/1500`, formatted with `String(beatNumber).padStart(4, "0")`). Visiting `/beats` returns 404; individual beats live at `/beat/####`.
 - Every beat is **1 minute long and loops seamlessly** (`loop_start_ms` $\to$ `loop_end_ms`).
 
 ### Loading Beats: One at a Time

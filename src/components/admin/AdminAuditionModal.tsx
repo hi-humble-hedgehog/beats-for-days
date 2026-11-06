@@ -34,8 +34,8 @@ function AuditionHeader({
   onClose,
 }: AuditionHeaderProps) {
   return (
-    <div className="flex items-center justify-between border-b border-foreground/30 pb-3">
-      <div className="flex items-baseline gap-2">
+    <div className="border-foreground/30 pb-3 flex items-center justify-between border-b">
+      <div className="gap-2 flex items-baseline">
         <h2 id="audition-dialog-title" className="text-sm font-bold uppercase">
           Audition Beat: #{trackLabel}
         </h2>
@@ -47,7 +47,7 @@ function AuditionHeader({
         type="button"
         onClick={onClose}
         aria-label="Close audition dialog"
-        className="inline-flex min-h-6 min-w-6 items-center justify-center text-xs font-bold text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+        className="min-h-6 min-w-6 text-xs font-bold text-muted-foreground hover:text-foreground focus-visible:ring-primary inline-flex items-center justify-center transition-colors focus-visible:ring-2 focus-visible:outline-none"
       >
         ✕
       </button>
@@ -128,12 +128,12 @@ export function AdminAuditionModal({
   const trackLabel = formatAdminTrackLabel(audition.currentTrack);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/60 p-4 backdrop-blur-xs">
+    <div className="inset-0 bg-foreground/60 p-4 backdrop-blur-xs fixed z-50 flex items-center justify-center">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="audition-dialog-title"
-        className="flex max-h-[90vh] w-full max-w-2xl flex-col gap-4 overflow-y-auto border-2 border-foreground bg-background p-6 shadow-2xl"
+        className="max-w-2xl gap-4 border-foreground bg-background p-6 shadow-2xl flex max-h-[90vh] w-full flex-col overflow-y-auto border-2"
       >
         <AuditionHeader
           trackLabel={trackLabel}

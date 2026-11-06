@@ -1,5 +1,5 @@
-import { PosterTrackNumber } from "@/components/audio/PosterTrackNumber";
+import { BeatNumber } from "@/components/audio/BeatNumber";
 
 export default function Home() {
-  return <PosterTrackNumber />;
+  return <BeatNumber />;
 }

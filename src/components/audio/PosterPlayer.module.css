@@ -1,0 +1,107 @@
+.stage {
+  position: relative;
+  height: 100dvh;
+  min-height: 600px;
+  overflow: clip;
+  background-color: var(--background);
+}
+
+.header {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  @media (min-width: 768px) {
+    top: 2rem;
+    left: 2rem;
+  }
+}
+
+.title {
+  font-size: 1.875rem;
+  line-height: 0.85;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+
+  @media (min-width: 768px) {
+    font-size: 3rem;
+  }
+}
+
+.subtitle {
+  display: none;
+  font-size: 0.875rem;
+  line-height: 1.375;
+  font-weight: 500;
+
+  @media (min-width: 768px) {
+    display: block;
+  }
+}
+
+.subtitleMuted {
+  color: var(--muted-foreground);
+}
+
+.main {
+  position: absolute;
+  inset: 0;
+}
+
+.canvasLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  animation: canvas-fade-in 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+.transport {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.5rem;
+
+  @media (min-width: 768px) {
+    right: 2rem;
+    bottom: 2rem;
+    left: calc((500vw / 12) + 12px);
+    gap: 1rem;
+  }
+}
+
+.slot {
+  display: flex;
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.controls {
+  width: 100%;
+}
+
+.narrow {
+  max-width: 24rem;
+}
+
+@keyframes canvas-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

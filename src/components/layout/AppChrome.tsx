@@ -2,40 +2,32 @@
 
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import { PersistentPlayerBar } from "@/components/audio/PersistentPlayerBar";
-import { PosterPlayer } from "@/components/audio/PosterPlayer";
 import { useAudioPlayer } from "@/components/audio/AudioPlayerContext";
-import { HeaderNav } from "@/components/navigation/HeaderNav";
-import {
-  shouldShowHeaderNav,
-  shouldShowPersistentPlayerBar,
-} from "@/lib/player/chrome";
+import { PosterPlayer } from "@/components/audio/PosterPlayer";
+import { shouldShowPosterPlayer } from "@/lib/player/chrome";
+import { shouldResolveStartOnPlay } from "@/lib/player/decisions";
 
 /**
- * Route chrome for the Swiss poster and editorial layouts.
- * Keeps the full-screen poster player and its canvas visualizers mounted
- * across all poster routes (`/`, `/beat/*`, `/about`, `/privacy`) so route
- * changes never flash or re-initialize the canvas.
- * Switches to the editorial chrome with the persistent player bar on 404
- * pages and missing-beat routes.
+ * Route chrome for the application.
+ * Keeps the full-screen Swiss poster player and canvas visualizers mounted
+ * across all public routes (`/`, `/beat/*`, `/about`, `/privacy`, and 404s)
+ * so route changes never flash or re-initialize the canvas.
+ * Isolates local admin management routes so they render without the consumer player shell.
  */
 export function AppChrome({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const { notFoundBeatId } = useAudioPlayer();
-  const showNav = shouldShowHeaderNav(pathname);
-  const showBar = shouldShowPersistentPlayerBar(pathname, notFoundBeatId);
+  const { isPlaying, current, notFoundBeatId } = useAudioPlayer();
 
-  if (!showBar) {
-    return (
-      <PosterPlayer startOnPlay={pathname === "/"}>{children}</PosterPlayer>
-    );
+  if (!shouldShowPosterPlayer(pathname)) {
+    return <>{children}</>;
   }
 
-  return (
-    <>
-      {showNav ? <HeaderNav /> : null}
-      <div className="flex min-h-full flex-1 flex-col pb-24">{children}</div>
-      <PersistentPlayerBar />
-    </>
+  const startOnPlay = shouldResolveStartOnPlay(
+    isPlaying,
+    pathname ?? "",
+    current,
+    notFoundBeatId,
   );
+
+  return <PosterPlayer startOnPlay={startOnPlay}>{children}</PosterPlayer>;
 }
