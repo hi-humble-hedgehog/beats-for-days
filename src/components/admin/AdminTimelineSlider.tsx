@@ -110,13 +110,13 @@ function TimelineMarkers({
       <div
         data-testid="shaded-loop-window"
         style={{ left: `${loopLeft}%`, width: `${loopWidth}%` }}
-        className="absolute top-0 bottom-0 border-r-2 border-primary bg-primary/25"
+        className="top-0 bottom-0 border-primary bg-primary/25 absolute border-r-2"
         title={`Loop window: ${loopStartSec.toFixed(1)}s → ${loopEndSec.toFixed(1)}s`}
       />
       <div
         data-testid="timeline-playhead"
         style={{ left: `${playheadLeft}%` }}
-        className="pointer-events-none absolute top-0 bottom-0 w-1 -translate-x-1/2 bg-foreground"
+        className="top-0 bottom-0 w-1 bg-foreground pointer-events-none absolute -translate-x-1/2"
       />
     </>
   );
@@ -169,7 +169,7 @@ export function AdminTimelineSlider({
   );
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="gap-1 flex flex-col">
       <div
         role="slider"
         tabIndex={0}
@@ -183,7 +183,7 @@ export function AdminTimelineSlider({
         onPointerUp={drag.onUp}
         onPointerCancel={drag.onCancel}
         onKeyDown={handleKeyDown}
-        className="relative h-6 w-full cursor-pointer overflow-hidden border border-foreground/30 bg-foreground/10 select-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+        className="h-6 border-foreground/30 bg-foreground/10 focus-visible:ring-primary relative w-full cursor-pointer overflow-hidden border select-none focus-visible:ring-2 focus-visible:outline-none"
       >
         <TimelineMarkers
           loopLeft={loopLeft}
@@ -193,7 +193,7 @@ export function AdminTimelineSlider({
           loopEndSec={loopEndSec}
         />
       </div>
-      <p className="font-mono text-[10px] text-muted-foreground">
+      <p className="font-mono text-muted-foreground text-[10px]">
         Shaded: Verse → Bridge loop window. Handover leaves at right edge.
         Click/drag to scrub. Arrow keys nudge 1s (Shift+arrow 4s).
       </p>
