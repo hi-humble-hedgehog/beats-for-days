@@ -15,7 +15,7 @@ import type { AudioPlayerState } from "@/lib/types/audio";
 import { useAudioPlayer } from "./AudioPlayerContext";
 import { PosterContext } from "./PosterContext";
 import type { PosterInfoSection } from "./PosterInfoSlot";
-import { PosterTrackNumber } from "./PosterTrackNumber";
+import { BeatNumber } from "./BeatNumber";
 import { TransportControls } from "./TransportControls";
 import { useStartPlayback } from "./useStartPlayback";
 import styles from "./PosterPlayer.module.css";
@@ -104,11 +104,7 @@ function PosterTransport(opts: {
       aria-label="Player"
     >
       <div className={`${styles.slot} ${geometry.mobile ? "" : styles.narrow}`}>
-        {children ? (
-          children
-        ) : (
-          <PosterTrackNumber fallbackBeatId={fallbackBeatId} />
-        )}
+        {children ? children : <BeatNumber fallbackBeatId={fallbackBeatId} />}
         <p className="sr-only" aria-live="polite">
           {player.isPlaying ? "On air" : "Paused"}
         </p>

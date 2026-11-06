@@ -16,7 +16,7 @@ We will split styling between the public player and the local admin tool, and in
 1. **Global tokens in `src/app/globals.css` and co-located CSS Modules (`.module.css`)**
    - Remove `@import "tailwindcss"` from `src/app/globals.css`.
    - Keep `src/app/globals.css` strictly for global OKLCH palette tokens, `@layer base` element resets, `.site-root`, `.site-body`, `.sr-only`, `.tabular-nums`, and reduced-motion rules.
-   - Define component-specific styles in co-located CSS Modules (`PosterPlayer.module.css`, `PosterTrackNumber.module.css`, `PosterInfoSlot.module.css`, `TransportControls.module.css`, `DebugPanel.module.css`, `Grid.module.css`) using native CSS nesting (`&:hover`, `&:focus-visible`, `@media`).
+   - Define component-specific styles in co-located CSS Modules (`PosterPlayer.module.css`, `BeatNumber.module.css`, `PosterInfoSlot.module.css`, `TransportControls.module.css`, `DebugPanel.module.css`, `Grid.module.css`) using native CSS nesting (`&:hover`, `&:focus-visible`, `@media`).
    - Remove the manual `<style>` workaround from `src/app/layout.tsx`.
 
 2. **Inline compiled CSS in `<head>` (`next.config.ts`)**
