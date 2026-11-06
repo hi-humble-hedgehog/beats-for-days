@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
 import { type AdminTrackRecord, fetchAdminTracks } from "@/lib/admin";
 import { getSupabaseAdminClient } from "@/lib/supabase";
+import "./admin.css";
 
 export const instant = false;
 

@@ -11,14 +11,14 @@ describe("isBeatPage", () => {
     expect(isBeatPage("/")).toBe(false);
   });
 
-  it("identifies /beat, /beats and /beat/:id paths as beat pages", () => {
+  it("identifies /beat and /beat/:id paths as beat pages", () => {
     expect(isBeatPage("/beat")).toBe(true);
-    expect(isBeatPage("/beats")).toBe(true);
     expect(isBeatPage("/beat/0001")).toBe(true);
     expect(isBeatPage("/beat/track-a")).toBe(true);
   });
 
   it("returns false for non-beat pages", () => {
+    expect(isBeatPage("/beats")).toBe(false);
     expect(isBeatPage("/about")).toBe(false);
     expect(isBeatPage("/privacy")).toBe(false);
     expect(isBeatPage("/generate")).toBe(false);

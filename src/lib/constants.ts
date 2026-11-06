@@ -1,6 +1,7 @@
 export const STORAGE_KEYS = {
   PLAYED_TRACKS: "beats_played_ids",
   ORDER_HASH: "beats_order_hash",
+  INITIAL_BEAT: "beats_initial_beat",
   BYOK_KEY: "elevenlabs_api_key",
   DEBUG_PANEL: "beats_debug_panel",
 } as const;
@@ -17,7 +18,6 @@ export const STARTER_BEAT_ID = "01";
 
 export const ROUTES = {
   HOME: "/",
-  BEATS: "/beats",
   BEAT: "/beat",
   GENERATE: "/generate",
   ABOUT: "/about",

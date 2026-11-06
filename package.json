@@ -12,7 +12,7 @@
     "start": "next start",
     "prepare": "lefthook install",
     "typecheck": "next typegen && tsc --noEmit",
-    "lint": "eslint --max-warnings=0 .",
+    "lint": "eslint --cache --max-warnings=0 .",
     "lint:fix": "eslint --fix .",
     "lint:a11y": "node .agents/skills/born-accessible-ui/scripts/lint.mjs --strict src/",
     "audit:a11y": "node .agents/skills/born-accessible-ui/scripts/audit.mjs http://localhost:3000/ http://localhost:3000/beat/01 http://localhost:3000/about http://localhost:3000/privacy --out reports/a11y",
@@ -31,15 +31,16 @@
     "deps:check": "depcruise src scripts",
     "deps:graph": "depcruise src --output-type mermaid --output-to reports/dependency-graph.mmd",
     "knip": "knip",
-    "verify": "pnpm typecheck && pnpm lint && pnpm lint:a11y && pnpm format:check && pnpm deps:check && pnpm knip && pnpm test:crap && pnpm test:e2e",
-    "verify:full": "pnpm verify && pnpm test:mutation"
+    "check": "pnpm typecheck && pnpm lint && pnpm lint:a11y && vitest run --changed --passWithNoTests",
+    "verify": "pnpm typecheck && pnpm lint && pnpm lint:a11y && pnpm format:check && pnpm deps:check && pnpm knip && pnpm test:crap",
+    "verify:full": "pnpm verify && pnpm test:e2e && pnpm test:mutation"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",
     "gsap": "^3.15.0",
-    "next": "16.4.2",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
+    "next": "16.4.4",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "server-only": "^0.0.1",
     "zod": "^4.6.7"
   },

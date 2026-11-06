@@ -11,8 +11,8 @@ vi.mock("@supabase/supabase-js", () => ({
 
 vi.mock("./env", () => ({
   getServerEnv: vi.fn(() => ({
-    NEXT_PUBLIC_SUPABASE_URL: "https://test.supabase.co",
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: "anon-test-key",
+    SUPABASE_URL: "https://test.supabase.co",
+    SUPABASE_ANON_KEY: "anon-test-key",
     SUPABASE_SERVICE_ROLE_KEY: "service-role-test-key",
   })),
 }));

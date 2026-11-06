@@ -762,7 +762,7 @@ describe("AudioPlayerProvider", () => {
     vi.useRealTimers();
   });
 
-  it("hydrates initial beat from BeatDeck without calling beatsApi.getBeat or writing played history before Play", async () => {
+  it("hydrates initial beat from BeatNumber without calling beatsApi.getBeat or writing played history before Play", async () => {
     mockPathname = "/beat/0002";
     window.localStorage.setItem(
       STORAGE_KEYS.PLAYED_TRACKS,

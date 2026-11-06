@@ -25,9 +25,8 @@ pre-commit:
       run: pnpm exec prettier --write --ignore-unknown {staged_files}
       stage_fixed: true
 
-    - name: typecheck
-      glob: "*.{ts,tsx,mts}"
-      run: pnpm typecheck
+  # Full-project typecheck runs in `pnpm check`, the agent Stop hook and
+  # pre-push. Keeping it out of pre-commit keeps commits fast (ADR 0017).
 
 commit-msg:
   jobs:
@@ -37,5 +36,7 @@ commit-msg:
 pre-push:
   piped: true
   jobs:
+    # Static checks + unit tests + CRAP. E2E and mutation run in CI on the PR
+    # (or locally with `pnpm verify:full`). See ADR 0017.
     - name: verify
       run: pnpm verify

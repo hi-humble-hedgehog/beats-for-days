@@ -14,10 +14,11 @@ import { extractBeatIdFromPathname, formatBeatUrl } from "@/lib/player/url";
 import type { AudioPlayerState } from "@/lib/types/audio";
 import { useAudioPlayer } from "./AudioPlayerContext";
 import { PosterContext } from "./PosterContext";
-import { PosterInfoSlot, type PosterInfoSection } from "./PosterInfoSlot";
-import { PosterTrackNumber } from "./PosterTrackNumber";
+import type { PosterInfoSection } from "./PosterInfoSlot";
+import { BeatNumber } from "./BeatNumber";
 import { TransportControls } from "./TransportControls";
 import { useStartPlayback } from "./useStartPlayback";
+import styles from "./PosterPlayer.module.css";
 
 function usePosterShortcuts(opts: {
   onToggle: () => void;
@@ -51,18 +52,18 @@ function usePosterShortcuts(opts: {
 function PosterHeader({ geometry }: { geometry: Geometry }) {
   return (
     <header
-      className="absolute top-4 left-4 z-20 flex flex-col gap-3 md:top-8 md:left-8"
+      className={styles.header}
       style={{ left: geometry.margin, top: geometry.margin }}
     >
-      <h1 className="text-3xl leading-[0.85] font-bold tracking-tighter md:text-5xl">
+      <h1 className={styles.title}>
         Beats
         <br />
         for Days
       </h1>
-      <p className="hidden text-sm leading-snug font-medium md:block">
+      <p className={styles.subtitle}>
         Infinite instrumental series
         <br />
-        <span className="text-muted-foreground">
+        <span className={styles.subtitleMuted}>
           Unreleased. Unnamed. Unending.
         </span>
       </p>
@@ -94,7 +95,7 @@ function PosterTransport(opts: {
   } = opts;
   return (
     <section
-      className="absolute right-4 bottom-4 left-4 z-20 flex flex-col justify-end gap-2 md:right-8 md:bottom-8 md:left-[calc((500vw/12)+12px)] md:gap-4"
+      className={styles.transport}
       style={{
         left: geometry.px + geometry.gap / 2,
         right: geometry.margin,
@@ -102,21 +103,19 @@ function PosterTransport(opts: {
       }}
       aria-label="Player"
     >
-      <div
-        className={`flex w-full justify-end ${geometry.mobile ? "" : "max-w-sm"}`}
-      >
-        {children ? (
-          children
-        ) : activeSection ? (
-          <PosterInfoSlot section={activeSection} returnHref={returnHref} />
-        ) : (
-          <PosterTrackNumber fallbackBeatId={fallbackBeatId} />
-        )}
+      <div className={`${styles.slot} ${geometry.mobile ? "" : styles.narrow}`}>
+        {children ? children : <BeatNumber fallbackBeatId={fallbackBeatId} />}
         <p className="sr-only" aria-live="polite">
           {player.isPlaying ? "On air" : "Paused"}
         </p>
       </div>
-      <div className={geometry.mobile ? "w-full" : "w-full max-w-sm"}>
+      <div
+        className={
+          geometry.mobile
+            ? styles.controls
+            : `${styles.controls} ${styles.narrow}`
+        }
+      >
         <TransportControls
           isPlaying={player.isPlaying}
           muted={player.muted ?? false}
@@ -220,13 +219,10 @@ export function PosterPlayer({
       4. Contrast: --foreground/--primary/--muted-foreground on --sleeve (verified tokens)
     */
     <PosterContext.Provider value={{ geometry, number, returnHref }}>
-      <div
-        ref={mainRef}
-        className="relative h-dvh min-h-[600px] overflow-hidden bg-background"
-      >
+      <div ref={mainRef} className={styles.stage}>
         <PosterHeader geometry={geometry} />
-        <main className="absolute inset-0">
-          <div className="animate-canvas-fade-in pointer-events-none absolute inset-0">
+        <main className={styles.main}>
+          <div className={styles.canvasLayer}>
             <SpectrumBars geometry={geometry} />
             <VinylVisualizer geometry={geometry} />
           </div>

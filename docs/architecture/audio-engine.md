@@ -6,7 +6,7 @@ This document describes how Beats for Days loops tracks gaplessly and splices tr
 
 - **Loop anatomy:** Every beat has an intro, a loop section (verse, chorus, bridge), and an outro.
 - **Sample-accurate looping:** The browser loops from `loopEndMs` back to `loopStartMs` using native `AudioBufferSourceNode` loop points.
-- **Configurable continuous play:** After continuous playback reaches a threshold (`NEXT_PUBLIC_AUTO_TRANSITION_RESOLVE_SECONDS`, default 30s), the player arms the next transition.
+- **Configurable continuous play:** After continuous playback reaches a threshold (`AUTO_TRANSITION_RESOLVE_SECONDS`, default 30s), the player arms the next transition.
 - **Minimum pass requirement (`minPass = 1`):** A track must complete pass 0 and wrap through the loop at least once before transitioning.
 - **3-node transition splice:** The engine crossfades track A into a transition bridge, and then crossfades the bridge into track B.
 
