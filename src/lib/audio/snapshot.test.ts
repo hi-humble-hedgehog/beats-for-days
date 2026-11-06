@@ -316,5 +316,15 @@ describe("createDefaultAudioContext & setupMasterAudioGraph", () => {
     });
     expect(schedule.bridgeStart).toBeGreaterThan(0);
     expect(schedule.nextStart).toBeGreaterThan(schedule.bridgeStart);
+
+    const schedulePass0 = scheduleTrackTransition({
+      beat: mockBeat,
+      transition: mockTransition,
+      audioCtxNow: 10,
+      segmentStartTime: 0,
+      initialOffsetSec: 0,
+      minPass: 0,
+    });
+    expect(schedulePass0.targetPass).toBe(0);
   });
 });

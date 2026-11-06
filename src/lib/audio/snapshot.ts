@@ -160,6 +160,7 @@ export interface TrackTransitionParams {
   audioCtxNow: number;
   segmentStartTime: number;
   initialOffsetSec: number;
+  minPass?: number;
 }
 
 /**
@@ -169,8 +170,14 @@ export interface TrackTransitionParams {
  * Packages timing and pass boundary resolution cleanly for AudioEngine splice orchestration.
  */
 export function scheduleTrackTransition(params: TrackTransitionParams) {
-  const { beat, transition, audioCtxNow, segmentStartTime, initialOffsetSec } =
-    params;
+  const {
+    beat,
+    transition,
+    audioCtxNow,
+    segmentStartTime,
+    initialOffsetSec,
+    minPass = 1,
+  } = params;
   return computeTransitionSchedule({
     segmentStartTime,
     initialOffsetSec,
@@ -178,7 +185,7 @@ export function scheduleTrackTransition(params: TrackTransitionParams) {
     exitSec: beat.loopEndMs / 1000,
     audioCtxNow,
     transitionTiming: transition.timing,
-    minPass: 1,
+    minPass,
     leadSec: 0.4,
   });
 }

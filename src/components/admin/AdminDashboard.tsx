@@ -113,7 +113,9 @@ export function AdminDashboard({ initialTracks }: AdminDashboardProps) {
 
       <AdminAuditionModal
         track={auditionTrack}
+        allTracks={tracks}
         onClose={() => setAuditionTrack(null)}
+        onSelectTrack={(track) => setAuditionTrack(track)}
       />
     </main>
   );
