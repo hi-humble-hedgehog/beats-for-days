@@ -33,10 +33,9 @@ measure whether tests _protect_ behaviour, without blocking simple glue code.
 
 ## Consequences
 
-- **Vitest is pinned to 4.1.x.** `@stryker-mutator/vitest-runner@10.0.0`
-  doesn't activate runtime mutants under Vitest 5: every mutant "survives"
-  and scores collapse to about 0%. Dependabot ignores Vitest ≥ 5. Re-test
-  when Stryker ships Vitest 5 support, then supersede this point.
+- **Vitest 5 is supported.** StrykerJS `@stryker-mutator/vitest-runner@>=10.1.1`
+  resolves the earlier Vitest 5 test-filter mismatch (`#6210`/`#6214`), allowing
+  mutation testing to run cleanly on Vitest 5.
 - Stryker uses localhost IPC between processes; sandboxed environments must
   allow local sockets.
 - Stryker plugins are listed explicitly (pnpm defeats auto-discovery).

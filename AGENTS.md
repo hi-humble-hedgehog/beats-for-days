@@ -78,8 +78,6 @@ Checks are staged so the slow ones run once, not after every task ([ADR 0017](do
 
 ## Known constraints
 
-- `vitest` is pinned to 4.1.x until Stryker's vitest runner supports Vitest 5
-  ([ADR 0003](docs/decisions/0003-testing-strategy.md)).
 - `pnpm typecheck` runs `next typegen` first (route types like `LayoutProps`).
 
 <!-- BEGIN:nextjs-agent-rules -->
