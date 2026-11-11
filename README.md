@@ -9,12 +9,10 @@
 
 **Beats for Days** is an infinite generative music experience dedicated to the golden era of 90s boom bap hip hop (dusty vinyl chops, punchy SP-1200 / MPC kicks & snares, warm basslines, and hypnotic grooves).
 
-The platform continuously generates, loops, and evolves beats in real time:
-
-- **In-Track Looping:** Handled natively in the client using the **Web Audio API** for sample-accurate, gapless playback.
-- **Track Transitions & Bridging:** Custom **ElevenLabs audio inpainting** pipelines to smoothly morph and transition between distinct generated boom bap tracks.
-- **Visual Presentation:** A highly visual, audio-reactive frontend designed to double as a full-screen ambient player and stream source.
-- **24/7 YouTube Live Stream:** Broadcast continuously via an independent headless streaming worker feeding YouTube Live RTMP.
+- **In-Track Looping:** Gapless, sample-accurate looping and 3-node transition splices in the browser via the **Web Audio API**, with turntable motor spin-up and brake physics.
+- **Transition Graph:** Directed track graph traversed with 1-step Warnsdorff lookahead and a 20-track repeat cooldown so streams never trap in short loops.
+- **Swiss Poster Player:** Full-screen Josef Müller-Brockmann (Tonhalle 1955) geometric canvas and SVG overlay, with GSAP morph transitions across `/`, `/beat/:slug`, `/about`, and `/privacy`.
+- **24/7 YouTube Live Stream (planned):** Independent headless streaming worker feeding YouTube Live RTMP.
 
 ---
 
@@ -22,45 +20,35 @@ The platform continuously generates, loops, and evolves beats in real time:
 
 ```mermaid
 flowchart TD
-    subgraph AI Generation & Serverless Backend ["Next.js on Vercel (beatsfordays.ai)"]
-        API["Next.js API Routes"]
-        ElevenLabs["ElevenLabs Inpainting & Audio APIs"]
-        TrackGen["Beat Generation Pipeline"]
-        API --> ElevenLabs
-        API --> TrackGen
+    subgraph Backend ["Next.js on Vercel + Supabase"]
+        API["Route Handlers\n(/api/beats, /api/beats/next, /api/admin/*)"]
+        Graph["Warnsdorff Transition Graph\n(src/lib/player/graph.ts)"]
+        DB[("Supabase Postgres & Audio Storage")]
+        API --> Graph
+        API --> DB
     end
 
-    subgraph Client ["Web Client (Next.js + Web Audio)"]
-        AudioEngine["Web Audio Engine\n(Sample-accurate looping)"]
-        InpaintBridge["Transition Inpainting Loader"]
-        Visualizer["Audio-Reactive Visualizer\n(Modular visual canvas)"]
-        AudioEngine --> Visualizer
-        AudioEngine --> InpaintBridge
+    subgraph Client ["Browser (Persistent Poster Shell)"]
+        Poster["PosterPlayer & Route Slots\n(src/components/audio)"]
+        AudioEngine["Web Audio Engine & 3-Node Splicer\n(src/lib/audio)"]
+        Grid["Tonhalle Canvas & SVG Geometry\n(src/lib/grid, src/components/grid)"]
+        Poster --> AudioEngine
+        Poster --> Grid
     end
 
-    subgraph StreamWorker ["24/7 YouTube Streaming Worker"]
-        Headless["Headless Chromium / Docker Worker"]
-        FFmpeg["FFmpeg Audio/Video Muxer"]
-        YT["YouTube Live (RTMP)"]
-        Headless --> FFmpeg
-        FFmpeg --> YT
-    end
-
-    API -->|Beat manifests & audio stems| Client
-    Client -->|Renders output| Headless
+    API -->|"Beat views & transition audio"| Client
 ```
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Framework:** [Next.js](https://nextjs.org/) (App Router, TypeScript)
-- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
-- **Audio Engine:** Web Audio API (client-side gapless looping, gain nodes, analyser nodes)
-- **AI Audio Engine:** [ElevenLabs](https://elevenlabs.io/) (inpainting and generation API)
-- **Hosting & Edge:** [Vercel](https://vercel.com/)
-- **Visual Engine:** Modular visualizer architecture (visual style TBD)
-- **Live Stream Pipeline:** Cloud worker (Docker / Headless Chromium + FFmpeg streaming to YouTube RTMP)
+- **Framework:** [Next.js 16](https://nextjs.org/) (App Router, TypeScript)
+- **Styling:** Inlined semantic CSS Modules + OKLCH tokens on public routes; [Tailwind CSS v4](https://tailwindcss.com/) scoped to `/admin` ([ADR 0019](docs/decisions/0019-inline-semantic-css-and-isolate-admin-tailwind.md))
+- **Audio Engine:** Web Audio API (sample-accurate looping, equal-power crossfades, LRU buffer cache, vinyl inertia)
+- **Database & Storage:** [Supabase](https://supabase.com/) (Postgres catalog + `.m4a` audio bucket, with local static fallback in `public/audio/`)
+- **Visual Engine:** Swiss geometric grid engine (`src/lib/grid/`) + HTML5 Canvas / SVG + GSAP transitions
+- **Hosting:** [Vercel](https://vercel.com/)
 
 ---
 
@@ -70,15 +58,24 @@ flowchart TD
 beats-for-days/
 ├── src/
 │   ├── app/                 # Next.js App Router routes, layouts & API route handlers
-│   ├── components/          # Thin, presentational React components (.tsx)
-│   └── lib/                 # Framework-agnostic logic (.ts): audio, visualizer, elevenlabs, env
-├── scripts/crap/            # In-repo CRAP (complexity × coverage) gate
-├── test/                    # Shared test setup & stubs
+│   ├── components/          # Thin, presentational React components (.tsx) & CSS Modules
+│   │   ├── admin/           # Local-only catalog & transition audition dashboard (ADR 0016)
+│   │   ├── audio/           # PosterPlayer, BeatNumber, TransportControls & audio context
+│   │   ├── debug/           # Optional playback & history debug panel (?debug=1)
+│   │   ├── grid/            # VinylVisualizer, SpectrumBars & GridOverlay canvases
+│   │   └── layout/          # AppChrome route wrapper
+│   └── lib/                 # Framework-agnostic logic (.ts): unit & mutation tested
+│       ├── audio/           # Web Audio engine, scheduler, splice coordinator, cache, vinyl
+│       ├── grid/            # Tonhalle poster geometry, angular cuts, GSAP interpolation
+│       ├── player/          # Transition graph, Warnsdorff walk, URL & history sync
+│       └── types/           # Shared beat and player state contracts
+├── scripts/                 # Repo tooling: CRAP gate, DB/storage seeding, WAV->M4A converter
+├── supabase/                # Local Supabase config & SQL schema migrations
+├── test/                    # Shared Vitest setup & stubs
 ├── e2e/                     # Playwright + axe-core end-to-end browser tests
 ├── docs/                    # Architecture, decisions (ADRs) & guides
-├── .agents/                 # Agent skills & hooks (Antigravity)
-├── AGENTS.md                # Instructions for AI coding agents
-└── stream-worker/           # (planned) Headless browser + FFmpeg RTMP worker
+├── .agents/                 # Agent skills & hooks
+└── AGENTS.md                # Instructions for AI coding agents
 ```
 
 Full layout and layering rules: [`docs/architecture/overview.md`](docs/architecture/overview.md).
@@ -93,14 +90,13 @@ Full layout and layering rules: [`docs/architecture/overview.md`](docs/architect
 - [pnpm](https://pnpm.io) (version pinned in `package.json`)
 - [Docker Desktop](https://docs.docker.com/desktop/) or OrbStack (for local Supabase database and audio storage)
 - [Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started) (`brew install supabase/tap/supabase`, v3 or newer)
-- Optional: ElevenLabs API credentials (only required when `ALLOW_LIVE_AI_CALLS=true`)
 - Optional: `brew install gitleaks` for local secret scanning
 
 ```bash
 pnpm install                 # installs deps + git hooks
-cp .env.example .env.local   # offline/mocked by default; add ELEVENLABS_API_KEY only for live calls
-supabase start               # start local postgres + storage services
-pnpm exec tsx scripts/seed/cli.ts # seed tracks and seamless transitions
+cp .env.example .env.local   # offline/mocked by default
+supabase start               # start local Postgres + storage services
+pnpm db:seed                 # seed tracks and transition graph
 pnpm dev                     # http://localhost:3000
 ```
 
@@ -127,10 +123,10 @@ See [`docs/guides/workflow.md`](docs/guides/workflow.md) and [`docs/guides/testi
 ## 🛣️ Roadmap
 
 - [x] Initial design alignment & repository setup
-- [x] Scaffold Next.js (App Router, TypeScript, Tailwind CSS)
-- [x] Quality foundation: docs/ADRs, CRAP gate, mutation testing, CI, agent guidelines
-- [ ] Implement core Web Audio API loop engine (gapless bar looping)
-- [ ] Integrate ElevenLabs inpainting pipeline for track transitions
-- [ ] Build extensible visualizer component
-- [ ] Deploy web player to Vercel (`beatsfordays.ai`)
-- [ ] Configure headless streaming worker & launch 24/7 YouTube stream
+- [x] Scaffold Next.js (App Router, TypeScript) & quality foundation (CRAP gate, Stryker mutation testing, Playwright + axe-core CI)
+- [x] Core Web Audio API loop engine (gapless looping, 3-node transition splices, turntable inertia)
+- [x] Warnsdorff transition graph & bidirectional `/beat/:slug` URL synchronization
+- [x] Swiss Tonhalle geometric poster visualizer with GSAP transitions
+- [x] Local catalog & transition audition admin dashboard (`/admin`)
+- [ ] On-the-fly ElevenLabs transition & beat generation pipeline (Phase 2)
+- [ ] Headless streaming worker for 24/7 YouTube Live RTMP broadcast

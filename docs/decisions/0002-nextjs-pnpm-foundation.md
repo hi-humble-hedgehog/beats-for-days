@@ -1,6 +1,6 @@
 # 0002. Next.js App Router + pnpm foundation
 
-- **Status:** Accepted
+- **Status:** Accepted (CSS setup amended by [0019](0019-inline-semantic-css-and-isolate-admin-tailwind.md))
 - **Date:** 2026-10-22
 
 ## Context

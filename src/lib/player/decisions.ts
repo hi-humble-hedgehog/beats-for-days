@@ -69,29 +69,6 @@ export function planAdvance(
   return { kind: "commit", beat: resolution.beat };
 }
 
-export interface BeatDisplayInfo {
-  slug: string;
-  beatName: string | undefined;
-  trackId: string;
-}
-
-/**
- * Computes the heading and track ID label for the beat deck from the active slug
- * and the loaded beat view, avoiding stale headings when the URL advances.
- */
-export function selectBeatDisplayInfo(opts: {
-  slug: string;
-  current: Pick<BeatView, "id" | "name"> | null;
-}): BeatDisplayInfo {
-  const { slug, current } = opts;
-  const isMatched = slug === "—" || current?.id === slug;
-  return {
-    slug,
-    beatName: isMatched ? current?.name : undefined,
-    trackId: isMatched ? (current?.id ?? slug) : slug,
-  };
-}
-
 export interface ResolveStartBeatOptions {
   current: BeatView | null;
   hasPausedBeat?: boolean;

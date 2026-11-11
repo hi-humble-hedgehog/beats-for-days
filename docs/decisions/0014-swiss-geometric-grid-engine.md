@@ -1,6 +1,6 @@
 # 0014. Use a two-part Swiss grid: Tonhalle poster geometry and editorial columns
 
-- **Status:** Accepted
+- **Status:** Accepted (Part 2 editorial grid superseded by [0018](0018-unify-poster-player-shell-and-isolate-admin-player.md))
 - **Date:** 2026-10-27
 
 ## Context

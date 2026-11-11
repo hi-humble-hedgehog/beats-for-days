@@ -2,18 +2,6 @@ const NUMERIC_ID = /^\d+$/;
 const CATALOG_MOD = 100;
 
 /**
- * Formats a playhead or duration as `mm:ss` for the seek readout.
- * Invalid or negative values collapse to `00:00` so the slider never lies.
- */
-export function formatTime(seconds: number): string {
-  // Stryker disable next-line EqualityOperator: 0 already formats as 00:00
-  if (!Number.isFinite(seconds) || seconds < 0) return "00:00";
-  const minutes = Math.floor(seconds / 60);
-  const remainder = Math.floor(seconds % 60);
-  return `${String(minutes).padStart(2, "0")}:${String(remainder).padStart(2, "0")}`;
-}
-
-/**
  * Turns a beat id into a stable integer seed so poster cuts stay per-track.
  * Numeric ids keep their catalog number. Slugs hash to a 32-bit value.
  */

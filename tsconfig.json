@@ -35,11 +35,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": [
-    "node_modules",
-    ".stryker-tmp",
-    "coverage",
-    "reports",
-    "docs/inspiration"
-  ]
+  "exclude": ["node_modules", ".stryker-tmp", "coverage", "reports"]
 }

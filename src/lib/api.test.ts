@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { beatsApi, waitlistApi } from "./api";
+import { beatsApi } from "./api";
 import { API_ROUTES } from "./constants";
 
 describe("beatsApi", () => {
@@ -126,59 +126,5 @@ describe("beatsApi", () => {
     await expect(beatsApi.getBeat("0001")).rejects.toThrow(
       "Failed to load beat: Internal Server Error",
     );
-  });
-});
-
-describe("waitlistApi", () => {
-  const originalFetch = globalThis.fetch;
-
-  beforeEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  afterEach(() => {
-    globalThis.fetch = originalFetch;
-  });
-
-  it("getStats fetches from /api/waitlist", async () => {
-    const mockStats = { total: 100, claimed: 40, remaining: 60 };
-    globalThis.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve(mockStats),
-    });
-
-    const result = await waitlistApi.getStats();
-
-    expect(globalThis.fetch).toHaveBeenCalledWith(API_ROUTES.WAITLIST);
-    expect(result).toEqual(mockStats);
-  });
-
-  it("getStats throws error when response is not ok", async () => {
-    globalThis.fetch = vi.fn().mockResolvedValue({
-      ok: false,
-      statusText: "Bad Gateway",
-    });
-
-    await expect(waitlistApi.getStats()).rejects.toThrow(
-      "Failed to load waitlist metrics: Bad Gateway",
-    );
-  });
-
-  it("joinWaitlist sends POST request to /api/waitlist", async () => {
-    const mockResponse = { success: true, remaining: 59 };
-    globalThis.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve(mockResponse),
-    });
-
-    const payload = { email: "test@example.com", timezone: "Europe/Amsterdam" };
-    const result = await waitlistApi.joinWaitlist(payload);
-
-    expect(globalThis.fetch).toHaveBeenCalledWith(API_ROUTES.WAITLIST, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    expect(result).toEqual(mockResponse);
   });
 });
