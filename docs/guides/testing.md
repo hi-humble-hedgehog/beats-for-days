@@ -77,7 +77,7 @@ For each survivor:
 3. **Truly equivalent** (rare): suppress with a reason:
    `// Stryker disable next-line EqualityOperator: <why it's equivalent>`
 
-Scope: `.ts` files in `src/` and `scripts/` (excluding tests and `cli.ts`).
+Scope: `.ts` files in `src/` and `scripts/` (excluding tests, `cli.ts`, and module-scope static initializers via `ignoreStatic: true`).
 Break threshold: **75%**, target **≥ 90%**.
 
 ## End-to-end browser & accessibility testing (Playwright + Born-Accessible UI)
