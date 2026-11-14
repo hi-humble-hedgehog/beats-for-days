@@ -7,7 +7,7 @@ way it is. Keep docs close to reality: update them in the same PR as the code.
 | ------------------------------------------------------------------------ | ----------------------------------------------------------- |
 | [`architecture/`](architecture/overview.md)                              | System overview, module layout, layering rules              |
 | [`architecture/audio-engine.md`](architecture/audio-engine.md)           | Web Audio engine, loop timing, and transition splices       |
-| [`architecture/generation-policy.md`](architecture/generation-policy.md) | Phased generation access, waitlist & transition graph       |
+| [`architecture/generation-policy.md`](architecture/generation-policy.md) | Directed transition graph, Warnsdorff walk & rollout policy |
 | [`decisions/`](decisions/README.md)                                      | Architecture Decision Records (ADRs): one file per decision |
 | [`guides/testing.md`](guides/testing.md)                                 | Test conventions, the CRAP gate, mutation testing           |
 | [`guides/workflow.md`](guides/workflow.md)                               | Local workflow, git hooks, CI, commit conventions           |

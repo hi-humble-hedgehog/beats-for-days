@@ -4,12 +4,12 @@ Why we test this way: [ADR 0003](../decisions/0003-testing-strategy.md) and [ADR
 
 ## Where tests go
 
-| Code                        | Test file                        | Environment                                 |
-| --------------------------- | -------------------------------- | ------------------------------------------- |
-| `src/lib/audio/loop.ts`     | `src/lib/audio/loop.test.ts`     | Node (`unit` project)                       |
-| `src/components/Player.tsx` | `src/components/Player.test.tsx` | happy-dom + Testing Library (`dom` project) |
-| `scripts/**.ts`             | next to the file                 | Node                                        |
-| End-to-end user flows       | `e2e/*.spec.ts`                  | Playwright (`chromium`, real browser)       |
+| Code                                  | Test file                                  | Environment                                 |
+| ------------------------------------- | ------------------------------------------ | ------------------------------------------- |
+| `src/lib/audio/scheduler.ts`          | `src/lib/audio/scheduler.test.ts`          | Node (`unit` project)                       |
+| `src/components/audio/BeatNumber.tsx` | `src/components/audio/BeatNumber.test.tsx` | happy-dom + Testing Library (`dom` project) |
+| `scripts/**.ts`                       | next to the file                           | Node                                        |
+| End-to-end user flows                 | `e2e/*.spec.ts`                            | Playwright (`chromium`, real browser)       |
 
 Shared setup lives in `test/` (`setup-dom.ts`, `stubs/`).
 
@@ -77,7 +77,7 @@ For each survivor:
 3. **Truly equivalent** (rare): suppress with a reason:
    `// Stryker disable next-line EqualityOperator: <why it's equivalent>`
 
-Scope: `.ts` files in `src/` and `scripts/` (excluding tests and `cli.ts`).
+Scope: `.ts` files in `src/` and `scripts/` (excluding tests, `cli.ts`, and module-scope static initializers via `ignoreStatic: true`).
 Break threshold: **75%**, target **≥ 90%**.
 
 ## End-to-end browser & accessibility testing (Playwright + Born-Accessible UI)

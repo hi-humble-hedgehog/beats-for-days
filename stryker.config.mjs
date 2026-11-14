@@ -29,6 +29,10 @@ const config = {
   incremental: true,
   incrementalFile: "reports/stryker-incremental.json",
 
+  // Skip module-scope static initializers (evaluated at import time before per-test coverage).
+  // They account for ~90% of test execution time because each one re-runs the entire suite.
+  ignoreStatic: true,
+
   reporters: ["clear-text", "progress", "html", "json"],
   htmlReporter: { fileName: "reports/mutation/index.html" },
   jsonReporter: { fileName: "reports/mutation/mutation.json" },

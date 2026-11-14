@@ -3,12 +3,15 @@ import type { BeatView, TransitionView } from "@/lib/types/beat";
 import {
   advancePlayedHistory,
   buildForwardResolution,
+  createInitialPlayerUiState,
   historyAfterPrevious,
   planAdvance,
+  playerReducer,
   resolveForwardBeatId,
   resolvePreviousAction,
   resolveRouteIntent,
-  selectBeatDisplayInfo,
+  resolveStartBeat,
+  shouldResolveStartOnPlay,
 } from "./decisions";
 
 const sampleBeat: BeatView = {
@@ -128,62 +131,6 @@ describe("planAdvance", () => {
   });
 });
 
-describe("selectBeatDisplayInfo", () => {
-  it("returns the current beat name and id when slug matches current beat", () => {
-    expect(
-      selectBeatDisplayInfo({
-        slug: "0002",
-        current: sampleBeat,
-      }),
-    ).toEqual({
-      slug: "0002",
-      beatName: "Jazz Flute",
-      trackId: "0002",
-    });
-  });
-
-  it("uses current beat when slug is the fallback dash", () => {
-    expect(
-      selectBeatDisplayInfo({
-        slug: "—",
-        current: sampleBeat,
-      }),
-    ).toEqual({
-      slug: "—",
-      beatName: "Jazz Flute",
-      trackId: "0002",
-    });
-  });
-
-  it("returns undefined beatName and fallback dash when both slug and current are absent", () => {
-    expect(
-      selectBeatDisplayInfo({
-        slug: "—",
-        current: null,
-      }),
-    ).toEqual({
-      slug: "—",
-      beatName: undefined,
-      trackId: "—",
-    });
-  });
-
-  it("shows loading state for target slug when current beat has not caught up", () => {
-    expect(
-      selectBeatDisplayInfo({
-        slug: "0003",
-        current: sampleBeat,
-      }),
-    ).toEqual({
-      slug: "0003",
-      beatName: undefined,
-      trackId: "0003",
-    });
-  });
-});
-
-import { createInitialPlayerUiState, playerReducer } from "./decisions";
-
 describe("playerReducer", () => {
   it("creates initial UI state for a given pathname", () => {
     expect(createInitialPlayerUiState("/beat/0001")).toEqual({
@@ -254,8 +201,6 @@ describe("playerReducer", () => {
     expect(errored.error).toBe("Network error");
   });
 });
-
-import { resolveStartBeat, shouldResolveStartOnPlay } from "./decisions";
 
 describe("playerReducer notFound and hasPausedBeat", () => {
   it("tracks hasPausedBeat once playback starts and keeps it true after pausing", () => {

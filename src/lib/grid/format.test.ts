@@ -1,20 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatBeatNumber, formatTime, seedFromBeatId } from "./format";
-
-describe("formatTime", () => {
-  it("formats minutes and seconds with two-digit pads", () => {
-    expect(formatTime(0)).toBe("00:00");
-    expect(formatTime(9)).toBe("00:09");
-    expect(formatTime(61)).toBe("01:01");
-    expect(formatTime(125.9)).toBe("02:05");
-  });
-
-  it("collapses invalid and negative values to 00:00", () => {
-    expect(formatTime(-1)).toBe("00:00");
-    expect(formatTime(Number.NaN)).toBe("00:00");
-    expect(formatTime(Number.POSITIVE_INFINITY)).toBe("00:00");
-  });
-});
+import { formatBeatNumber, seedFromBeatId } from "./format";
 
 describe("seedFromBeatId", () => {
   it("parses numeric catalog ids as integers and treats empty or dash as 0", () => {

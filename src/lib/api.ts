@@ -13,19 +13,6 @@ export interface NextBeatResponse {
   resolveAfterSec?: number;
 }
 
-export interface WaitlistStatsResponse {
-  total: number;
-  claimed: number;
-  remaining: number;
-}
-
-export interface JoinWaitlistResponse {
-  success: boolean;
-  message?: string;
-  error?: string;
-  remaining?: number;
-}
-
 export const beatsApi = {
   /**
    * Resolves the next beat from `/api/beats/next` using the client's listening history.
@@ -57,33 +44,5 @@ export const beatsApi = {
     }
     const data = (await res.json()) as { beat: BeatView };
     return data.beat;
-  },
-};
-
-export const waitlistApi = {
-  /**
-   * Loads the current waitlist invite counts from `/api/waitlist`.
-   */
-  async getStats(): Promise<WaitlistStatsResponse> {
-    const res = await fetch(API_ROUTES.WAITLIST);
-    if (!res.ok) {
-      throw new Error(`Failed to load waitlist metrics: ${res.statusText}`);
-    }
-    return res.json();
-  },
-
-  /**
-   * Sends the user's email and timezone to `/api/waitlist` to join the waitlist.
-   */
-  async joinWaitlist(payload: {
-    email: string;
-    timezone?: string;
-  }): Promise<JoinWaitlistResponse> {
-    const res = await fetch(API_ROUTES.WAITLIST, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    return res.json();
   },
 };
